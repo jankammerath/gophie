@@ -3,12 +3,12 @@ package ui;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.border.*;
-import java.io.*;
 
 public class MainWindow{
     /* define the constants for the UI */
-    public static final String TOOLBAR_BACKGROUND = "#248AC2";
+    public static final String NAVIGATIONBAR_BACKGROUND = "#248AC2";
+    public static final String NAVIGATIONBAR_TEXTCOLOR = "#76bce3";
+    public static final String NAVIGATIONBAR_TEXTHOVERCOLOR = "#ffffff";
     public static final String VIEW_BACKGROUND = "#1b1b1b";
 
     /* define the local objects */
@@ -16,8 +16,7 @@ public class MainWindow{
     JEditorPane viewPane;
     JScrollPane viewScrollPane;
     JMenuBar menuBar;
-    JToolBar toolBar;
-    Font iconFont;
+    NavigationBar navigationBar;
 
     public MainWindow(){
         try{
@@ -33,7 +32,7 @@ public class MainWindow{
         UIManager.getDefaults().put("ScrollPane.border", BorderFactory.createEmptyBorder());
 
         /* create the main window */
-        this.frame= new JFrame("Gophie");
+        this.frame = new JFrame("Gophie");
         this.frame.setMinimumSize(new Dimension(800, 600));
         this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -48,41 +47,14 @@ public class MainWindow{
         /* create the menu bar */
         this.createMenuBar();
 
-        try{
-            /* try to open the font for icon display */
-            this.iconFont = Font.createFont(Font.TRUETYPE_FONT, new File("../resources/Fonts/Feather.ttf")).deriveFont(19f);
-            GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            graphicsEnvironment.registerFont(this.iconFont);
-        }catch(Exception ex){
-            System.out.println("Unable to load the fonts!");
-        }
-
-        /* create the toolbar */
-        this.toolBar = new JToolBar(); 
-        this.toolBar.setBackground(Color.decode(TOOLBAR_BACKGROUND));
-        this.toolBar.setFloatable(false);
-        this.toolBar.setBorder(new EmptyBorder(new Insets(3,4,4,4)));
-        JButton backButton = new JButton("");
-        backButton.setFont(this.iconFont);
-        backButton.setBorderPainted(false); 
-        backButton.setContentAreaFilled(false); 
-        backButton.setFocusPainted(false); 
-        backButton.setOpaque(false);
-        backButton.setForeground(Color.decode("#ffffff"));
-        JButton forwardButton = new JButton("");
-        forwardButton.setBorderPainted(false); 
-        forwardButton.setContentAreaFilled(false); 
-        forwardButton.setFocusPainted(false); 
-        forwardButton.setOpaque(false);
-        forwardButton.setFont(this.iconFont);
-        forwardButton.setForeground(Color.decode("#ffffff"));
-        this.toolBar.add(backButton);
-        this.toolBar.add(forwardButton);
+        /* create the navigation bar */
+        this.navigationBar = new NavigationBar(NAVIGATIONBAR_BACKGROUND, 
+                NAVIGATIONBAR_TEXTCOLOR, NAVIGATIONBAR_TEXTHOVERCOLOR);
 
         /* set the content pane */
         Container contentPane = frame.getContentPane();
         contentPane.add(this.viewScrollPane, BorderLayout.CENTER);
-        contentPane.add(this.toolBar, BorderLayout.SOUTH);
+        contentPane.add(this.navigationBar, BorderLayout.SOUTH);
         this.frame.setVisible(true);
     }
 
