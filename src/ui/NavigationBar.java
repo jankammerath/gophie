@@ -3,8 +3,12 @@ package ui;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.border.*;
+
+import ui.event.NavigationInputListener;
+
 import javax.swing.*;
 import java.io.*;
+import java.util.*;
 
 public class NavigationBar extends JPanel {
     /* constants */
@@ -15,11 +19,14 @@ public class NavigationBar extends JPanel {
     static String textHoverColorHex;
 
     /* local variables and objects */
-    Font iconFont;
-    JLabel backButton;
-    JLabel forwardButton;
-    JLabel refreshButton;
-    JTextField addressInput;
+    private Font iconFont;
+    private JLabel backButton;
+    private JLabel forwardButton;
+    private JLabel refreshButton;
+    private JTextField addressInput;
+
+    /* listeners for local events */
+    private ArrayList<NavigationInputListener> inputListenerList = new ArrayList<NavigationInputListener>();
 
     /* the constructor essentially builds up the entire
         component with all its sub-components 
