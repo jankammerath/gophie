@@ -1,7 +1,6 @@
 package ui;
 
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 
 public class MainWindow{
@@ -15,9 +14,7 @@ public class MainWindow{
 
     /* define the local objects */
     JFrame frame;
-    JEditorPane viewPane;
-    JScrollPane viewScrollPane;
-    JMenuBar menuBar;
+    PageView pageView;
     NavigationBar navigationBar;
 
     public MainWindow(){
@@ -38,13 +35,8 @@ public class MainWindow{
         this.frame.setMinimumSize(new Dimension(800, 600));
         this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        /* create the editor pane */
-        this.viewPane = new JEditorPane();
-        this.viewPane.setEditable(false);
-        this.viewPane.setBackground(Color.decode(VIEW_BACKGROUND));
-        this.viewScrollPane = new JScrollPane(this.viewPane);
-        this.viewScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        this.viewScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        /* create the page view component object */
+        this.pageView = new PageView(VIEW_BACKGROUND);
 
         /* create the menu bar */
         this.frame.setJMenuBar(new MainMenu());
@@ -56,7 +48,7 @@ public class MainWindow{
 
         /* set the content pane */
         Container contentPane = frame.getContentPane();
-        contentPane.add(this.viewScrollPane, BorderLayout.CENTER);
+        contentPane.add(this.pageView, BorderLayout.CENTER);
         contentPane.add(this.navigationBar, BorderLayout.SOUTH);
         this.frame.setVisible(true);
     }
