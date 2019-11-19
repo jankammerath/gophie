@@ -1,24 +1,36 @@
 package net;
 
-import java.io.IOException;
-import java.nio.channels.*;
+import java.io.*;
+import java.net.Socket;
 
 public class GopherClient {
-    private AsynchronousSocketChannel client;
+    public void fetchAsync(String url){
+        
+    }
 
-    public void fetch(String url){
+    public String fetch(String url){
+        String result = "";
+
         try{
-            /* parse the url */
+            /* parse the url and instanciate the client */
             GopherUrl gopherUrl = new GopherUrl(url);
-            System.out.println("Server Host: " + gopherUrl.getHost());
-            System.out.println("Server Port: " + gopherUrl.getPort());
-            System.out.println("Selector: " + gopherUrl.getSelector());
+            Socket gopherSocket = new Socket(gopherUrl.getHost(), gopherUrl.getPort());
+            (new DataOutputStream(gopherSocket.getOutputStream())).writeBytes("\r\n");
+            BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(gopherSocket.getInputStream()));
+            
+            for (String line = responseBuffer.readLine(); line != null; line = responseBuffer.readLine()) {
+                result += line + "\n";
+            }
 
-            this.client = AsynchronousSocketChannel.open();
-            // InetSocketAddress hostAddress = new InetSocketAddress("localhost", 4999);
-        }catch(IOException ex){
+            System.out.println("=== GOPHER PAGE ===");
+            System.out.print(result);
+
+            gopherSocket.close();
+        }catch(Exception ex){
             /* handle the error properly and raise and event */
             System.out.println("Oopsie, connection failed: " + ex.getMessage());
         }
+
+        return result;
     }
 }
