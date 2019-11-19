@@ -6,6 +6,7 @@ import javax.swing.*;
 
 public class MainWindow{
     /* define the constants for the UI */
+    public static final String APPLICATION_TITLE = "Gophie";
     public static final String NAVIGATIONBAR_BACKGROUND = "#248AC2";
     public static final String NAVIGATIONBAR_TEXTCOLOR = "#76bce3";
     public static final String NAVIGATIONBAR_TEXTHOVERCOLOR = "#ffffff";
@@ -33,7 +34,7 @@ public class MainWindow{
         UIManager.getDefaults().put("ScrollPane.border", BorderFactory.createEmptyBorder());
 
         /* create the main window */
-        this.frame = new JFrame("Gophie");
+        this.frame = new JFrame(APPLICATION_TITLE);
         this.frame.setMinimumSize(new Dimension(800, 600));
         this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -46,7 +47,7 @@ public class MainWindow{
         this.viewScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         /* create the menu bar */
-        this.createMenuBar();
+        this.frame.setJMenuBar(new MainMenu());
 
         /* create the navigation bar */
         this.navigationBar = new NavigationBar(NAVIGATIONBAR_BACKGROUND, 
@@ -58,51 +59,6 @@ public class MainWindow{
         contentPane.add(this.viewScrollPane, BorderLayout.CENTER);
         contentPane.add(this.navigationBar, BorderLayout.SOUTH);
         this.frame.setVisible(true);
-    }
-
-    private void createMenuBar(){
-        /* set to use the mac menu bar instead */
-        System.setProperty("apple.laf.useScreenMenuBar", "true");
-
-        /* set the proper application title on mac */
-        System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Gophie");
-
-        /* create the JMenuBar */
-        this.menuBar = new JMenuBar();
-        JMenu pageMenu = new JMenu("Page");
-
-        /* create the open menu item */
-        JMenuItem openMenuItem = new JMenuItem(new AbstractAction("Open Page...") {
-            private static final long serialVersionUID = 1L;
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null,"Ok");
-            }
-        });
-        openMenuItem.setAccelerator(KeyStroke.getKeyStroke('O',
-            Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
-            pageMenu.add(openMenuItem);
-
-        /* create the save menu item */
-        JMenuItem saveMenuItem = new JMenuItem("Save Page");
-        saveMenuItem.setAccelerator(KeyStroke.getKeyStroke('S',
-            Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
-            pageMenu.add(saveMenuItem);
-
-        /* show the close menu item at the bottom */
-        pageMenu.add(new JSeparator());
-        JMenuItem closeMenuItem = new JMenuItem("Close Page");
-        pageMenu.add(closeMenuItem);
-        this.menuBar.add(pageMenu);
-
-        JMenu navigationMenu = new JMenu("Navigation");
-        navigationMenu.add(new JMenuItem("Back"));
-        navigationMenu.add(new JMenuItem("Forward"));
-        navigationMenu.add(new JMenuItem("Home"));
-        navigationMenu.add(new JSeparator());
-        navigationMenu.add(new JMenuItem("Refresh"));
-        this.menuBar.add(navigationMenu);
-
-        this.frame.setJMenuBar(this.menuBar);
     }
 
     public void show(){
