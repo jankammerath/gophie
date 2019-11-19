@@ -5,11 +5,15 @@ import javax.swing.*;
 
 /* import gopher network client */
 import net.GopherClient;
+import net.GopherNetworkException;
+import net.GopherPage;
+import net.event.GopherClientEventListener;
+import net.event.GopherError;
 
 /* import ui event listeners */
 import ui.event.NavigationInputListener;
 
-public class MainWindow implements NavigationInputListener{
+public class MainWindow implements NavigationInputListener, GopherClientEventListener {
     /* define the constants for the UI */
     public static final String APPLICATION_TITLE = "Gophie";
     public static final String NAVIGATIONBAR_BACKGROUND = "#248AC2";
@@ -26,14 +30,14 @@ public class MainWindow implements NavigationInputListener{
     private PageView pageView;
     private NavigationBar navigationBar;
 
-    public MainWindow(){
+    public MainWindow() {
         /* create the instance of the client */
         this.gopherClient = new GopherClient();
 
-        try{
+        try {
             /* try setting to system look and feel */
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        }catch(Exception e){
+        } catch (Exception e) {
             /* exception when trying to set, but ignore it */
             System.out.println("Error setting system look and feel");
         }
@@ -54,8 +58,8 @@ public class MainWindow implements NavigationInputListener{
         this.frame.setJMenuBar(new MainMenu());
 
         /* create the navigation bar */
-        this.navigationBar = new NavigationBar(NAVIGATIONBAR_BACKGROUND, 
-                NAVIGATIONBAR_TEXTCOLOR, NAVIGATIONBAR_TEXTHOVERCOLOR);
+        this.navigationBar = new NavigationBar(NAVIGATIONBAR_BACKGROUND, NAVIGATIONBAR_TEXTCOLOR,
+                NAVIGATIONBAR_TEXTHOVERCOLOR);
         this.navigationBar.setAddressText(DEFAULT_GOPHERHOME);
 
         /* attach listener to navigation bar */
@@ -68,7 +72,7 @@ public class MainWindow implements NavigationInputListener{
         this.frame.setVisible(true);
     }
 
-    public void show(){
+    public void show() {
         /* display the window */
         this.frame.pack();
         this.frame.setVisible(true);
@@ -76,8 +80,7 @@ public class MainWindow implements NavigationInputListener{
 
     @Override
     public void addressRequested(String addressText) {
-        System.out.println("Address requested: " + addressText);
-        this.gopherClient.fetch(addressText);
+        this.gopherClient.fetchAsync(addressText,this);
     }
 
     @Override
@@ -100,6 +103,18 @@ public class MainWindow implements NavigationInputListener{
 
     @Override
     public void stopRequested() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void pageLoaded(GopherPage result) {
+        System.out.println("Got gopher page!");
+        System.out.print(result.getSourceCode());
+    }
+
+    @Override
+    public void pageLoadFailed(GopherError error) {
         // TODO Auto-generated method stub
 
     }

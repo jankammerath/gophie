@@ -1,12 +1,6 @@
 package net.event;
 
-enum GopherError {
-    INVALID_URL,
-    UNKNOWN_DNS,
-    TCP_CONNECT_FAILED,
-    CONNECTION_TIMEOUT,
-    PARSER_FAILED
-}
+import net.GopherPage;
 
 public interface GopherClientEventListener {
     void pageLoaded(GopherPage result);

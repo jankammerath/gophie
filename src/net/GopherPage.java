@@ -1,17 +1,17 @@
 package net;
 
 public class GopherPage{
-    private String textContent;
+    private String sourceCode;
 
-    public void setTextContent(String value){
-        this.textContent = value;
+    public GopherPage(String gopherPageSourceCode){
+        this.sourceCode = gopherPageSourceCode;
     }
 
-    public String getTextContent(){
-        return this.textContent;
+    public void setSourceCode(String value){
+        this.sourceCode = value;
     }
 
-    public static GopherPage parse(String text){
-        return new GopherPage();
+    public String getSourceCode(){
+        return this.sourceCode;
     }
 }
