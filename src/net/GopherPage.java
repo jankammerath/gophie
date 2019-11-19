@@ -14,4 +14,9 @@ public class GopherPage{
     public String getSourceCode(){
         return this.sourceCode;
     }
+
+    /* parses the local source code into components */
+    private void parse(){
+
+    }
 }

@@ -5,7 +5,6 @@ import javax.swing.*;
 
 /* import gopher network client */
 import net.GopherClient;
-import net.GopherNetworkException;
 import net.GopherPage;
 import net.event.GopherClientEventListener;
 import net.event.GopherError;
@@ -20,6 +19,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     public static final String NAVIGATIONBAR_TEXTCOLOR = "#76bce3";
     public static final String NAVIGATIONBAR_TEXTHOVERCOLOR = "#ffffff";
     public static final String VIEW_BACKGROUND = "#1b1b1b";
+    public static final String VIEW_TEXTCOLOR = "#ffffff";
     public static final String DEFAULT_GOPHERHOME = "gopher.floodgap.com";
 
     /* local network objects */
@@ -52,7 +52,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         /* create the page view component object */
-        this.pageView = new PageView(VIEW_BACKGROUND);
+        this.pageView = new PageView(VIEW_TEXTCOLOR, VIEW_BACKGROUND);
 
         /* create the menu bar */
         this.frame.setJMenuBar(new MainMenu());
@@ -109,8 +109,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
     @Override
     public void pageLoaded(GopherPage result) {
-        System.out.println("Got gopher page!");
-        System.out.print(result.getSourceCode());
+        this.pageView.showGopherPage(result);
     }
 
     @Override

@@ -52,7 +52,8 @@ public class GopherClient {
             /* read the response and build a string with
                 the complete source code of the gopher page */
             for (String line = responseBuffer.readLine(); line != null; line = responseBuffer.readLine()) {
-                content += line + "\n";
+                /* Gopher line termination is always CR+LF */
+                content += line + "\r\n";
             }
 
             /* close the socket to the server */
