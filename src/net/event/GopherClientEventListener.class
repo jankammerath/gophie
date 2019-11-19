@@ -1,0 +1,13 @@
+package net.event;
+
+enum GopherError {
+    FAILED_DNS,
+    FAILED_TCP_CONNECT,
+    FAILED_TIMEOUT,
+    FAILED_PARSER
+}
+
+public interface GopherClientEventListener {
+    void pageLoaded(GopherPage result);
+    void pageLoadFailed(GopherError error);
+}
