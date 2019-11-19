@@ -24,13 +24,93 @@ public class GopherItem{
         INFORMATION,                // i = Informational message
         SOUND_FILE,                 // s = Sound file (especially the WAV format)
 
-        /* Gophie specific */
-        UNKNOWN                     // any other unknown item type code
+        /* Gophie specific (Non-standard) */
+        UNKNOWN;                     // any other unknown item type code
     }
 
-    private GopherItemType itemType;
+    /* defines the type of this gopher item */
+    private GopherItemType itemType = GopherItemType.UNKNOWN;
 
-    public GopherItem(String line){
+    /* defines the item type code of this gopher item */
+    private String itemTypeCode = "?";
+
+    /* the user display string of this gopher item */
+    private String userDisplayString = "";
+
+    /* defines the selector of this gopher item */
+    private String selector = "";
+
+    /* defines the host name of this gopher item */
+    private String hostName = "";
+
+    /* defines the port number of this gopher item */
+    private int portNumber = 70;
+
+    /* constructs the gopher item taking the single line
+        and parsing its content into the structure of this
+        object
         
+        @line       the single gophermenu line for this item
+    */
+    public GopherItem(String line){
+        /* type code is defined as first character in line */
+        this.setItemTypeByCode(line.substring(0,1));
+        
+        /* get all properties for this item */
+        String[] property = line.split("\t");
+
+        /* display string is first property without type code char */
+        this.userDisplayString = property[0].substring(1).trim();
+
+        /* second property is the selector */
+        if(property.length > 0){ this.selector = property[1].trim(); }
+
+        /* third property is the host name of the target */
+        if(property.length > 1){ this.hostName = property[2].trim(); }
+    }
+
+    /* 
+        Returns the item type as GopherItemType enum
+    */
+    public GopherItemType getItemType(){
+        return this.itemType;
+    }
+
+    /* 
+        Returns the item type code as a string
+    */
+    public String getItemTypeCode(){
+        return this.itemTypeCode;
+    }
+
+    public String getHostName(){
+        return this.hostName;
+    }
+
+    /* 
+        sets the code locally and also the proper type enum value
+
+        @code           the single-char gopher item type code
+    */
+    private void setItemTypeByCode(String code){
+        this.itemTypeCode = code;
+        if(code == "0"){ this.itemType = GopherItemType.TEXTFILE; }
+        if(code == "1"){ this.itemType = GopherItemType.SUBMENU; } 
+        if(code == "2"){ this.itemType = GopherItemType.CCSCO_NAMESERVER; } 
+        if(code == "3"){ this.itemType = GopherItemType.ERRORCODE; } 
+        if(code == "4"){ this.itemType = GopherItemType.BINHEX_FILE; } 
+        if(code == "5"){ this.itemType = GopherItemType.DOS_FILE; } 
+        if(code == "6"){ this.itemType = GopherItemType.UUENCODED_FILE; } 
+        if(code == "7"){ this.itemType = GopherItemType.FULLTEXT_SEARCH; } 
+        if(code == "8"){ this.itemType = GopherItemType.TELNET; } 
+        if(code == "9"){ this.itemType = GopherItemType.BINARY_FILE; } 
+        if(code == "+"){ this.itemType = GopherItemType.MIRROR; } 
+        if(code == "g"){ this.itemType = GopherItemType.GIF_FILE; } 
+        if(code == "I"){ this.itemType = GopherItemType.IMAGE_FILE; } 
+        if(code == "T"){ this.itemType = GopherItemType.TELNET3270; } 
+        if(code == "h"){ this.itemType = GopherItemType.HTML_FILE; }         
+        if(code == "i"){ this.itemType = GopherItemType.INFORMATION; } 
+        if(code == "s"){ this.itemType = GopherItemType.SOUND_FILE; } 
+        if(code == "?"){ this.itemType = GopherItemType.UNKNOWN; } 
     }
 }
