@@ -3,6 +3,9 @@ package ui;
 import java.awt.*;
 import javax.swing.*;
 
+/* import gopher network client */
+import net.GopherClient;
+
 /* import ui event listeners */
 import ui.event.NavigationInputListener;
 
@@ -15,12 +18,18 @@ public class MainWindow implements NavigationInputListener{
     public static final String VIEW_BACKGROUND = "#1b1b1b";
     public static final String DEFAULT_GOPHERHOME = "gopher.floodgap.com";
 
-    /* define the local objects */
-    JFrame frame;
-    PageView pageView;
-    NavigationBar navigationBar;
+    /* local network objects */
+    private GopherClient gopherClient;
+
+    /* local ui elements */
+    private JFrame frame;
+    private PageView pageView;
+    private NavigationBar navigationBar;
 
     public MainWindow(){
+        /* create the instance of the client */
+        this.gopherClient = new GopherClient();
+
         try{
             /* try setting to system look and feel */
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -68,6 +77,7 @@ public class MainWindow implements NavigationInputListener{
     @Override
     public void addressRequested(String addressText) {
         System.out.println("Address requested: " + addressText);
+        this.gopherClient.fetch(addressText);
     }
 
     @Override

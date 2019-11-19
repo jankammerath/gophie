@@ -1,10 +1,11 @@
 package net.event;
 
 enum GopherError {
-    FAILED_DNS,
-    FAILED_TCP_CONNECT,
-    FAILED_TIMEOUT,
-    FAILED_PARSER
+    INVALID_URL,
+    UNKNOWN_DNS,
+    TCP_CONNECT_FAILED,
+    CONNECTION_TIMEOUT,
+    PARSER_FAILED
 }
 
 public interface GopherClientEventListener {
