@@ -10,6 +10,7 @@ public class MainWindow{
     public static final String NAVIGATIONBAR_TEXTCOLOR = "#76bce3";
     public static final String NAVIGATIONBAR_TEXTHOVERCOLOR = "#ffffff";
     public static final String VIEW_BACKGROUND = "#1b1b1b";
+    public static final String DEFAULT_GOPHERHOME = "gopher.floodgap.com";
 
     /* define the local objects */
     JFrame frame;
@@ -50,6 +51,7 @@ public class MainWindow{
         /* create the navigation bar */
         this.navigationBar = new NavigationBar(NAVIGATIONBAR_BACKGROUND, 
                 NAVIGATIONBAR_TEXTCOLOR, NAVIGATIONBAR_TEXTHOVERCOLOR);
+        this.navigationBar.setAddressText(DEFAULT_GOPHERHOME);
 
         /* set the content pane */
         Container contentPane = frame.getContentPane();
@@ -67,10 +69,10 @@ public class MainWindow{
 
         /* create the JMenuBar */
         this.menuBar = new JMenuBar();
-        JMenu workspaceMenu = new JMenu("Workspace");
+        JMenu pageMenu = new JMenu("Page");
 
         /* create the open menu item */
-        JMenuItem openMenuItem = new JMenuItem(new AbstractAction("Open Workspace") {
+        JMenuItem openMenuItem = new JMenuItem(new AbstractAction("Open Page...") {
             private static final long serialVersionUID = 1L;
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(null,"Ok");
@@ -78,19 +80,27 @@ public class MainWindow{
         });
         openMenuItem.setAccelerator(KeyStroke.getKeyStroke('O',
             Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
-        workspaceMenu.add(openMenuItem);
+            pageMenu.add(openMenuItem);
 
         /* create the save menu item */
-        JMenuItem saveMenuItem = new JMenuItem("Save Workspace");
+        JMenuItem saveMenuItem = new JMenuItem("Save Page");
         saveMenuItem.setAccelerator(KeyStroke.getKeyStroke('S',
             Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
-        workspaceMenu.add(saveMenuItem);
+            pageMenu.add(saveMenuItem);
 
         /* show the close menu item at the bottom */
-        workspaceMenu.add(new JSeparator());
-        JMenuItem closeMenuItem = new JMenuItem("Close Workspace");
-        workspaceMenu.add(closeMenuItem);
-        this.menuBar.add(workspaceMenu);
+        pageMenu.add(new JSeparator());
+        JMenuItem closeMenuItem = new JMenuItem("Close Page");
+        pageMenu.add(closeMenuItem);
+        this.menuBar.add(pageMenu);
+
+        JMenu navigationMenu = new JMenu("Navigation");
+        navigationMenu.add(new JMenuItem("Back"));
+        navigationMenu.add(new JMenuItem("Forward"));
+        navigationMenu.add(new JMenuItem("Home"));
+        navigationMenu.add(new JSeparator());
+        navigationMenu.add(new JMenuItem("Refresh"));
+        this.menuBar.add(navigationMenu);
 
         this.frame.setJMenuBar(this.menuBar);
     }

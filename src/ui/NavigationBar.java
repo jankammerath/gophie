@@ -16,9 +16,10 @@ public class NavigationBar extends JPanel {
 
     /* local variables and objects */
     Font iconFont;
-    JButton backButton;
-    JButton forwardButton;
-    JButton refreshButton;
+    JLabel backButton;
+    JLabel forwardButton;
+    JLabel refreshButton;
+    JTextField addressInput;
 
     /* the constructor essentially builds up the entire
         component with all its sub-components 
@@ -46,15 +47,38 @@ public class NavigationBar extends JPanel {
         /* set the background color initially */
         this.setBackgroundColor(backgroundColor);
 
-        /* adjust the border properly so it looks nice */
-        this.setBorder(new EmptyBorder(0,0,0,0));
+        /* set the layout for this navigation bar */
+        this.setLayout(new BoxLayout(this,BoxLayout.X_AXIS));
+        this.setBorder(new EmptyBorder(4,4,4,4));
 
-        this.setLayout(new FlowLayout());
-
-        /* create the buttons */
+        /* create the buttons and address input */
         this.backButton = this.createButton("");
         this.forwardButton = this.createButton("");
+        this.addressInput = this.createAddressInput();
         this.refreshButton = this.createButton("");
+    }
+
+    /*
+        Sets the text for the address input
+
+        @addressText    text to insert into address input
+    */
+    public void setAddressText(String addressText){
+        this.addressInput.setText(addressText);
+    }
+
+    /*
+        Creates the address input to insert gopher URLs in
+
+        @return     the JTextField which is the address input
+    */
+    private JTextField createAddressInput(){
+        JTextField inputField = new JTextField();
+        inputField.setBorder(new EmptyBorder(4,16,6,4));
+        inputField.setForeground(Color.decode(NavigationBar.textColorHex));
+        inputField.setOpaque(false);
+        this.add(inputField);
+        return inputField;
     }
 
     /* 
@@ -63,14 +87,8 @@ public class NavigationBar extends JPanel {
         @text       text on the new button
         @return     the JButton object created
     */
-    private JButton createButton(String text){
-        JButton button = new JButton(text);
-
-        /* remove borders and all the button stuff */
-        button.setBorderPainted(false); 
-        button.setContentAreaFilled(false); 
-        button.setFocusPainted(false); 
-        button.setOpaque(false);
+    private JLabel createButton(String text){
+        JLabel button = new JLabel(text);
 
         /* set the icon font */
         button.setFont(this.iconFont);
@@ -90,6 +108,9 @@ public class NavigationBar extends JPanel {
                 button.setForeground(Color.decode(NavigationBar.textColorHex));
             }
         });
+
+        /* set the border properly to give some space */
+        button.setBorder(new EmptyBorder(0,8,0,8));
 
         /* add the button the bar */
         this.add(button);
