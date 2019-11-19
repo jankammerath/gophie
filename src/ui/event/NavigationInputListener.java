@@ -5,7 +5,7 @@ package ui.event;
     navigation bar ui element.
 */
 public interface NavigationInputListener {
-    void addressRequested();
+    void addressRequested(String addressText);
     void backwardRequested();
     void forwardRequested();
     void refreshRequested();

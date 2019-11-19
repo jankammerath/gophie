@@ -3,7 +3,10 @@ package ui;
 import java.awt.*;
 import javax.swing.*;
 
-public class MainWindow{
+/* import ui event listeners */
+import ui.event.NavigationInputListener;
+
+public class MainWindow implements NavigationInputListener{
     /* define the constants for the UI */
     public static final String APPLICATION_TITLE = "Gophie";
     public static final String NAVIGATIONBAR_BACKGROUND = "#248AC2";
@@ -46,6 +49,9 @@ public class MainWindow{
                 NAVIGATIONBAR_TEXTCOLOR, NAVIGATIONBAR_TEXTHOVERCOLOR);
         this.navigationBar.setAddressText(DEFAULT_GOPHERHOME);
 
+        /* attach listener to navigation bar */
+        this.navigationBar.addListener(this);
+
         /* set the content pane */
         Container contentPane = frame.getContentPane();
         contentPane.add(this.pageView, BorderLayout.CENTER);
@@ -57,5 +63,34 @@ public class MainWindow{
         /* display the window */
         this.frame.pack();
         this.frame.setVisible(true);
+    }
+
+    @Override
+    public void addressRequested(String addressText) {
+        System.out.println("Address requested: " + addressText);
+    }
+
+    @Override
+    public void backwardRequested() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void forwardRequested() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void refreshRequested() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void stopRequested() {
+        // TODO Auto-generated method stub
+
     }
 }

@@ -26,7 +26,7 @@ public class NavigationBar extends JPanel {
     private JTextField addressInput;
 
     /* listeners for local events */
-    private ArrayList<NavigationInputListener> inputListenerList = new ArrayList<NavigationInputListener>();
+    private ArrayList<NavigationInputListener> inputListenerList;
 
     /* the constructor essentially builds up the entire
         component with all its sub-components 
@@ -36,6 +36,8 @@ public class NavigationBar extends JPanel {
         @textHoverColor     Color of the text and icons on hover
     */
     public NavigationBar(String backgroundColor, String textColor, String textHoverColor){
+        this.inputListenerList = new ArrayList<NavigationInputListener>();
+
         /* get the icon font for this navigation bar */
         try{
             /* try to open the font for icon display */
@@ -65,6 +67,13 @@ public class NavigationBar extends JPanel {
         this.refreshButton = this.createButton("");
     }
 
+    /* 
+        Adds a listener for navigation events
+    */
+    public void addListener(NavigationInputListener listener){
+        this.inputListenerList.add(listener);
+    }
+
     /*
         Sets the text for the address input
 
@@ -85,6 +94,15 @@ public class NavigationBar extends JPanel {
         inputField.setForeground(Color.decode(NavigationBar.textColorHex));
         inputField.setOpaque(false);
         this.add(inputField);
+
+        inputField.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                for (NavigationInputListener inputListener : inputListenerList){
+                    inputListener.addressRequested(inputField.getText().trim());
+                }
+            }
+        });
+
         return inputField;
     }
 
