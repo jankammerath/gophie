@@ -60,7 +60,7 @@ public class GopherClient {
             gopherSocket.close();
 
             /* set the result page */
-            result = new GopherPage(content);
+            result = new GopherPage(content, gopherUrl);
         }catch(UnknownHostException ex){
             /* handle host not found exception */
             throw new GopherNetworkException(GopherError.HOST_UNKNOWN, ex.getMessage());
