@@ -60,13 +60,16 @@ public class GopherItem{
         String[] property = line.split("\t");
 
         /* display string is first property without type code char */
-        this.userDisplayString = property[0].substring(1).trim();
+        if(property.length > 0){ this.userDisplayString = property[0].substring(1); }
 
         /* second property is the selector */
-        if(property.length > 0){ this.selector = property[1].trim(); }
+        if(property.length > 1){ this.selector = property[1].trim(); }
 
         /* third property is the host name of the target */
-        if(property.length > 1){ this.hostName = property[2].trim(); }
+        if(property.length > 2){ this.hostName = property[2].trim(); }
+
+        /* fourth property is the port of the target host */
+        if(property.length > 3){ this.portNumber = Integer.parseInt(property[3].trim()); }
     }
 
     /* 

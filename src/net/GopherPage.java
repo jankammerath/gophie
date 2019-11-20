@@ -39,11 +39,22 @@ public class GopherPage {
         return this.url;
     }
 
+    /*
+        Returns an array list with all gopher items of this page
+    */
+    public ArrayList<GopherItem> getItemList(){
+        return this.itemList;
+    }
+
     /* parses the local source code into components */
     private void parse(){
         String[] itemSourceList = this.sourceCode.split("\r\n");
         for(int i=0; i<itemSourceList.length; i++){
+            String itemSource = itemSourceList[i];
 
+            if(itemSource.length() > 0 && itemSource != "."){
+                this.itemList.add(new GopherItem(itemSource));
+            }
         }
     }
 }

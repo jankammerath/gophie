@@ -3,7 +3,9 @@ package ui;
 import java.awt.*;
 import java.io.File;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
+import net.GopherItem;
 import net.GopherPage;
 
 public class PageView extends JScrollPane{
@@ -15,7 +17,12 @@ public class PageView extends JScrollPane{
     Font textFont;
 
     public void showGopherPage(GopherPage page){
-        this.viewPane.setText(page.getSourceCode());
+        String renderedContent = "";
+        for(GopherItem item : page.getItemList()){
+            renderedContent = renderedContent 
+                + item.getUserDisplayString() + "\n";
+        }
+        this.viewPane.setText(renderedContent);
     }
 
     /* 
@@ -27,11 +34,12 @@ public class PageView extends JScrollPane{
         this.viewPane.setEditable(false);
         this.viewPane.setBackground(Color.decode(backgroundColor));
         this.viewPane.setForeground(Color.decode(textColor));
+        this.viewPane.setBorder(new EmptyBorder(16,16,8,8));
         this.getViewport().add(this.viewPane);
         this.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         this.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         this.getVerticalScrollBar().setOpaque(false);
-        
+
         try{
             /* try to open the font for icon display */
             this.textFont = Font.createFont(Font.TRUETYPE_FONT, new File("../resources/Fonts/Inconsolata-Regular.ttf")).deriveFont(17f);

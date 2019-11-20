@@ -69,6 +69,8 @@ public class GopherClient {
             throw new GopherNetworkException(GopherError.CONNECTION_TIMEOUT, ex.getMessage());
         }catch(Exception ex){
             /* handle the error properly and raise and event */
+            System.out.println("GOPHER NETWORK EXCEPTION: " + ex.getMessage());
+            ex.printStackTrace();
             throw new GopherNetworkException(GopherError.EXCEPTION, ex.getMessage());
         }
 

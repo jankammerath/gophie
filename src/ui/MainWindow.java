@@ -19,7 +19,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     public static final String NAVIGATIONBAR_TEXTCOLOR = "#76bce3";
     public static final String NAVIGATIONBAR_TEXTHOVERCOLOR = "#ffffff";
     public static final String VIEW_BACKGROUND = "#1b1b1b";
-    public static final String VIEW_TEXTCOLOR = "#ffffff";
+    public static final String VIEW_TEXTCOLOR = "#e8e8e8";
     public static final String DEFAULT_GOPHERHOME = "gopher.floodgap.com";
 
     /* local network objects */
@@ -114,7 +114,6 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
     @Override
     public void pageLoadFailed(GopherError error) {
-        // TODO Auto-generated method stub
-
+        System.out.println("Failed to load gopher page: " + error.toString());
     }
 }
