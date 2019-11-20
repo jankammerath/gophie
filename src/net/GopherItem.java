@@ -83,8 +83,35 @@ public class GopherItem{
         return this.itemTypeCode;
     }
 
+    /* 
+        Returns the user display string which is 
+        supposed to be used as the title of this
+        gopher item when being displayed
+    */
+    public String getUserDisplayString(){
+        return this.userDisplayString;
+    }
+
+    /*
+        Returns the selector of this gopher item
+    */
+    public String getSelector(){
+        return this.selector;
+    }
+
+    /* 
+        Returns the item host name as a string
+    */
     public String getHostName(){
         return this.hostName;
+    }
+
+    /* 
+        Returns the port number for the gopher 
+        item's host to collect the content from
+    */
+    public int getPortNumber(){
+        return this.portNumber;
     }
 
     /* 
