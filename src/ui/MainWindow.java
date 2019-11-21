@@ -70,6 +70,9 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         contentPane.add(this.pageView, BorderLayout.CENTER);
         contentPane.add(this.navigationBar, BorderLayout.SOUTH);
         this.frame.setVisible(true);
+
+        /* fetch the default gopher home */
+        this.addressRequested(DEFAULT_GOPHERHOME);
     }
 
     public void show() {

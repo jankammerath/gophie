@@ -2,6 +2,10 @@ package net;
 
 import java.util.ArrayList;
 
+/**
+ * A GopherMenu page object that contains all information
+ * and Gopher items provided in the underlying Gopher Menu
+ */
 public class GopherPage {
     private String sourceCode;
     private GopherUrl url;
@@ -14,20 +18,22 @@ public class GopherPage {
         this.parse();
     }
 
-    /* 
-        Sets the goper menu source code for
-        this gopher page as string
-
-        @value      the gopermap source code as string
-    */
+    /**
+     * Sets the source code (gophermap) of this gopher page
+     * 
+     * @param value
+     * The text value as supplied by the server
+     */
     public void setSourceCode(String value){
         this.sourceCode = value;
     }
 
-    /* 
-        Returns the source code of this page
-        in the gopher menu format
-    */
+    /**
+     * Returns the source code (gophermap) of this page
+     * 
+     * @return
+     * The gophermap content as a String
+     */
     public String getSourceCode(){
         return this.sourceCode;
     }
@@ -52,7 +58,7 @@ public class GopherPage {
         for(int i=0; i<itemSourceList.length; i++){
             String itemSource = itemSourceList[i];
 
-            if(itemSource.length() > 0 && itemSource != "."){
+            if(itemSource.length() > 0 && itemSource.equals(".") == false){
                 this.itemList.add(new GopherItem(itemSource));
             }
         }
