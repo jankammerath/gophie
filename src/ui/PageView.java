@@ -59,6 +59,10 @@ public class PageView extends JScrollPane{
      * The GopherPage to display on this view
      */
     public void showGopherPage(GopherPage page){
+        /* set the current local gopher page */
+        this.currentPage = page;
+
+        /* create the headers */
         String renderedHeader = "<table cellspacing=\"0\" cellpadding=\"2\">";
         String renderedContent = "<table cellspacing=\"0\" cellpadding=\"2\">";
 
@@ -136,6 +140,7 @@ public class PageView extends JScrollPane{
         this.viewPane.setForeground(Color.decode(textColor));
         this.viewPane.setBorder(new EmptyBorder(10,4,8,8));
         this.viewPane.setEditorKit(this.editorKit);
+        this.viewPane.setCursor(new Cursor(Cursor.TEXT_CURSOR));
         this.getViewport().add(this.viewPane);
 
         /* set the text color locally */

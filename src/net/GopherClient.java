@@ -44,6 +44,8 @@ public class GopherClient {
             /* string result with content */
             String content = "";
 
+            System.out.println("Fetching (" + contentType.toString() + "): " + url);
+
             /* parse the url and instanciate the client */
             GopherUrl gopherUrl = new GopherUrl(url);
             Socket gopherSocket = new Socket(gopherUrl.getHost(), gopherUrl.getPort());

@@ -26,6 +26,8 @@ public class NavigationBar extends JPanel {
     private JLabel refreshButton;
     private JTextField addressInput;
     private Boolean isLoadingStatus = false;
+    private Boolean allowNavigateForward = false;
+    private Boolean allowNavigateBack = false;
 
     /* listeners for local events */
     private ArrayList<NavigationInputListener> inputListenerList;
@@ -62,11 +64,98 @@ public class NavigationBar extends JPanel {
         this.setLayout(new BoxLayout(this,BoxLayout.X_AXIS));
         this.setBorder(new EmptyBorder(4,4,4,4));
 
-        /* create the buttons and address input */
+        /* create the back navigation button */
         this.backButton = this.createButton("");
+        this.backButton.addMouseListener(new MouseAdapter() {
+            /* notify the listeners of the move back request */
+            public void mouseClicked(MouseEvent evt){
+                if(allowNavigateBack == true){
+                    for (NavigationInputListener inputListener : inputListenerList){
+                        inputListener.backwardRequested();
+                    }
+                }
+            }
+
+            /* set the color to the hover color and use the hand cursor */
+            public void mouseEntered(MouseEvent evt) {
+                if(allowNavigateBack == true){
+                    setCursor(new Cursor(Cursor.HAND_CURSOR));
+                    backButton.setForeground(Color.decode(NavigationBar.textHoverColorHex));
+                }
+            }
+        
+            /* revert back to the default cursor and default color */
+            public void mouseExited(MouseEvent evt) {
+                setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                backButton.setForeground(Color.decode(NavigationBar.textColorHex));
+            }
+        });
+
+        /* create the forward navigation button */
         this.forwardButton = this.createButton("");
+        this.forwardButton.addMouseListener(new MouseAdapter() {
+            /* notify the listeners of the forward move request */
+            public void mouseClicked(MouseEvent evt){
+                if(allowNavigateForward == true){
+                    for (NavigationInputListener inputListener : inputListenerList){
+                        inputListener.forwardRequested();
+                    }
+                }
+            }
+
+            /* set the color to the hover color and use the hand cursor */
+            public void mouseEntered(MouseEvent evt) {
+                if(allowNavigateForward == true){
+                    setCursor(new Cursor(Cursor.HAND_CURSOR));
+                    forwardButton.setForeground(Color.decode(NavigationBar.textHoverColorHex));
+                }
+            }
+        
+            /* revert back to the default cursor and default color */
+            public void mouseExited(MouseEvent evt) {
+                setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                forwardButton.setForeground(Color.decode(NavigationBar.textColorHex));
+            }
+        });
+
+        /* create the address input */
         this.addressInput = this.createAddressInput();
+
+        /* create the refresh button and handle it */
         this.refreshButton = this.createButton("");
+        this.refreshButton.addMouseListener(new MouseAdapter() {
+            /* set the color to the hover color and use the hand cursor */
+            public void mouseEntered(MouseEvent evt) {
+                setCursor(new Cursor(Cursor.HAND_CURSOR));
+                refreshButton.setForeground(Color.decode(NavigationBar.textHoverColorHex));
+            }
+        
+            /* revert back to the default cursor and default color */
+            public void mouseExited(MouseEvent evt) {
+                setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                refreshButton.setForeground(Color.decode(NavigationBar.textColorHex));
+            }
+        });
+    }
+
+    /**
+     * Defines whether forward navigation is enabled
+     * 
+     * @param value
+     * true enables navigation, false disables
+     */
+    public void setNavigateForward(Boolean value){
+        this.allowNavigateForward = value;
+    }
+
+    /**
+     * Defines whether navigation back is enabled
+     * 
+     * @param value
+     * true enables navigation, false disables
+     */
+    public void setNavigateBack(Boolean value){
+        this.allowNavigateBack = value;
     }
 
     /**
@@ -137,21 +226,6 @@ public class NavigationBar extends JPanel {
         button.setFont(this.iconFont);
         button.setForeground(Color.decode(NavigationBar.textColorHex));
         
-        /* add the mouse listeners to create the hover effect */
-        button.addMouseListener(new MouseAdapter() {
-            /* set the color to the hover color and use the hand cursor */
-            public void mouseEntered(MouseEvent evt) {
-                setCursor(new Cursor(Cursor.HAND_CURSOR));
-                button.setForeground(Color.decode(NavigationBar.textHoverColorHex));
-            }
-        
-            /* revert back to the default cursor and default color */
-            public void mouseExited(MouseEvent evt) {
-                setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-                button.setForeground(Color.decode(NavigationBar.textColorHex));
-            }
-        });
-
         /* set the border properly to give some space */
         button.setBorder(new EmptyBorder(0,8,0,8));
 

@@ -1,6 +1,8 @@
 package ui;
 
 import java.awt.*;
+import java.util.ArrayList;
+
 import javax.swing.*;
 
 /* import gopher network client */
@@ -25,6 +27,10 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
     /* local network objects */
     private GopherClient gopherClient;
+
+    /* storage with history for browsing */
+    private ArrayList<GopherPage> history = new ArrayList<GopherPage>();
+    private int historyPosition = -1;
 
     /* local ui elements */
     private JFrame frame;
@@ -83,23 +89,108 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.frame.setVisible(true);
     }
 
+    /**
+     * Updates the history with a new page
+     * 
+     * @param page
+     * The page that was received
+     */
+    private void updateHistory(GopherPage page){
+        Boolean addToHistory = false;
+
+        /* check if current position is at last page */
+        if(this.historyPosition == this.history.size()-1){
+            /* add this page to the history */
+            if(this.history.size() > 0){
+                /* make sure this was not just a reload and the last
+                    page in the history is not already ours */
+                if(!this.history.get(this.history.size()-1).getUrl().getUrlString()
+                                        .equals(page.getUrl().getUrlString())){
+                    /* just drop it in */
+                    addToHistory = true;
+                }
+            }else{
+                /* empty history, just drop in the page */
+                addToHistory = true;
+            }    
+        }else{
+            /* user navigation inside history, check if the current
+                page is at the position in history or if it is a 
+                new page the user went to */
+            if(!this.history.get(this.historyPosition).getUrl()
+                .getUrlString().equals(page.getUrl().getUrlString())){
+                /* it is a new page outside the history, keep the history
+                    up until the current page and add this page as a new
+                    branch to the history, eliminating the 
+                    previous branch forward */
+                ArrayList<GopherPage> updatedHistory = new ArrayList<GopherPage>();
+                for(int h=0; h<=this.historyPosition; h++){
+                    updatedHistory.add(this.history.get(h));
+                }
+
+                /* update the history */
+                this.history = updatedHistory;
+
+                /* allow adding to history */
+                addToHistory = true;
+            }
+        }    
+
+        /* add to history, if allowed */
+        if(addToHistory == true){
+            /* add to the stack of pages */
+            this.history.add(page);
+
+            /* update position to the top */
+            this.historyPosition = this.history.size()-1;
+
+            /* disable forward */
+            this.navigationBar.setNavigateForward(false);
+            if(this.history.size() > 1){
+                /* allow back if more than just this page exist */
+                this.navigationBar.setNavigateBack(true);
+            }
+        }else{
+            /* if position is 0, there is nowhere to go back to */
+            if(this.historyPosition > 0){
+                /* allow navigation back in history */
+                this.navigationBar.setNavigateBack(true);
+            }if(this.historyPosition < (this.history.size()-1)){
+                /* if position is at the end, there is nowhere
+                    to move forward to */
+                this.navigationBar.setNavigateForward(true);
+            }
+        }
+    }
+
     @Override
     public void addressRequested(String addressText, GopherItemType contentType) {
         this.navigationBar.setIsLoading(true);
+        this.frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
         this.navigationBar.setAddressText(addressText);
         this.gopherClient.fetchAsync(addressText,contentType,this);
     }
 
     @Override
     public void backwardRequested() {
-        // TODO Auto-generated method stub
+        /* set the new history position */
+        if(this.historyPosition > 0){
+            this.historyPosition--;
 
+            /* get the new page from history */
+            this.pageLoaded(this.history.get(this.historyPosition));
+        }
     }
 
     @Override
     public void forwardRequested() {
-        // TODO Auto-generated method stub
+        /* set the new history position */
+        if(this.historyPosition < (this.history.size()-1)){
+            this.historyPosition++;
 
+            /* get the new page from history */
+            this.pageLoaded(this.history.get(this.historyPosition));
+        }
     }
 
     @Override
@@ -114,17 +205,40 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
     }
 
+    /**
+     * Handles page load events from the listener
+     * 
+     * @param result
+     * The gopher page that was received
+     */
     @Override
     public void pageLoaded(GopherPage result) {
-        this.frame.setTitle(result.getUrl().getUrlString() + " - " + APPLICATION_TITLE);
+        /* set the window title to the url of this page */
+        this.frame.setTitle(result.getUrl().getUrlString() 
+                            + " - " + APPLICATION_TITLE);
 
+        /* update the address text with the loaded page */
+        this.navigationBar.setAddressText(result.getUrl().getUrlString());
+
+        /* detect the content type and determine how the handle it */
         if(result.getContentType() == GopherItemType.GOPHERMENU){
+            /* this is a gopher menu hence it is rendered like
+                one including highlighting of links and 
+                the menu icons for the various item types */
             this.pageView.showGopherPage(result);
         }else{
+            /* this is plain content, so render it
+                appropriately and let the view decide
+                on how to handle the content */
             this.pageView.showGopherContent(result);
         }
 
+        /* update the history */
+        this.updateHistory(result);
+
+        /* reset the loading indicators */
         this.navigationBar.setIsLoading(false);
+        this.frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
     }
 
     @Override
