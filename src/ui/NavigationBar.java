@@ -18,6 +18,7 @@ public class NavigationBar extends JPanel {
     /* static variables */
     static String textColorHex;
     static String textHoverColorHex;
+    private String selectionColor = "#ffffff";
 
     /* local variables and objects */
     private Font iconFont;
@@ -120,6 +121,8 @@ public class NavigationBar extends JPanel {
 
         /* create the address input */
         this.addressInput = this.createAddressInput();
+        this.addressInput.setSelectionColor(Color.decode(this.selectionColor));
+        this.addressInput.setCaretColor(Color.decode(NavigationBar.textColorHex));
 
         /* create the refresh button and handle it */
         this.refreshButton = this.createButton("");

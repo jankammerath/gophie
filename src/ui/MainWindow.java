@@ -167,12 +167,33 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         }
     }
 
+    /**
+     * Process a request to go to an address or URL
+     * 
+     * @param addressText
+     * The text or URL of the address, the client will guess the correct URL
+     * 
+     * @param contentType
+     * The expected content type of the content behind the address
+     */
     @Override
     public void addressRequested(String addressText, GopherItemType contentType) {
+        /* activate the load indicator in the address bar */
         this.navigationBar.setIsLoading(true);
+
+        /* set the cursor to wait indicating a wait */
         this.frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+
+        /* update the navigation bar with the new address */
         this.navigationBar.setAddressText(addressText);
-        this.gopherClient.fetchAsync(addressText,contentType,this);
+
+        try{
+            /* try to execute the thread */
+            this.gopherClient.fetchAsync(addressText,contentType,this);
+        }catch(Exception ex){
+            /* might throw an ex when thread is interrupted */
+            System.out.println("Exception while fetching async: " + ex.getMessage());
+        }
     }
 
     @Override

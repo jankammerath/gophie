@@ -8,7 +8,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import javax.swing.text.AttributeSet;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
@@ -28,8 +27,10 @@ public class PageView extends JScrollPane{
     private JEditorPane viewPane;
     private JEditorPane headerPane;
     private HTMLEditorKit editorKit;
+    private StyleSheet styleSheet;
     private Font textFont;
     private String viewTextColor = "#ffffff";
+    private String selectionColor = "#cf9a0c";
 
     /* listeners for local events */
     private ArrayList<NavigationInputListener> inputListenerList;
@@ -46,6 +47,13 @@ public class PageView extends JScrollPane{
         this.inputListenerList.add(listener);
     }
 
+    /**
+     * Instead of displaying a gopher page, it displays content
+     * as plain text in the view page section of this component
+     * 
+     * @param content
+     * GopherPage with respective content
+     */
     public void showGopherContent(GopherPage content){
         this.viewPane.setContentType("text/plain");
         this.viewPane.setText(content.getSourceCode());
@@ -76,7 +84,7 @@ public class PageView extends JScrollPane{
 
             /* set the content for the text view */
             String itemTitle = item.getUserDisplayString().replace(" ", "&nbsp;");
-            String itemCode = itemTitle;
+            String itemCode = "<span class=\"text\">" + itemTitle + "</span>";
 
             /* build links for anything other than infromation items */
             if(!item.getItemTypeCode().equals("i")){ 
@@ -98,22 +106,28 @@ public class PageView extends JScrollPane{
             lineNumber++;
         }
 
+        /* set content type and add content to view */
         this.viewPane.setContentType("text/html");
         this.viewPane.setText(renderedContent+"</table>");
 
+        /* set content type and add content to header */
         this.headerPane.setContentType("text/html");
         this.headerPane.setText(renderedHeader+"</table>");
+
+        /* scroll the view pane to the top */
+        this.viewPane.setCaretPosition(0);
     }
 
     /**
      * Configures the style of the view
      */
     private void configureStyle(){
-        StyleSheet styleSheet = this.editorKit.getStyleSheet();
-        styleSheet.addRule(".lineNumber { color: #454545; }");
-        styleSheet.addRule(".itemIcon { font-family:Feather; font-size:10px; margin-left:5px; }"); 
-        styleSheet.addRule("a { text-decoration: none; color: #22c75c; }");  
-        styleSheet.addRule(".item { color: " + this.viewTextColor + "; }");      
+        this.styleSheet = this.editorKit.getStyleSheet();
+        this.styleSheet.addRule(".text { cursor:text; }");
+        this.styleSheet.addRule(".lineNumber { color: #454545; }");
+        this.styleSheet.addRule(".itemIcon { font-family:Feather; font-size:10px; margin-left:5px; }"); 
+        this.styleSheet.addRule("a { text-decoration: none; color: #22c75c; }");  
+        this.styleSheet.addRule(".item { color: " + this.viewTextColor + "; }");  
     }
 
     /**
@@ -141,6 +155,7 @@ public class PageView extends JScrollPane{
         this.viewPane.setBorder(new EmptyBorder(10,4,8,8));
         this.viewPane.setEditorKit(this.editorKit);
         this.viewPane.setCursor(new Cursor(Cursor.TEXT_CURSOR));
+        this.viewPane.setSelectionColor(Color.decode(this.selectionColor));
         this.getViewport().add(this.viewPane);
 
         /* set the text color locally */
