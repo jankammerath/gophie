@@ -46,6 +46,10 @@ public class GopherPage {
                 /* parsing succeeded, define as gopher menu */
                 this.contentType = GopherItemType.GOPHERMENU;
             }catch(Exception ex){
+                /* output the parser exception */
+                System.out.println("Failed to parse gophermenu: " + ex.getMessage());
+                ex.printStackTrace();
+
                 /* parsing failed for whatever, define as text */
                 this.contentType = GopherItemType.TEXTFILE;
             }
@@ -128,7 +132,7 @@ public class GopherPage {
 
     /* parses the local source code into components */
     private void parse(){
-        String[] itemSourceList = this.getSourceCode().split("\r\n");
+        String[] itemSourceList = this.getSourceCode().split("\n");
         for(int i=0; i<itemSourceList.length; i++){
             String itemSource = itemSourceList[i];
 

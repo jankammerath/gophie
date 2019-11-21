@@ -57,7 +57,7 @@ public class GopherItem{
         this.setItemTypeByCode(line.substring(0,1));
         
         /* get all properties for this item */
-        String[] property = line.split("\t");
+        String[] property = line.replace("\r","").replace("\n","").split("\t");
 
         /* display string is first property without type code char */
         if(property.length > 0){ this.userDisplayString = property[0].substring(1); }
