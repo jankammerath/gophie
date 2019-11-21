@@ -117,6 +117,17 @@ public class GopherItem{
         return this.portNumber;
     }
 
+    public String getUrlString(){
+        String result = "";
+
+        if(this.itemType != GopherItemType.UNKNOWN 
+            && this.itemType != GopherItemType.INFORMATION){
+
+        }
+
+        return result;
+    }
+
     /* 
         sets the code locally and also the proper type enum value
 

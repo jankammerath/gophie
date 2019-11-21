@@ -112,6 +112,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
     @Override
     public void pageLoaded(GopherPage result) {
+        this.frame.setTitle(result.getUrl().getUrlString() + " - " + APPLICATION_TITLE);
         this.pageView.showGopherPage(result);
     }
 

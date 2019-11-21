@@ -16,6 +16,24 @@ public class GopherUrl {
     public String getSelector(){
         return this.selector;
     }
+
+    public String getUrlString(){
+        String result = this.host;
+
+        if(this.port != 70){
+            result += ":" + this.port;
+        }
+
+        if(this.selector.length() > 0){
+            if(this.selector.startsWith("/")){
+                result += this.selector;
+            }else{
+                result += "/" + this.selector;
+            }
+        }
+
+        return result;
+    }
     
     /* constructs the object and parses the url */
     public GopherUrl(String url){
