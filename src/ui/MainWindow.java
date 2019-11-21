@@ -1,6 +1,7 @@
 package ui;
 
 import java.awt.*;
+import java.net.URI;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -178,21 +179,46 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
      */
     @Override
     public void addressRequested(String addressText, GopherItemType contentType) {
-        /* activate the load indicator in the address bar */
-        this.navigationBar.setIsLoading(true);
+        /* check what type of link was requested and execute
+            the appropriate external application or use the
+            default approach for gopher content */
+        if(addressText.startsWith("https://") == true 
+            || addressText.startsWith("http://") == true){
+            /* this is the World Wide Web using HTTP or HTTPS, 
+                so try to open the systems browser so that the
+                user can enjoy bloated javascript based html
+                content with the fine-art of pop-up advertising
+                and animated display banners */
+            try{
+                if (Desktop.isDesktopSupported() == true 
+                    && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                    /* launch the systems WWW browser */
+                    Desktop.getDesktop().browse(new URI(addressText));
+                }
+            }catch(Exception ex){
+                /* Error: cannot enjoy bloated javascript 
+                        stuffed World Wide Web pages! */
+                System.out.println("Unable to open system's "
+                    + "world wide web browser: " + ex.getMessage());
+            }
+        }else{
+            /* this is default gopher content */
+            /* activate the load indicator in the address bar */
+            this.navigationBar.setIsLoading(true);
 
-        /* set the cursor to wait indicating a wait */
-        this.frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+            /* set the cursor to wait indicating a wait */
+            this.frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 
-        /* update the navigation bar with the new address */
-        this.navigationBar.setAddressText(addressText);
+            /* update the navigation bar with the new address */
+            this.navigationBar.setAddressText(addressText);
 
-        try{
-            /* try to execute the thread */
-            this.gopherClient.fetchAsync(addressText,contentType,this);
-        }catch(Exception ex){
-            /* might throw an ex when thread is interrupted */
-            System.out.println("Exception while fetching async: " + ex.getMessage());
+            try{
+                /* try to execute the thread */
+                this.gopherClient.fetchAsync(addressText,contentType,this);
+            }catch(Exception ex){
+                /* might throw an ex when thread is interrupted */
+                System.out.println("Exception while fetching async: " + ex.getMessage());
+            }
         }
     }
 
