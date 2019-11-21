@@ -179,8 +179,6 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     public void backwardRequested() {
         /* set the new history position */
         if(this.historyPosition > 0){
-            System.out.println("Backward request acknowledged");
-
             this.historyPosition--;
 
             /* get the new page from history */
@@ -195,8 +193,6 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     public void forwardRequested() {
         /* set the new history position */
         if(this.historyPosition < (this.history.size()-1)){
-            System.out.println("Forward request acknowledged");
-
             this.historyPosition++;
 
             /* get the new page from history */

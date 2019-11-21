@@ -69,8 +69,6 @@ public class NavigationBar extends JPanel {
         this.backButton.addMouseListener(new MouseAdapter() {
             /* notify the listeners of the move back request */
             public void mouseReleased(MouseEvent evt){
-                System.out.println("Back button requested");
-
                 if(allowNavigateBack == true){
                     for (NavigationInputListener inputListener : inputListenerList){
                         inputListener.backwardRequested();
@@ -98,8 +96,6 @@ public class NavigationBar extends JPanel {
         this.forwardButton.addMouseListener(new MouseAdapter() {
             /* notify the listeners of the forward move request */
             public void mouseReleased(MouseEvent evt){
-                System.out.println("Forward button requested");
-
                 if(allowNavigateForward == true){
                     for (NavigationInputListener inputListener : inputListenerList){
                         inputListener.forwardRequested();
