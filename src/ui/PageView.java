@@ -1,7 +1,12 @@
 package ui;
 
 import java.awt.*;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -55,9 +60,49 @@ public class PageView extends JScrollPane{
      * GopherPage with respective content
      */
     public void showGopherContent(GopherPage content){
-        this.viewPane.setContentType("text/plain");
-        this.viewPane.setText(content.getSourceCode());
+        /* reset the header to just show nothing */
         this.headerPane.setText("");
+
+        /* check the type of content supplied */
+        if(content.getContentType() == GopherItemType.IMAGE_FILE
+            || content.getContentType() == GopherItemType.GIF_FILE){
+            /* try to display as an image */
+            try{
+                /* try to identify the file extension */
+                String imageFileExt = ".jpg";
+                if(content.getContentType() == GopherItemType.GIF_FILE){
+                    imageFileExt = ".gif";
+                }
+
+                /* try to determine the filetype from the url */
+                String imageUrl = content.getUrl().getUrlString();
+                if(imageUrl.substring(imageUrl.length()-4).equals(".")){
+                    imageFileExt = imageUrl.substring(imageUrl.length()-3);
+                }if(imageUrl.substring(imageUrl.length()-5).equals(".")){
+                    imageFileExt = imageUrl.substring(imageUrl.length()-4);
+                }
+
+                /* write the image content to file */
+                File tempImageFile = File.createTempFile("gopherimagefile", imageFileExt);
+                FileOutputStream outputStream = new FileOutputStream(tempImageFile);
+                outputStream.write(content.getByteArray()); 
+                outputStream.close();
+                
+                System.out.println("Image stored in: " + tempImageFile.getAbsolutePath());
+    
+                /* display content as an image */
+                this.viewPane.setContentType("text/html");
+                this.viewPane.setText("<img src=\"" + tempImageFile.toURI().toURL().toExternalForm() + "\" />");
+            }catch(Exception ex){
+                /* display exception cause as text inside the view */
+                this.viewPane.setContentType("text/plain");
+                this.viewPane.setText("Failed to display the image:\n" + ex.getMessage());
+            }
+        }else{
+            /* display content as plain text */
+            this.viewPane.setContentType("text/plain");
+            this.viewPane.setText(content.getSourceCode());
+        }
     }
 
     /**

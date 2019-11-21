@@ -1,6 +1,7 @@
 package net;
 
 import java.util.ArrayList;
+import java.util.Base64;
 
 import net.GopherItem.GopherItemType;
 
@@ -9,7 +10,7 @@ import net.GopherItem.GopherItemType;
  * and Gopher items provided in the underlying Gopher Menu
  */
 public class GopherPage {
-    private String sourceCode;
+    private byte[] sourceCode;
     private GopherUrl url;
     private ArrayList<GopherItem> itemList;
     private GopherItemType contentType = GopherItemType.UNKNOWN;
@@ -24,19 +25,19 @@ public class GopherPage {
      * @param gopherPageSourceCode
      * Source code or content of the gopher page
      * 
-     * @param contentType
+     * @param gopherContentType
      * The estimated content type of the gopher page
      * 
      * @param gopherPageUrl
      * The URL of the gopher page
      */
-    public GopherPage(String gopherPageSourceCode, GopherItemType contentType, GopherUrl gopherPageUrl){
+    public GopherPage(byte[] gopherPageSourceCode, GopherItemType gopherContentType, GopherUrl gopherPageUrl){
         this.sourceCode = gopherPageSourceCode;
         this.url = gopherPageUrl;
         this.itemList = new ArrayList<GopherItem>();
 
-        if(contentType == GopherItemType.GOPHERMENU 
-            || contentType == GopherItemType.UNKNOWN){
+        if(gopherContentType == GopherItemType.GOPHERMENU 
+            || gopherContentType == GopherItemType.UNKNOWN){
             /* try to parse it as a gopher menu */
             try{
                 /* execute the parse process */
@@ -48,6 +49,9 @@ public class GopherPage {
                 /* parsing failed for whatever, define as text */
                 this.contentType = GopherItemType.TEXTFILE;
             }
+        }else{
+            /* set the supplied content type */
+            this.contentType = gopherContentType;
         }
     }
 
@@ -62,12 +66,33 @@ public class GopherPage {
     }
 
     /**
+     * Returns the source code in base64 encoded format
+     * which can be used to display images in the view
+     * 
+     * @return
+     * String with base64 encoded data of the source code
+     */
+    public String getBase64(){
+        return Base64.getEncoder().encodeToString(this.sourceCode); 
+    }
+
+    /**
+     * Returns the raw bytes of the data received
+     * 
+     * @return
+     * Byte array with the raw gopher page data
+     */
+    public byte[] getByteArray(){
+        return this.sourceCode;
+    }
+
+    /**
      * Sets the source code (gophermap) of this gopher page
      * 
      * @param value
      * The text value as supplied by the server
      */
-    public void setSourceCode(String value){
+    public void setSourceCode(byte[] value){
         this.sourceCode = value;
     }
 
@@ -78,7 +103,13 @@ public class GopherPage {
      * The gophermap content as a String
      */
     public String getSourceCode(){
-        return this.sourceCode;
+        try{
+            return new String(this.sourceCode, "ASCII");
+        }catch(Exception ex){
+            /* drop a quick info on the console when decoding fails */
+            System.out.println("Failed to decode ASCII bytes of Gopher Page: " + ex.getMessage());
+            return "";
+        }
     }
 
     /* 
@@ -97,7 +128,7 @@ public class GopherPage {
 
     /* parses the local source code into components */
     private void parse(){
-        String[] itemSourceList = this.sourceCode.split("\r\n");
+        String[] itemSourceList = this.getSourceCode().split("\r\n");
         for(int i=0; i<itemSourceList.length; i++){
             String itemSource = itemSourceList[i];
 

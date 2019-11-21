@@ -58,7 +58,7 @@ public class GopherClient {
 
         try{
             /* string result with content */
-            String content = "";
+            byte[] content;
 
             System.out.println("Fetching (" + contentType.toString() + "): " + url);
 
@@ -66,14 +66,7 @@ public class GopherClient {
             GopherUrl gopherUrl = new GopherUrl(url);
             Socket gopherSocket = new Socket(gopherUrl.getHost(), gopherUrl.getPort());
             (new DataOutputStream(gopherSocket.getOutputStream())).writeBytes(gopherUrl.getSelector() + "\r\n");
-            BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(gopherSocket.getInputStream()));
-            
-            /* read the response and build a string with
-                the complete source code of the gopher page */
-            for (String line = responseBuffer.readLine(); line != null; line = responseBuffer.readLine()) {
-                /* Gopher line termination is always CR+LF */
-                if(!line.equals(".")){ content += line + "\r\n"; }
-            }
+            content = gopherSocket.getInputStream().readAllBytes();
 
             /* close the socket to the server */
             gopherSocket.close();
