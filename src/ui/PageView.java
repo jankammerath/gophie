@@ -83,8 +83,6 @@ public class PageView extends JScrollPane{
                 FileOutputStream outputStream = new FileOutputStream(tempImageFile);
                 outputStream.write(content.getByteArray()); 
                 outputStream.close();
-                
-                System.out.println("Image stored in: " + tempImageFile.getAbsolutePath());
     
                 /* display content as an image */
                 this.viewPane.setContentType("text/html");
@@ -97,7 +95,7 @@ public class PageView extends JScrollPane{
         }else{
             /* display content as plain text */
             this.viewPane.setContentType("text/plain");
-            this.viewPane.setText(content.getSourceCode());
+            this.viewPane.setText(content.getSourceCode().replace("\n.\r\n", ""));
         }
     }
 
@@ -193,10 +191,11 @@ public class PageView extends JScrollPane{
         this.viewPane.setEditable(false);
         this.viewPane.setBackground(Color.decode(backgroundColor));
         this.viewPane.setForeground(Color.decode(textColor));
-        this.viewPane.setBorder(new EmptyBorder(10,4,8,8));
+        this.viewPane.setBorder(new EmptyBorder(10,4,8,16));
         this.viewPane.setEditorKit(this.editorKit);
         this.viewPane.setCursor(new Cursor(Cursor.TEXT_CURSOR));
         this.viewPane.setSelectionColor(Color.decode(this.selectionColor));
+        this.viewPane.setDragEnabled(false);
         this.getViewport().add(this.viewPane);
 
         /* set the text color locally */
@@ -213,6 +212,7 @@ public class PageView extends JScrollPane{
         this.headerPane.setForeground(Color.decode(textColor));
         this.headerPane.setBorder(new EmptyBorder(10,12,8,2));
         this.headerPane.setEditorKit(this.editorKit);
+        this.headerPane.setDragEnabled(false);
         this.setRowHeaderView(this.headerPane);
 
         /* configure the style of the header and the view */

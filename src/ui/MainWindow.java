@@ -190,10 +190,25 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                 content with the fine-art of pop-up advertising
                 and animated display banners */
             try{
-                if (Desktop.isDesktopSupported() == true 
-                    && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                    /* launch the systems WWW browser */
-                    Desktop.getDesktop().browse(new URI(addressText));
+                /* ensure the user knows the risk of the WWW */
+                Object[] confirmHttpOptions = { "Open Website", "Abort" };
+                int confirmOpenHttp = JOptionPane.showOptionDialog(this.frame,
+                      "The Gopher menu item you selected wants you to leave the\n"
+                    + "Gopherspace and enter the World Wide Web using your browser.\n\n"
+                    + "Do you want to open the following Website?\n"
+                    + addressText,
+                    "Enter the World Wide Web?",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
+                    null, confirmHttpOptions, confirmHttpOptions[0]);
+                
+                /* direct user when decision was yes */
+                if(confirmOpenHttp == JOptionPane.YES_OPTION){
+                    /* launch the system WWW browser */
+                    if (Desktop.isDesktopSupported() == true 
+                        && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                        /* launch the systems WWW browser */
+                        Desktop.getDesktop().browse(new URI(addressText));
+                    }
                 }
             }catch(Exception ex){
                 /* Error: cannot enjoy bloated javascript 
@@ -306,7 +321,31 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
     @Override
     public void pageLoadFailed(GopherError error) {
+        /* show message for connection timeout */
+        if(error == GopherError.CONNECTION_TIMEOUT){
+            JOptionPane.showMessageDialog(this.frame, 
+                    "The Gopher server did not respond in a timely manner.", 
+                    "Connection timeout", JOptionPane.WARNING_MESSAGE);
+        }
+
+        /* show DNS or host not found error */
+        if(error == GopherError.HOST_UNKNOWN){
+            JOptionPane.showMessageDialog(this.frame, 
+                    "The Gopher server address could not be reached.", 
+                    "Server not found", JOptionPane.WARNING_MESSAGE);
+        }
+
+        /* show some information about an exception */
+        if(error == GopherError.EXCEPTION){
+            JOptionPane.showMessageDialog(this.frame, 
+                    "Ouchn, an unknown error occured.", 
+                    "Ooopsie...", JOptionPane.ERROR_MESSAGE);
+        }
+
+        /* output some base information to the console */
         System.out.println("Failed to load gopher page: " + error.toString());
+
+        /* reset the navigation bar status */
         this.navigationBar.setIsLoading(false);
     }
 }
