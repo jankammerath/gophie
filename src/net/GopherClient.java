@@ -9,6 +9,18 @@ import net.GopherItem.GopherItemType;
 import net.event.*;
 
 public class GopherClient {
+    /* thread with the active fetch process */
+    private Thread thread;
+
+    /**
+     * Cancels a current fetch operation
+     */
+    public void cancelFetch(){
+        if(this.thread != null){
+            this.thread.interrupt();
+        }
+    }
+
     /* 
         Fetches a gopher page asynchronously
 
@@ -16,7 +28,8 @@ public class GopherClient {
         @eventListener      the listener to report the result to
     */
     public void fetchAsync(String url, GopherItemType contentType, GopherClientEventListener eventListener){
-        new Thread(new Runnable() { 
+        /* instanciate the new thread */
+        this.thread = new Thread(new Runnable() { 
             public void run() { 
                 try{
                     GopherPage resultPage = fetch(url, contentType);
@@ -29,7 +42,10 @@ public class GopherClient {
                     } 
                 }
             } 
-        }).start(); 
+        });
+
+        /* start the new thread */
+        this.thread.start();
     }
 
     /*

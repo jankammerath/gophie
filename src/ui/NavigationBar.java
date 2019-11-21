@@ -124,6 +124,23 @@ public class NavigationBar extends JPanel {
         /* create the refresh button and handle it */
         this.refreshButton = this.createButton("");
         this.refreshButton.addMouseListener(new MouseAdapter() {
+            /* initiate a refresh or cancel process */
+            public void mouseReleased(MouseEvent evt){
+                /* request a stop or cancellation when currently loading */
+                if(isLoadingStatus == true){
+                    for (NavigationInputListener inputListener : inputListenerList){
+                        inputListener.stopRequested();
+                    }
+                }
+
+                /* request a refresh when currently in network idle */
+                if(isLoadingStatus == false){
+                    for (NavigationInputListener inputListener : inputListenerList){
+                        inputListener.refreshRequested();
+                    }
+                }
+            }
+
             /* set the color to the hover color and use the hand cursor */
             public void mouseEntered(MouseEvent evt) {
                 setCursor(new Cursor(Cursor.HAND_CURSOR));

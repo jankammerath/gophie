@@ -205,14 +205,20 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
     @Override
     public void refreshRequested() {
-        // TODO Auto-generated method stub
+        /* get the current gopher page to reload it */
+        GopherPage currentPage = this.history.get(this.historyPosition);
 
+        /* reload practically means just requesting this page again */
+        this.addressRequested(currentPage.getUrl().getUrlString(), currentPage.getContentType());
     }
 
     @Override
     public void stopRequested() {
-        // TODO Auto-generated method stub
+        /* cancel any current operation */
+        this.gopherClient.cancelFetch();
 
+        /* notify the local handler about cancellation by the user */
+        this.pageLoadFailed(GopherError.USER_CANCELLED);
     }
 
     /**
