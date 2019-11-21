@@ -5,7 +5,7 @@ public class GopherItem{
     public enum GopherItemType {
         /* Canonical types */
         TEXTFILE,                   // 0 = Text file
-        SUBMENU,                    // 1 = Gopher submenu
+        GOPHERMENU,                 // 1 = Gopher (sub-)menu
         CCSCO_NAMESERVER,           // 2 = CCSO Nameserver
         ERRORCODE,                  // 3 = Error code returned by a Gopher server to indicate failure
         BINHEX_FILE,                // 4 = BinHex-encoded file (primarily for Macintosh computers)
@@ -163,7 +163,7 @@ public class GopherItem{
     private void setItemTypeByCode(String code){
         this.itemTypeCode = code;
         if(code.equals("0")){ this.itemType = GopherItemType.TEXTFILE; }
-        if(code.equals("1")){ this.itemType = GopherItemType.SUBMENU; } 
+        if(code.equals("1")){ this.itemType = GopherItemType.GOPHERMENU; } 
         if(code.equals("2")){ this.itemType = GopherItemType.CCSCO_NAMESERVER; } 
         if(code.equals("3")){ this.itemType = GopherItemType.ERRORCODE; } 
         if(code.equals("4")){ this.itemType = GopherItemType.BINHEX_FILE; } 

@@ -14,6 +14,7 @@ import javax.swing.text.html.StyleSheet;
 
 import net.GopherItem;
 import net.GopherPage;
+import net.GopherItem.GopherItemType;
 import ui.event.NavigationInputListener;
 
 /**
@@ -24,14 +25,17 @@ public class PageView extends JScrollPane{
     private static final long serialVersionUID = 1L;
 
     /* local variables and objects */
-    JEditorPane viewPane;
-    JEditorPane headerPane;
-    HTMLEditorKit editorKit;
-    Font textFont;
-    String viewTextColor = "#ffffff";
+    private JEditorPane viewPane;
+    private JEditorPane headerPane;
+    private HTMLEditorKit editorKit;
+    private Font textFont;
+    private String viewTextColor = "#ffffff";
 
     /* listeners for local events */
     private ArrayList<NavigationInputListener> inputListenerList;
+
+    /* current page displayed */
+    private GopherPage currentPage = null;
 
     /**
      * Adds a new navigation listener for any navigation events
@@ -40,6 +44,12 @@ public class PageView extends JScrollPane{
      */
     public void addListener(NavigationInputListener listener){
         this.inputListenerList.add(listener);
+    }
+
+    public void showGopherContent(GopherPage content){
+        this.viewPane.setContentType("text/plain");
+        this.viewPane.setText(content.getSourceCode());
+        this.headerPane.setText("");
     }
 
     /**
@@ -84,7 +94,10 @@ public class PageView extends JScrollPane{
             lineNumber++;
         }
 
+        this.viewPane.setContentType("text/html");
         this.viewPane.setText(renderedContent+"</table>");
+
+        this.headerPane.setContentType("text/html");
         this.headerPane.setText(renderedHeader+"</table>");
     }
 
@@ -122,7 +135,6 @@ public class PageView extends JScrollPane{
         this.viewPane.setBackground(Color.decode(backgroundColor));
         this.viewPane.setForeground(Color.decode(textColor));
         this.viewPane.setBorder(new EmptyBorder(10,4,8,8));
-        this.viewPane.setContentType("text/html");
         this.viewPane.setEditorKit(this.editorKit);
         this.getViewport().add(this.viewPane);
 
@@ -139,7 +151,6 @@ public class PageView extends JScrollPane{
         this.headerPane.setBackground(Color.decode(backgroundColor));
         this.headerPane.setForeground(Color.decode(textColor));
         this.headerPane.setBorder(new EmptyBorder(10,12,8,2));
-        this.headerPane.setContentType("text/html");
         this.headerPane.setEditorKit(this.editorKit);
         this.setRowHeaderView(this.headerPane);
 
@@ -156,8 +167,20 @@ public class PageView extends JScrollPane{
                         urlValue = "gopher://" + urlValue.substring(14);
                     }
 
+                    /* determine the content type of the link target */
+                    GopherItemType contentType = GopherItemType.UNKNOWN;
+                    if(currentPage != null){
+                        /* determine the content type of the gopher item
+                            by the definition of it in the gopher menu */
+                        for(GopherItem contentItem : currentPage.getItemList()){
+                            if(contentItem.getUrlString().equals(urlValue)){
+                                contentType = contentItem.getItemType();
+                            }
+                        }
+                    }
+
                     for (NavigationInputListener inputListener : inputListenerList){
-                        inputListener.addressRequested(urlValue);
+                        inputListener.addressRequested(urlValue,contentType);
                     }
                 }
             }

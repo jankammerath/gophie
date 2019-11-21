@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.border.*;
 
+import net.GopherItem.GopherItemType;
 import ui.event.NavigationInputListener;
 
 import javax.swing.*;
@@ -24,6 +25,7 @@ public class NavigationBar extends JPanel {
     private JLabel forwardButton;
     private JLabel refreshButton;
     private JTextField addressInput;
+    private Boolean isLoadingStatus = false;
 
     /* listeners for local events */
     private ArrayList<NavigationInputListener> inputListenerList;
@@ -67,6 +69,22 @@ public class NavigationBar extends JPanel {
         this.refreshButton = this.createButton("");
     }
 
+    /**
+     * Defines whether is loading content or not
+     * 
+     * @param status
+     * true when currently loading content, false if not
+     */
+    public void setIsLoading(Boolean status){
+        this.isLoadingStatus = status;
+
+        if(status == true){
+            this.refreshButton.setText("");
+        }else{
+            this.refreshButton.setText("");
+        }
+    }
+
     /* 
         Adds a listener for navigation events
     */
@@ -98,7 +116,7 @@ public class NavigationBar extends JPanel {
         inputField.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 for (NavigationInputListener inputListener : inputListenerList){
-                    inputListener.addressRequested(inputField.getText().trim());
+                    inputListener.addressRequested(inputField.getText().trim(), GopherItemType.UNKNOWN);
                 }
             }
         });

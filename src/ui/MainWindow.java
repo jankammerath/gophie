@@ -6,6 +6,7 @@ import javax.swing.*;
 /* import gopher network client */
 import net.GopherClient;
 import net.GopherPage;
+import net.GopherItem.GopherItemType;
 import net.event.GopherClientEventListener;
 import net.event.GopherError;
 
@@ -73,7 +74,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.frame.setVisible(true);
 
         /* fetch the default gopher home */
-        this.addressRequested(DEFAULT_GOPHERHOME);
+        this.addressRequested(DEFAULT_GOPHERHOME, GopherItemType.GOPHERMENU);
     }
 
     public void show() {
@@ -83,8 +84,10 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     }
 
     @Override
-    public void addressRequested(String addressText) {
-        this.gopherClient.fetchAsync(addressText,this);
+    public void addressRequested(String addressText, GopherItemType contentType) {
+        this.navigationBar.setIsLoading(true);
+        this.navigationBar.setAddressText(addressText);
+        this.gopherClient.fetchAsync(addressText,contentType,this);
     }
 
     @Override
@@ -114,11 +117,19 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     @Override
     public void pageLoaded(GopherPage result) {
         this.frame.setTitle(result.getUrl().getUrlString() + " - " + APPLICATION_TITLE);
-        this.pageView.showGopherPage(result);
+
+        if(result.getContentType() == GopherItemType.GOPHERMENU){
+            this.pageView.showGopherPage(result);
+        }else{
+            this.pageView.showGopherContent(result);
+        }
+
+        this.navigationBar.setIsLoading(false);
     }
 
     @Override
     public void pageLoadFailed(GopherError error) {
         System.out.println("Failed to load gopher page: " + error.toString());
+        this.navigationBar.setIsLoading(false);
     }
 }

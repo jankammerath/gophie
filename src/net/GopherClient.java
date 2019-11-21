@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
+import net.GopherItem.GopherItemType;
 import net.event.*;
 
 public class GopherClient {
@@ -14,11 +15,11 @@ public class GopherClient {
         @url                the url of the gopher page to fetch
         @eventListener      the listener to report the result to
     */
-    public void fetchAsync(String url, GopherClientEventListener eventListener){
+    public void fetchAsync(String url, GopherItemType contentType, GopherClientEventListener eventListener){
         new Thread(new Runnable() { 
             public void run() { 
                 try{
-                    GopherPage resultPage = fetch(url);
+                    GopherPage resultPage = fetch(url, contentType);
                     if (eventListener != null) { 
                         eventListener.pageLoaded(resultPage); 
                     } 
@@ -36,7 +37,7 @@ public class GopherClient {
 
         @url                the url of the gopher page to fetch
     */
-    public GopherPage fetch(String url) throws GopherNetworkException {
+    public GopherPage fetch(String url, GopherItemType contentType) throws GopherNetworkException {
         GopherPage result = null;
 
         try{
@@ -46,21 +47,21 @@ public class GopherClient {
             /* parse the url and instanciate the client */
             GopherUrl gopherUrl = new GopherUrl(url);
             Socket gopherSocket = new Socket(gopherUrl.getHost(), gopherUrl.getPort());
-            (new DataOutputStream(gopherSocket.getOutputStream())).writeBytes("\r\n");
+            (new DataOutputStream(gopherSocket.getOutputStream())).writeBytes(gopherUrl.getSelector() + "\r\n");
             BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(gopherSocket.getInputStream()));
             
             /* read the response and build a string with
                 the complete source code of the gopher page */
             for (String line = responseBuffer.readLine(); line != null; line = responseBuffer.readLine()) {
                 /* Gopher line termination is always CR+LF */
-                content += line + "\r\n";
+                if(!line.equals(".")){ content += line + "\r\n"; }
             }
 
             /* close the socket to the server */
             gopherSocket.close();
 
             /* set the result page */
-            result = new GopherPage(content, gopherUrl);
+            result = new GopherPage(content, contentType, gopherUrl);
         }catch(UnknownHostException ex){
             /* handle host not found exception */
             throw new GopherNetworkException(GopherError.HOST_UNKNOWN, ex.getMessage());
