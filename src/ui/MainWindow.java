@@ -136,6 +136,10 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
             }
         }    
 
+        /* reset navigation allowance */
+        this.navigationBar.setNavigateBack(false);
+        this.navigationBar.setNavigateForward(false);
+
         /* add to history, if allowed */
         if(addToHistory == true){
             /* add to the stack of pages */
@@ -175,10 +179,15 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     public void backwardRequested() {
         /* set the new history position */
         if(this.historyPosition > 0){
+            System.out.println("Backward request acknowledged");
+
             this.historyPosition--;
 
             /* get the new page from history */
             this.pageLoaded(this.history.get(this.historyPosition));
+
+            /* update the history */
+            this.updateHistory(this.history.get(this.historyPosition));
         }
     }
 
@@ -186,10 +195,15 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     public void forwardRequested() {
         /* set the new history position */
         if(this.historyPosition < (this.history.size()-1)){
+            System.out.println("Forward request acknowledged");
+
             this.historyPosition++;
 
             /* get the new page from history */
             this.pageLoaded(this.history.get(this.historyPosition));
+
+            /* update the history */
+            this.updateHistory(this.history.get(this.historyPosition));
         }
     }
 
