@@ -131,9 +131,14 @@ public class GopherItem{
         if(this.itemType != GopherItemType.UNKNOWN 
             && this.itemType != GopherItemType.INFORMATION){
             /* check if the selector contains a URL */
-            if(this.selector.startsWith("URL:")){
+            if(this.selector.startsWith("URL:") == true
+                || this.selector.startsWith("/URL:") == true){
                 /* selector is link to other resource */
-                result = this.selector.substring(4);
+                if(this.selector.startsWith("/URL:")){
+                    result = this.selector.substring(5);
+                }else{
+                    result = this.selector.substring(4);
+                }
             }else{
                 /* protocol is definitely gopher */
                 result = "gopher://" + this.hostName;
