@@ -53,6 +53,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
         /* create the page view component object */
         this.pageView = new PageView(VIEW_TEXTCOLOR, VIEW_BACKGROUND);
+        this.pageView.addListener(this);
 
         /* create the menu bar */
         this.frame.setJMenuBar(new MainMenu());
