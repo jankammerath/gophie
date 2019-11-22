@@ -188,7 +188,7 @@ public class NavigationBar extends JPanel {
         this.isLoadingStatus = status;
 
         if(status == true){
-            this.refreshButton.setText("");
+            this.refreshButton.setText("");
         }else{
             this.refreshButton.setText("");
         }
