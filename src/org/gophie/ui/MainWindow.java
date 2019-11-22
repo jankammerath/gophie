@@ -1,4 +1,4 @@
-package ui;
+package org.gophie.ui;
 
 import java.awt.*;
 import java.net.URI;
@@ -7,15 +7,11 @@ import java.util.ArrayList;
 import javax.swing.*;
 
 /* import gopher network client */
-import net.GopherClient;
-import net.GopherPage;
-import net.GopherUrl;
-import net.GopherItem.GopherItemType;
-import net.event.GopherClientEventListener;
-import net.event.GopherError;
-import ui.event.MessageViewListener;
+import org.gophie.net.*;
+import org.gophie.net.GopherItem.GopherItemType;
+import org.gophie.net.event.*;
 /* import ui event listeners */
-import ui.event.NavigationInputListener;
+import org.gophie.ui.event.*;
 
 public class MainWindow implements NavigationInputListener, GopherClientEventListener {
     /* define the constants for the UI */
@@ -38,6 +34,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     private JFrame frame;
     private PageView pageView;
     private NavigationBar navigationBar;
+    private JPanel headerBar;
     private MessageView messageView;
 
     public MainWindow() {
@@ -76,12 +73,16 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         /* attach listener to navigation bar */
         this.navigationBar.addListener(this);
 
-        /* create the message view */
+        /* create the header bar, message view
+            and search input component */
+        this.headerBar = new JPanel();
+        this.headerBar.setLayout(new BoxLayout(this.headerBar,BoxLayout.Y_AXIS));
         this.messageView = new MessageView();
+        this.headerBar.add(this.messageView);
 
         /* set the content pane */
         Container contentPane = frame.getContentPane();
-        contentPane.add(this.messageView, BorderLayout.NORTH);
+        contentPane.add(this.headerBar, BorderLayout.NORTH);
         contentPane.add(this.pageView, BorderLayout.CENTER);
         contentPane.add(this.navigationBar, BorderLayout.SOUTH);
         this.frame.setVisible(true);

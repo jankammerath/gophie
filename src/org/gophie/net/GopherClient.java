@@ -1,4 +1,4 @@
-package net;
+package org.gophie.net;
 
 import java.io.*;
 import java.net.ConnectException;
@@ -7,8 +7,8 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 
-import net.GopherItem.GopherItemType;
-import net.event.*;
+import org.gophie.net.GopherItem.GopherItemType;
+import org.gophie.net.event.*;
 
 public class GopherClient {
     /* thread with the active fetch process */

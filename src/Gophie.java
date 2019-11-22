@@ -1,4 +1,4 @@
-import ui.MainWindow;
+import org.gophie.ui.MainWindow;
 
 public class Gophie {
     /**

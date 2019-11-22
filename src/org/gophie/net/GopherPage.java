@@ -1,9 +1,9 @@
-package net;
+package org.gophie.net;
 
 import java.util.ArrayList;
 import java.util.Base64;
 
-import net.GopherItem.GopherItemType;
+import org.gophie.net.GopherItem.GopherItemType;
 
 /**
  * A GopherMenu page object that contains all information

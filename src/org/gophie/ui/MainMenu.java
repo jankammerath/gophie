@@ -1,4 +1,4 @@
-package ui;
+package org.gophie.ui;
 
 import javax.swing.*;
 

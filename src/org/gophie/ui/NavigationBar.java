@@ -1,11 +1,11 @@
-package ui;
+package org.gophie.ui;
 
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.border.*;
 
-import net.GopherItem.GopherItemType;
-import ui.event.NavigationInputListener;
+import org.gophie.net.GopherItem.GopherItemType;
+import org.gophie.ui.event.NavigationInputListener;
 
 import javax.swing.*;
 import java.io.*;

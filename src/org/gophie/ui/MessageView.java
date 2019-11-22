@@ -1,4 +1,4 @@
-package ui;
+package org.gophie.ui;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -7,7 +7,7 @@ import java.io.File;
 import javax.swing.*;
 import javax.swing.border.*;
 
-import ui.event.MessageViewListener;
+import org.gophie.ui.event.MessageViewListener;
 
 public class MessageView extends JPanel {
     /* constants */

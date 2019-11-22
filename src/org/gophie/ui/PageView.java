@@ -1,4 +1,4 @@
-package ui;
+package org.gophie.ui;
 
 import java.awt.*;
 import java.io.File;
@@ -12,10 +12,10 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
-import net.GopherItem;
-import net.GopherPage;
-import net.GopherItem.GopherItemType;
-import ui.event.NavigationInputListener;
+import org.gophie.net.GopherItem;
+import org.gophie.net.GopherPage;
+import org.gophie.net.GopherItem.GopherItemType;
+import org.gophie.ui.event.NavigationInputListener;
 
 /**
  * The PageView component renders GopherPage objects

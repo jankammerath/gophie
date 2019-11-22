@@ -1,4 +1,4 @@
-package net.event;
+package org.gophie.net.event;
 
 public enum GopherError {
     EXCEPTION,

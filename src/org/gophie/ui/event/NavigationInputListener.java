@@ -1,6 +1,6 @@
-package ui.event;
+package org.gophie.ui.event;
 
-import net.GopherItem.GopherItemType;
+import org.gophie.net.GopherItem.GopherItemType;
 
 /*
     Listener for the events raised by the

@@ -1,4 +1,4 @@
-package net;
+package org.gophie.net;
 
 public class GopherItem{
     /* defines the official types of gopher items */

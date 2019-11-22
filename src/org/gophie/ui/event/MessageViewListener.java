@@ -1,4 +1,4 @@
-package ui.event;
+package org.gophie.ui.event;
 
 public interface MessageViewListener {
     void optionSelected(int option);

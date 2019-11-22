@@ -1,7 +1,7 @@
-package net.event;
+package org.gophie.net.event;
 
-import net.GopherPage;
-import net.GopherUrl;
+import org.gophie.net.GopherPage;
+import org.gophie.net.GopherUrl;
 
 public interface GopherClientEventListener {
     void pageLoaded(GopherPage result);

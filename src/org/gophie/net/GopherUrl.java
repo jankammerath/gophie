@@ -1,4 +1,4 @@
-package net;
+package org.gophie.net;
 
 public class GopherUrl {
     private int port = 70;

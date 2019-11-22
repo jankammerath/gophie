@@ -1,6 +1,6 @@
-package net;
+package org.gophie.net;
 
-import net.event.*;
+import org.gophie.net.event.*;
 
 public class GopherNetworkException extends Exception {
     private static final long serialVersionUID = 1L;
