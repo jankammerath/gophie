@@ -36,6 +36,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     private NavigationBar navigationBar;
     private JPanel headerBar;
     private MessageView messageView;
+    private SearchInput searchInput;
 
     public MainWindow() {
         /* create the instance of the client */
@@ -79,6 +80,8 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.headerBar.setLayout(new BoxLayout(this.headerBar,BoxLayout.Y_AXIS));
         this.messageView = new MessageView();
         this.headerBar.add(this.messageView);
+        this.searchInput = new SearchInput();
+        this.headerBar.add(this.searchInput);
 
         /* set the content pane */
         Container contentPane = frame.getContentPane();
