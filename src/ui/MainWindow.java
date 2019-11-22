@@ -9,6 +9,7 @@ import javax.swing.*;
 /* import gopher network client */
 import net.GopherClient;
 import net.GopherPage;
+import net.GopherUrl;
 import net.GopherItem.GopherItemType;
 import net.event.GopherClientEventListener;
 import net.event.GopherError;
@@ -37,6 +38,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     private JFrame frame;
     private PageView pageView;
     private NavigationBar navigationBar;
+    private MessageView messageView;
 
     public MainWindow() {
         /* create the instance of the client */
@@ -74,8 +76,12 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         /* attach listener to navigation bar */
         this.navigationBar.addListener(this);
 
+        /* create the message view at the top */
+        this.messageView = new MessageView();
+
         /* set the content pane */
         Container contentPane = frame.getContentPane();
+        contentPane.add(messageView, BorderLayout.NORTH);
         contentPane.add(this.pageView, BorderLayout.CENTER);
         contentPane.add(this.navigationBar, BorderLayout.SOUTH);
         this.frame.setVisible(true);
@@ -221,9 +227,6 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
             /* activate the load indicator in the address bar */
             this.navigationBar.setIsLoading(true);
 
-            /* set the cursor to wait indicating a wait */
-            this.frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-
             /* update the navigation bar with the new address */
             this.navigationBar.setAddressText(addressText);
 
@@ -280,7 +283,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.gopherClient.cancelFetch();
 
         /* notify the local handler about cancellation by the user */
-        this.pageLoadFailed(GopherError.USER_CANCELLED);
+        this.pageLoadFailed(GopherError.USER_CANCELLED,null);
     }
 
     /**
@@ -316,30 +319,27 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
         /* reset the loading indicators */
         this.navigationBar.setIsLoading(false);
-        this.frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
     }
 
     @Override
-    public void pageLoadFailed(GopherError error) {
+    public void pageLoadFailed(GopherError error, GopherUrl url) {
         /* show message for connection timeout */
         if(error == GopherError.CONNECTION_TIMEOUT){
-            JOptionPane.showMessageDialog(this.frame, 
-                    "The Gopher server did not respond in a timely manner.", 
-                    "Connection timeout", JOptionPane.WARNING_MESSAGE);
+            if(url != null){
+                this.messageView.showInfo("Connection timed out: " + url.getHost());
+            }
         }
 
         /* show DNS or host not found error */
         if(error == GopherError.HOST_UNKNOWN){
-            JOptionPane.showMessageDialog(this.frame, 
-                    "The Gopher server address could not be reached.", 
-                    "Server not found", JOptionPane.WARNING_MESSAGE);
+            if(url != null){
+                this.messageView.showInfo("Server not found: " + url.getHost());
+            }
         }
 
         /* show some information about an exception */
         if(error == GopherError.EXCEPTION){
-            JOptionPane.showMessageDialog(this.frame, 
-                    "Ouchn, an unknown error occured.", 
-                    "Ooopsie...", JOptionPane.ERROR_MESSAGE);
+            this.messageView.showInfo("Ouchn, an unknown error occured.");
         }
 
         /* output some base information to the console */

@@ -224,8 +224,11 @@ public class NavigationBar extends JPanel {
 
         inputField.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                for (NavigationInputListener inputListener : inputListenerList){
-                    inputListener.addressRequested(inputField.getText().trim(), GopherItemType.UNKNOWN);
+                String requestedAddress = inputField.getText().trim();
+                if(requestedAddress.length() > 0){
+                    for (NavigationInputListener inputListener : inputListenerList){
+                        inputListener.addressRequested(requestedAddress, GopherItemType.UNKNOWN);
+                    }
                 }
             }
         });

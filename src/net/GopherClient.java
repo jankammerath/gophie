@@ -38,7 +38,7 @@ public class GopherClient {
                     } 
                 }catch(GopherNetworkException ex){
                     if (eventListener != null) { 
-                        eventListener.pageLoadFailed(ex.getGopherErrorType());
+                        eventListener.pageLoadFailed(ex.getGopherErrorType(),new GopherUrl(url));
                     } 
                 }
             } 
