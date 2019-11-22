@@ -26,6 +26,7 @@ public class NavigationBar extends JPanel {
     private JLabel forwardButton;
     private JLabel refreshButton;
     private JTextField addressInput;
+    private JLabel statusIcon;
     private Boolean isLoadingStatus = false;
     private Boolean allowNavigateForward = false;
     private Boolean allowNavigateBack = false;
@@ -119,11 +120,6 @@ public class NavigationBar extends JPanel {
             }
         });
 
-        /* create the address input */
-        this.addressInput = this.createAddressInput();
-        this.addressInput.setSelectionColor(Color.decode(this.selectionColor));
-        this.addressInput.setCaretColor(Color.decode(NavigationBar.textColorHex));
-
         /* create the refresh button and handle it */
         this.refreshButton = this.createButton("");
         this.refreshButton.addMouseListener(new MouseAdapter() {
@@ -156,6 +152,19 @@ public class NavigationBar extends JPanel {
                 refreshButton.setForeground(Color.decode(NavigationBar.textColorHex));
             }
         });
+
+        /* create the address input */
+        this.addressInput = this.createAddressInput();
+        this.addressInput.setSelectionColor(Color.decode(this.selectionColor));
+        this.addressInput.setCaretColor(Color.decode(NavigationBar.textColorHex));
+
+        /* create the status indicator */
+        ImageIcon statusIconImage = new ImageIcon("../resources/Image/loading.gif");
+        this.statusIcon = new JLabel(statusIconImage);
+        this.statusIcon.setBorder(new EmptyBorder(0,8,0,2));
+        this.statusIcon.setOpaque(false);
+        this.statusIcon.setVisible(false);
+        this.add(this.statusIcon);
     }
 
     /**
@@ -188,8 +197,10 @@ public class NavigationBar extends JPanel {
         this.isLoadingStatus = status;
 
         if(status == true){
+            this.statusIcon.setVisible(true);
             this.refreshButton.setText("");
         }else{
+            this.statusIcon.setVisible(false);
             this.refreshButton.setText("");
         }
     }
@@ -217,7 +228,7 @@ public class NavigationBar extends JPanel {
     */
     private JTextField createAddressInput(){
         JTextField inputField = new JTextField();
-        inputField.setBorder(new EmptyBorder(4,16,6,4));
+        inputField.setBorder(new EmptyBorder(4,10,6,4));
         inputField.setForeground(Color.decode(NavigationBar.textColorHex));
         inputField.setOpaque(false);
         this.add(inputField);
