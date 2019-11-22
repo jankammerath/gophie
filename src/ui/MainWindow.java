@@ -81,7 +81,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
         /* set the content pane */
         Container contentPane = frame.getContentPane();
-        contentPane.add(messageView, BorderLayout.NORTH);
+        contentPane.add(this.messageView, BorderLayout.NORTH);
         contentPane.add(this.pageView, BorderLayout.CENTER);
         contentPane.add(this.navigationBar, BorderLayout.SOUTH);
         this.frame.setVisible(true);
@@ -195,7 +195,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                 user can enjoy bloated javascript based html
                 content with the fine-art of pop-up advertising
                 and animated display banners */
-            String confirmText = "Open Website " + addressText + " with your browser?";
+            String confirmText = "Open \"" + addressText + "\" with your web browser?";
             String[] optionList = new String[2];
             optionList[0] = "Open Website";
             optionList[1] = "Dismiss";
