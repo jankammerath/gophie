@@ -12,6 +12,7 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
+import org.gophie.config.ConfigurationManager;
 import org.gophie.net.GopherItem;
 import org.gophie.net.GopherPage;
 import org.gophie.net.GopherItem.GopherItemType;
@@ -236,24 +237,17 @@ public class PageView extends JScrollPane{
             }
         });
 
-        try{
-            /* try to open the font for icon display */
-            this.textFont = Font.createFont(Font.TRUETYPE_FONT, new File("../resources/Fonts/Inconsolata-Regular.ttf")).deriveFont(17f);
-            GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            graphicsEnvironment.registerFont(this.textFont);
+        /* try to open the font for icon display */
+        this.textFont = ConfigurationManager.getConsoleFont(17f);
 
-            /* apply the font settings to the view pane */
-            this.viewPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-            this.viewPane.setFont(this.textFont);
+        /* apply the font settings to the view pane */
+        this.viewPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+        this.viewPane.setFont(this.textFont);
 
-            /* apply the font settings to the header pane */
-            this.headerPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-            this.headerPane.setFont(this.textFont);
-            this.headerPane.setHighlighter(null);
-        }catch(Exception ex){
-            /* Ouchie, this will look bad... */
-            System.out.println("Unable to load the fonts!");
-        }
+        /* apply the font settings to the header pane */
+        this.headerPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+        this.headerPane.setFont(this.textFont);
+        this.headerPane.setHighlighter(null);
     }
 
     public String getGopherItemTypeIcon(String code){

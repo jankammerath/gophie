@@ -7,6 +7,7 @@ import java.io.File;
 import javax.swing.*;
 import javax.swing.border.*;
 
+import org.gophie.config.ConfigurationManager;
 import org.gophie.ui.event.MessageViewListener;
 
 public class MessageView extends JPanel {
@@ -26,16 +27,7 @@ public class MessageView extends JPanel {
      */
     public MessageView() {
         /* get the icon font for this navigation bar */
-        try {
-            /* try to open the font for icon display */
-            this.iconFont = Font.createFont(Font.TRUETYPE_FONT, new File("../resources/Fonts/Feather.ttf"))
-                    .deriveFont(19f);
-            GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            graphicsEnvironment.registerFont(this.iconFont);
-        } catch (Exception ex) {
-            /* Ouchie, this will look bad... */
-            System.out.println("Unable to load the fonts!");
-        }
+        this.iconFont = ConfigurationManager.getIconFont(19f);
 
         /* set box layout for this message view */
         this.setLayout(new BorderLayout());

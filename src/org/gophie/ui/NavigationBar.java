@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.border.*;
 
+import org.gophie.config.ConfigurationManager;
 import org.gophie.net.GopherItem.GopherItemType;
 import org.gophie.ui.event.NavigationInputListener;
 
@@ -44,16 +45,8 @@ public class NavigationBar extends JPanel {
     public NavigationBar(String backgroundColor, String textColor, String textHoverColor){
         this.inputListenerList = new ArrayList<NavigationInputListener>();
 
-        /* get the icon font for this navigation bar */
-        try{
-            /* try to open the font for icon display */
-            this.iconFont = Font.createFont(Font.TRUETYPE_FONT, new File("../resources/Fonts/Feather.ttf")).deriveFont(19f);
-            GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            graphicsEnvironment.registerFont(this.iconFont);
-        }catch(Exception ex){
-            /* Ouchie, this will look bad... */
-            System.out.println("Unable to load the fonts!");
-        }
+        /* get the icon font from the configuration */
+        this.iconFont = ConfigurationManager.getIconFont(19f);
 
         /* store the text color locally */
         NavigationBar.textHoverColorHex = textHoverColor;
