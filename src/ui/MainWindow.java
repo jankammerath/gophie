@@ -326,6 +326,13 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     @Override
     public void pageLoadFailed(GopherError error, GopherUrl url) {
         /* show message for connection timeout */
+        if(error == GopherError.CONNECT_FAILED){
+            if(url != null){
+                this.messageView.showInfo("Connection refused: " + url.getHost());
+            }
+        }
+
+        /* show message for connection timeout */
         if(error == GopherError.CONNECTION_TIMEOUT){
             if(url != null){
                 this.messageView.showInfo("Connection timed out: " + url.getHost());

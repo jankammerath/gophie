@@ -1,6 +1,7 @@
 package net;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -73,6 +74,9 @@ public class GopherClient {
 
             /* set the result page */
             result = new GopherPage(content, contentType, gopherUrl);
+        }catch(ConnectException ex){
+            /* handle host connection errors */
+            throw new GopherNetworkException(GopherError.CONNECT_FAILED, ex.getMessage());
         }catch(UnknownHostException ex){
             /* handle host not found exception */
             throw new GopherNetworkException(GopherError.HOST_UNKNOWN, ex.getMessage());

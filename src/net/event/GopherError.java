@@ -5,6 +5,7 @@ public enum GopherError {
     INVALID_URL,
     HOST_UNKNOWN,
     CONNECTION_TIMEOUT,
+    CONNECT_FAILED,
     PARSER_FAILED,
     USER_CANCELLED
 }
