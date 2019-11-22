@@ -127,16 +127,8 @@ public class PageView extends JScrollPane{
 
             /* build links for anything other than infromation items */
             if(!item.getItemTypeCode().equals("i")){ 
-                String linkUrlValue = item.getUrlString();
-                if(linkUrlValue.startsWith("gopher://")){
-                    /* create a fake http URL to represent gopher protocol as
-                        otherwise the underlying Java classes will struggle
-                        dealing with gopher as a protocol */
-                    linkUrlValue = "http://gopher/" + linkUrlValue.substring(9);
-                }
-
                 /* create the link for this item */
-                itemCode = "<a href=\"" + linkUrlValue + "\">" + itemTitle + "</a>";
+                itemCode = "<a href=\"" + item.getUrlString() + "\">" + itemTitle + "</a>";
             }
 
             /* create the item table row */
@@ -222,11 +214,8 @@ public class PageView extends JScrollPane{
         this.viewPane.addHyperlinkListener(new HyperlinkListener() {
             public void hyperlinkUpdate(HyperlinkEvent e) {
                 if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                    String urlValue = e.getURL().toString();
-                    if(urlValue.startsWith("http://gopher/")){
-                        /* revert the gopher fake url */
-                        urlValue = "gopher://" + urlValue.substring(14);
-                    }
+                    /* get the url of that link */
+                    String urlValue = e.getDescription();
 
                     /* determine the content type of the link target */
                     GopherItemType contentType = GopherItemType.UNKNOWN;
