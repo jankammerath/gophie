@@ -60,7 +60,11 @@ public class GopherItem{
         String[] property = line.replace("\r","").replace("\n","").split("\t");
 
         /* display string is first property without type code char */
-        if(property.length > 0){ this.userDisplayString = property[0].substring(1); }
+        if(property.length > 0){ 
+            if(property[0].length() > 1){
+                this.userDisplayString = property[0].substring(1);
+            }
+        }
 
         /* second property is the selector */
         if(property.length > 1){ this.selector = property[1].trim(); }
@@ -69,7 +73,16 @@ public class GopherItem{
         if(property.length > 2){ this.hostName = property[2].trim(); }
 
         /* fourth property is the port of the target host */
-        if(property.length > 3){ this.portNumber = Integer.parseInt(property[3].trim()); }
+        if(property.length > 3){ 
+            try{
+                /* try to parse the port number */
+                this.portNumber = Integer.parseInt(property[3].trim()); 
+            }catch(Exception ex){
+                /* report the failure */
+                System.out.println("Found what was supposed to be a port number "
+                    + "and it did not parse into an integer: " + ex.getMessage());
+            }
+        }
     }
 
     /* 
