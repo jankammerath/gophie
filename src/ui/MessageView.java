@@ -6,7 +6,6 @@ import java.io.File;
 
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.event.MouseInputAdapter;
 
 import ui.event.MessageViewListener;
 
