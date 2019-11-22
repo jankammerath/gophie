@@ -5,6 +5,7 @@ import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 
 import net.GopherItem.GopherItemType;
 import net.event.*;
@@ -66,7 +67,8 @@ public class GopherClient {
             /* parse the url and instanciate the client */
             GopherUrl gopherUrl = new GopherUrl(url);
             Socket gopherSocket = new Socket(gopherUrl.getHost(), gopherUrl.getPort());
-            (new DataOutputStream(gopherSocket.getOutputStream())).writeBytes(gopherUrl.getSelector() + "\r\n");
+            byte[] gopherRequest = (gopherUrl.getSelector() + "\r\n").getBytes(StandardCharsets.US_ASCII);
+            (new DataOutputStream(gopherSocket.getOutputStream())).write(gopherRequest);
             content = gopherSocket.getInputStream().readAllBytes();
 
             /* close the socket to the server */
