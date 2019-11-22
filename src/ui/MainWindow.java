@@ -76,7 +76,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         /* attach listener to navigation bar */
         this.navigationBar.addListener(this);
 
-        /* create the message view at the top */
+        /* create the message view */
         this.messageView = new MessageView();
 
         /* set the content pane */
