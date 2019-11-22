@@ -13,7 +13,7 @@ import net.GopherUrl;
 import net.GopherItem.GopherItemType;
 import net.event.GopherClientEventListener;
 import net.event.GopherError;
-
+import ui.event.MessageViewListener;
 /* import ui event listeners */
 import ui.event.NavigationInputListener;
 
@@ -195,33 +195,35 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                 user can enjoy bloated javascript based html
                 content with the fine-art of pop-up advertising
                 and animated display banners */
-            try{
-                /* ensure the user knows the risk of the WWW */
-                Object[] confirmHttpOptions = { "Open Website", "Abort" };
-                int confirmOpenHttp = JOptionPane.showOptionDialog(this.frame,
-                      "The Gopher menu item you selected wants you to leave the\n"
-                    + "Gopherspace and enter the World Wide Web using your browser.\n\n"
-                    + "Do you want to open the following Website?\n"
-                    + addressText,
-                    "Enter the World Wide Web?",
-                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
-                    null, confirmHttpOptions, confirmHttpOptions[0]);
-                
-                /* direct user when decision was yes */
-                if(confirmOpenHttp == JOptionPane.YES_OPTION){
-                    /* launch the system WWW browser */
-                    if (Desktop.isDesktopSupported() == true 
-                        && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                        /* launch the systems WWW browser */
-                        Desktop.getDesktop().browse(new URI(addressText));
+            String confirmText = "Open Website " + addressText + " with your browser?";
+            String[] optionList = new String[2];
+            optionList[0] = "Open Website";
+            optionList[1] = "Dismiss";
+            this.messageView.showConfirm(confirmText, optionList, new MessageViewListener(){
+                @Override
+                public void optionSelected(int option) {
+                    if(option == 0){
+                        /* launch the system WWW browser */
+                        if (Desktop.isDesktopSupported() == true 
+                            && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                            try{
+                                /* launch the systems WWW browser */
+                                Desktop.getDesktop().browse(new URI(addressText));
+                            }catch(Exception ex){
+                                /* Error: cannot enjoy bloated javascript 
+                                        stuffed World Wide Web pages! */
+                                System.out.println("Unable to open system's "
+                                    + "world wide web browser: " + ex.getMessage());
+                            }
+                        }
+                        /* hide the message view */
+                        messageView.setVisible(false);
+                    }else{
+                        /* hide the message view */
+                        messageView.setVisible(false);
                     }
                 }
-            }catch(Exception ex){
-                /* Error: cannot enjoy bloated javascript 
-                        stuffed World Wide Web pages! */
-                System.out.println("Unable to open system's "
-                    + "world wide web browser: " + ex.getMessage());
-            }
+            });
         }else{
             /* this is default gopher content */
             /* activate the load indicator in the address bar */

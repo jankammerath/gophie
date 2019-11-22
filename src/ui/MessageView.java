@@ -8,6 +8,8 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.MouseInputAdapter;
 
+import ui.event.MessageViewListener;
+
 public class MessageView extends JPanel {
     /* constants */
     private static final long serialVersionUID = 1L;
@@ -58,6 +60,15 @@ public class MessageView extends JPanel {
         this.setVisible(false);
     }
 
+    /**
+     * Creates a new button for this view
+     * 
+     * @param text
+     * The text on the button as string
+     * 
+     * @return
+     * The button in the form of a JLabel
+     */
     private JLabel createButton(String text) {
         JLabel customButton = new JLabel("<html><div style=\"border:1px solid #000000;"
                 + "padding:2px 6px 2px 6px;border-radius:6px;\">" + text + "</div></html>");
@@ -100,11 +111,24 @@ public class MessageView extends JPanel {
      * @param optionList
      * A string array with the options
      */
-    public void showConfirm(String text, String[] optionList){
+    public void showConfirm(String text, String[] optionList, MessageViewListener eventListener){
         /* remove all components */
-        this.removeAll();
-
+        this.messageIcon.setText("");
         this.messageText.setText(text);
+
+        /* build the option buttons */
+        this.buttonPanel.removeAll();
+        for(int i=0; i<optionList.length; i++){
+            JLabel optionButton = this.createButton(optionList[i]);
+            final int optionId = i;
+            optionButton.addMouseListener(new MouseAdapter() {
+                public void mouseReleased(MouseEvent evt){
+                    eventListener.optionSelected(optionId);
+                }
+            });
+
+            this.buttonPanel.add(optionButton);
+        }
 
         this.setVisible(true);
     }
