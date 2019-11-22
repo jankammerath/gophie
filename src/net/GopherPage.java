@@ -10,6 +10,10 @@ import net.GopherItem.GopherItemType;
  * and Gopher items provided in the underlying Gopher Menu
  */
 public class GopherPage {
+    /* defines the default charset */
+    private static final String GOPHERPAGE_DEFAULT_CHARSET = "UTF-8";
+
+    /* local variables */
     private byte[] sourceCode;
     private GopherUrl url;
     private ArrayList<GopherItem> itemList;
@@ -108,10 +112,10 @@ public class GopherPage {
      */
     public String getSourceCode(){
         try{
-            return new String(this.sourceCode, "ASCII");
+            return new String(this.sourceCode, GOPHERPAGE_DEFAULT_CHARSET);
         }catch(Exception ex){
             /* drop a quick info on the console when decoding fails */
-            System.out.println("Failed to decode ASCII bytes of Gopher Page: " + ex.getMessage());
+            System.out.println("Failed to decode bytes of Gopher Page: " + ex.getMessage());
             return "";
         }
     }
