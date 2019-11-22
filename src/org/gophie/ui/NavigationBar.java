@@ -9,7 +9,6 @@ import org.gophie.net.GopherItem.GopherItemType;
 import org.gophie.ui.event.NavigationInputListener;
 
 import javax.swing.*;
-import java.io.*;
 import java.util.*;
 
 public class NavigationBar extends JPanel {
