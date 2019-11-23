@@ -10,7 +10,7 @@ import javax.swing.*;
 import org.gophie.net.*;
 import org.gophie.net.GopherItem.GopherItemType;
 import org.gophie.net.event.*;
-import org.gophie.ui.dialog.DownloadPromptDialog;
+
 /* import ui event listeners */
 import org.gophie.ui.event.*;
 
