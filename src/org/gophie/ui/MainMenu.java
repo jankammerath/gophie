@@ -16,10 +16,5 @@ public class MainMenu extends JMenuBar {
 
        /* set the proper application title on mac */
        System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Gophie");
-
-       JMenu viewMenu = new JMenu("View");
-       JMenuItem viewDownloadItem = new JMenuItem("Downloads");
-       viewMenu.add(viewDownloadItem);
-       this.add(viewMenu);
     }
 }

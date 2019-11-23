@@ -23,12 +23,87 @@ public class GopherClient {
         }
     }
 
-    /* 
-        Fetches a gopher page asynchronously
+    /**
+     * Downloads content through gopher and 
+     * stores it in the define target file
+     * 
+     * @param url
+     * Url to download the content from
+     * 
+     * @param targetFile
+     * The file to write the content to
+     * 
+     * @param eventListener
+     * Listener to report the status to
+     */
+    public void downloadAsync(String url, String targetFile, GopherClientEventListener eventListener){
+        /* instanciate the new thread */
+        this.thread = new Thread(new Runnable() { 
+            public void run() { 
+                try{
+                    System.out.println("Downloading: " + url);
 
-        @url                the url of the gopher page to fetch
-        @eventListener      the listener to report the result to
-    */
+                    /* create the output file stream to write to */
+                    OutputStream fileStream = new FileOutputStream(new File(targetFile));
+
+                    /* parse the url and instanciate the client */
+                    GopherUrl gopherUrl = new GopherUrl(url);
+                    Socket gopherSocket = new Socket(gopherUrl.getHost(), gopherUrl.getPort());
+                    byte[] gopherRequest = (gopherUrl.getSelector() + "\r\n").getBytes(StandardCharsets.US_ASCII);
+                    (new DataOutputStream(gopherSocket.getOutputStream())).write(gopherRequest);
+
+                    /* read byte in chunks and report progress */
+                    int read;
+                    InputStream socketStream = gopherSocket.getInputStream();
+                    byte[] data = new byte[16384];
+                    long totalByteCount = 0;
+
+                    /* read byte by byte to be able to report progress */
+                    while ((read = socketStream.read(data, 0, data.length)) != -1) {
+                        fileStream.write(data, 0, read);
+
+                        /* calculate total bytes read */
+                        totalByteCount = totalByteCount + data.length;
+
+                        /* report byte count to listener */
+                        if(eventListener != null){
+                            eventListener.progress(gopherUrl, totalByteCount);
+                        }
+                    }
+
+                    /* close the socket to the server */
+                    gopherSocket.close();
+
+                    /* close the file stream */
+                    fileStream.close();
+
+                    if (eventListener != null) { 
+                        eventListener.pageLoaded(null); 
+                    } 
+                }catch(Exception ex){
+                    if (eventListener != null) { 
+                        eventListener.pageLoadFailed(GopherError.EXCEPTION,new GopherUrl(url));
+                    } 
+                }
+            } 
+        });
+
+        /* start the new thread */
+        this.thread.start();        
+    }
+
+    /**
+     * Fetches a gopher page asynchronously
+     * 
+     * @param url
+     * the url of the gopher page to fetch
+     * 
+     * @param contentType
+     * the expected content type of the url
+     * 
+     * @param eventListener
+     * the listener to report the result to
+     */
     public void fetchAsync(String url, GopherItemType contentType, GopherClientEventListener eventListener){
         /* instanciate the new thread */
         this.thread = new Thread(new Runnable() { 
@@ -50,11 +125,24 @@ public class GopherClient {
         this.thread.start();
     }
 
-    /*
-        Fetches a gopher page
-
-        @url                the url of the gopher page to fetch
-    */
+    /**
+     * Fetches a gopher page
+     * 
+     * @param url
+     * the url of the page to fetch
+     * 
+     * @param contentType
+     * the expected content type
+     * 
+     * @param eventListener
+     * event listener to report progress to
+     * 
+     * @return
+     * the fetched gopher page object
+     * 
+     * @throws GopherNetworkException
+     * Exception with network information
+     */
     public GopherPage fetch(String url, GopherItemType contentType, GopherClientEventListener eventListener) throws GopherNetworkException {
         GopherPage result = null;
 

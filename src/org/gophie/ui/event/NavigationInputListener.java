@@ -12,4 +12,5 @@ public interface NavigationInputListener {
     void forwardRequested();
     void refreshRequested();
     void stopRequested();
+    void showDownloadRequested();
 }

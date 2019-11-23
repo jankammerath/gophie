@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
+import org.gophie.config.ConfigurationManager;
 import org.gophie.config.SystemUtility;
 /* import gopher network client */
 import org.gophie.net.*;
@@ -27,6 +28,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
     /* local network objects */
     private GopherClient gopherClient;
+    private DownloadList downloadList;
 
     /* storage with history for browsing */
     private ArrayList<GopherPage> history = new ArrayList<GopherPage>();
@@ -39,10 +41,17 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     private JPanel headerBar;
     private MessageView messageView;
     private SearchInput searchInput;
+    private DownloadWindow downloadWindow;
 
     public MainWindow() {
         /* create the instance of the client */
         this.gopherClient = new GopherClient();
+
+        /* create the download list */
+        this.downloadList = new DownloadList();
+
+        /* create the download window */
+        this.downloadWindow = new DownloadWindow(this.downloadList);
 
         /* create the main window */
         this.frame = new JFrame(APPLICATION_TITLE);
@@ -182,11 +191,11 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
             @Override
             public void optionSelected(int option) {
                 if(option == 0){
-                    /* download to download directory */
-                    String targetFileName = System.getProperty("user.home") 
-                                    + "/Downloads/" + item.getFileName();
+                    /* store file to download directory and open */
+                    String targetFileName = ConfigurationManager.getDownloadPath() + item.getFileName();
                                     
                     System.out.println("Download \"" + item.getUrlString() + "\" to \"" + targetFileName + "\"");
+                    downloadList.add(new DownloadItem(item,targetFileName,true));
 
                     /* hide the message view */
                     messageView.setVisible(false);
@@ -200,6 +209,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                         && targetFileName.equals("nullnull") == false){
                         /* pass url and target file to download manager */
                         System.out.println("Download \"" + item.getUrlString() + "\" to \"" + targetFileName + "\"");
+                        downloadList.add(new DownloadItem(item,targetFileName,false));
                     }
 
                     /* hide the message view */
@@ -452,5 +462,10 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.frame.setTitle(url.getUrlString() 
             + " (" + SystemUtility.getFileSizeString(byteCount) + ")"
             + " - " + APPLICATION_TITLE);
+    }
+
+    @Override
+    public void showDownloadRequested() {
+        this.downloadWindow.show(this.frame);
     }
 }

@@ -44,4 +44,8 @@ public class ConfigurationManager{
 
         return result;
     }
+
+    public static String getDownloadPath(){
+        return System.getProperty("user.home") + "/Downloads/";
+    }
 }

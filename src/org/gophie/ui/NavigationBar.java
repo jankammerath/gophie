@@ -26,6 +26,7 @@ public class NavigationBar extends JPanel {
     private JLabel forwardButton;
     private JLabel refreshButton;
     private JTextField addressInput;
+    private JLabel downloadButton;
     private JLabel statusIcon;
     private Boolean isLoadingStatus = false;
     private Boolean allowNavigateForward = false;
@@ -149,6 +150,29 @@ public class NavigationBar extends JPanel {
         this.addressInput = this.createAddressInput();
         this.addressInput.setSelectionColor(Color.decode(this.selectionColor));
         this.addressInput.setCaretColor(Color.decode(NavigationBar.textColorHex));
+
+        /* create the download button and handle it */
+        this.downloadButton = this.createButton("");
+        this.downloadButton.addMouseListener(new MouseAdapter() {
+            /* notify the listeners of the forward move request */
+            public void mouseReleased(MouseEvent evt){
+                for (NavigationInputListener inputListener : inputListenerList){
+                    inputListener.showDownloadRequested();
+                }
+            }
+
+            /* set the color to the hover color and use the hand cursor */
+            public void mouseEntered(MouseEvent evt) {
+                setCursor(new Cursor(Cursor.HAND_CURSOR));
+                downloadButton.setForeground(Color.decode(NavigationBar.textHoverColorHex));
+            }
+        
+            /* revert back to the default cursor and default color */
+            public void mouseExited(MouseEvent evt) {
+                setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                downloadButton.setForeground(Color.decode(NavigationBar.textColorHex));
+            }
+        });
 
         /* create the status indicator */
         ImageIcon statusIconImage = new ImageIcon("../resources/Image/loading.gif");
