@@ -181,6 +181,39 @@ public class GopherItem{
     }
 
     /**
+     * Returns the file name of this items file
+     * 
+     * @return
+     * Filename as string with file title and extension
+     */
+    public String getFileName(){
+        String result = this.getUrlString();
+
+        if(result.lastIndexOf("/") > 0){
+            result = result.substring(result.lastIndexOf("/")+1);
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the file extension of the item if any
+     * 
+     * @return
+     * The file extension as string, if unsure returns txt
+     */
+    public String getFileExt(){
+        String result = "txt";
+
+        String fileName = this.getFileName();
+        if(fileName.lastIndexOf(".") > 0){
+            result = fileName.substring(fileName.lastIndexOf(".")+1);
+        }
+
+        return result;
+    }
+
+    /**
      * Returns whether this item is supposed to
      * be some sort of binary file that needs to
      * be downloaded or handled differently

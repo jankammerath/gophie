@@ -22,7 +22,8 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     public static final String NAVIGATIONBAR_TEXTHOVERCOLOR = "#ffffff";
     public static final String VIEW_BACKGROUND = "#1b1b1b";
     public static final String VIEW_TEXTCOLOR = "#e8e8e8";
-    public static final String DEFAULT_GOPHERHOME = "gopher.floodgap.com";
+    // public static final String DEFAULT_GOPHERHOME = "gopher.floodgap.com";
+    public static final String DEFAULT_GOPHERHOME = "gopher.semmel.ch/mp3/Cosmic_Baby";
 
     /* local network objects */
     private GopherClient gopherClient;
@@ -89,6 +90,11 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         contentPane.add(this.headerBar, BorderLayout.NORTH);
         contentPane.add(this.pageView, BorderLayout.CENTER);
         contentPane.add(this.navigationBar, BorderLayout.SOUTH);
+
+        /* start the window in the center of the screen */
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        this.frame.setLocation(dim.width/2-this.frame.getSize().width/2, 
+                            dim.height/2-this.frame.getSize().height/2);
         this.frame.setVisible(true);
 
         /* fetch the default gopher home */
@@ -196,7 +202,8 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         if(item.isBinaryFile()){
             /* binary files are handled by the download manager */
             System.out.println("Download required: " + item.getUrlString());
-            DownloadPromptDialog.prompt(item);
+            DownloadPromptDialog promptDialog = new DownloadPromptDialog(this.frame);
+            promptDialog.display(item);
         }else{
             /* this is not a binary file, try to handle and render */
             switch(item.getItemType()){
