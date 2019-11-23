@@ -237,6 +237,36 @@ public class GopherItem{
     }
 
     /**
+     * Returns the type name in a human readable format
+     * 
+     * @return
+     * Type name of this gopher item as human readable string
+     */
+    public String getTypeName(){
+        String result = "Unknown";
+
+        if(this.getItemType() == GopherItemType.TEXTFILE){ result = "Text file"; }
+        if(this.getItemType() == GopherItemType.GOPHERMENU){ result = "Gopher menu"; }
+        if(this.getItemType() == GopherItemType.CCSCO_NAMESERVER){ result = "CCSO Nameserver"; }
+        if(this.getItemType() == GopherItemType.ERRORCODE){ result = "Error code"; }
+        if(this.getItemType() == GopherItemType.BINHEX_FILE){ result = "BinHex file (Macintosh)"; }
+        if(this.getItemType() == GopherItemType.DOS_FILE){ result = "DOS file"; }
+        if(this.getItemType() == GopherItemType.UUENCODED_FILE){ result = "uuencoded file"; }
+        if(this.getItemType() == GopherItemType.FULLTEXT_SEARCH){ result = "Full-text search"; }
+        if(this.getItemType() == GopherItemType.TELNET){ result = "Telnet"; }
+        if(this.getItemType() == GopherItemType.BINARY_FILE){ result = "Binary file"; }
+        if(this.getItemType() == GopherItemType.MIRROR){ result = "Mirror"; }
+        if(this.getItemType() == GopherItemType.GIF_FILE){ result = "GIF file"; }
+        if(this.getItemType() == GopherItemType.IMAGE_FILE){ result = "Image file"; }
+        if(this.getItemType() == GopherItemType.TELNET3270){ result = "Telnet 3270"; }
+        if(this.getItemType() == GopherItemType.HTML_FILE){ result = "HTML file"; }
+        if(this.getItemType() == GopherItemType.INFORMATION){ result = "Information"; }
+        if(this.getItemType() == GopherItemType.SOUND_FILE){ result = "Sound file"; }   
+
+        return result;
+    }
+
+    /**
      * Sets the code locally and also the proper type enum value 
      * 
      * @param code

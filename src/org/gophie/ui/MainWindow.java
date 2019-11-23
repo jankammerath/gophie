@@ -22,8 +22,8 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     public static final String NAVIGATIONBAR_TEXTHOVERCOLOR = "#ffffff";
     public static final String VIEW_BACKGROUND = "#1b1b1b";
     public static final String VIEW_TEXTCOLOR = "#e8e8e8";
-    // public static final String DEFAULT_GOPHERHOME = "gopher.floodgap.com";
-    public static final String DEFAULT_GOPHERHOME = "gopher.semmel.ch/mp3/Cosmic_Baby";
+    public static final String DEFAULT_GOPHERHOME = "gopher.floodgap.com";
+    // public static final String DEFAULT_GOPHERHOME = "gopher.semmel.ch/mp3/Cosmic_Baby";
 
     /* local network objects */
     private GopherClient gopherClient;

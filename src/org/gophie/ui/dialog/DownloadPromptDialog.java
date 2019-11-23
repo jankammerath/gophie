@@ -1,6 +1,9 @@
 package org.gophie.ui.dialog;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.*;
 
 import org.gophie.net.GopherItem;
@@ -9,6 +12,7 @@ import org.gophie.config.*;
 public class DownloadPromptDialog {
     /* local components */
     private JDialog dialog;
+    private JFrame parent;
     private JLabel titleLabel = new JLabel("Do you want to open or save the item?");
     private JLabel fileNameLabel = new JLabel("unknown.dat");
     private JLabel fileTypeLabel = new JLabel("Unknown type");
@@ -17,12 +21,13 @@ public class DownloadPromptDialog {
     private JButton saveButton = new JButton("Save");
     private JButton cancelButton = new JButton("Cancel");
 
-    public DownloadPromptDialog(JFrame parentFrame){
+    public DownloadPromptDialog(JFrame parentFrame) {
+        this.parent = parentFrame;
+
         /* build up the dialog itself */
         this.dialog = new JDialog(parentFrame);
         this.dialog.setResizable(false);
-        this.dialog.setLocationRelativeTo(parentFrame);
-        this.dialog.setSize(new Dimension(400,200));
+        this.dialog.setSize(new Dimension(400, 200));
         this.dialog.setLayout(null);
 
         this.titleLabel.setBounds(15, 10, 380, 20);
@@ -56,19 +61,31 @@ public class DownloadPromptDialog {
         buttonPanel.add(this.saveButton);
         buttonPanel.add(this.cancelButton);
         this.dialog.getContentPane().add(buttonPanel);
+
+        /* simply close the window when cancel was hit */
+        this.cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dialog.setVisible(false);
+            }
+        });
     }
 
     public void display(GopherItem item){
         /* update text and title with file name */
         String itemFileName = item.getFileName();
         this.fileNameLabel.setText(itemFileName);
-        Icon fileTypeIcon = SystemUtility.getFileExtIcon(item.getFileExt());
+
+        String fileExt = item.getFileExt();
+        Icon fileTypeIcon = SystemUtility.getFileExtIcon(fileExt);
         this.fileNameLabel.setIcon(fileTypeIcon);
         this.fileUrlLabel.setText(item.getHostName());
-        this.fileTypeLabel.setText(item.getItemType().toString());
+        this.fileTypeLabel.setText(item.getTypeName() 
+                + " (" + fileExt.toUpperCase() + ")");
         this.dialog.setTitle(itemFileName);
 
         /* show the dialog */
+        this.dialog.setLocationRelativeTo(this.parent);
         this.dialog.setModal(true);
         this.dialog.setVisible(true);
     }
