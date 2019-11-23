@@ -181,6 +181,29 @@ public class GopherItem{
     }
 
     /**
+     * Returns whether this item is supposed to
+     * be some sort of binary file that needs to
+     * be downloaded or handled differently
+     * 
+     * @return
+     * true when is binary file, otherwise false
+     */
+    public Boolean isBinaryFile(){
+        Boolean result = false;
+
+        if(this.itemType == GopherItemType.BINHEX_FILE
+            || this.itemType == GopherItemType.DOS_FILE
+            || this.itemType == GopherItemType.UUENCODED_FILE
+            || this.itemType == GopherItemType.BINARY_FILE
+            || this.itemType == GopherItemType.SOUND_FILE){
+            /* this item is a binary file */
+            result = true;
+        }
+
+        return result;
+    }
+
+    /**
      * Sets the code locally and also the proper type enum value 
      * 
      * @param code
