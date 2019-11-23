@@ -189,20 +189,32 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
      */
     @Override
     public void addressRequested(String addressText, GopherItem item) {
-        /* check what type of link was requested and execute
-            the appropriate external application or use the
-            default approach for gopher content */
-        if(addressText.startsWith("https://") == true 
-            || addressText.startsWith("http://") == true){
-            /* this is the World Wide Web using HTTP or HTTPS, 
-                so try to open the systems browser so that the
-                user can enjoy bloated javascript based html
-                content with the fine-art of pop-up advertising
-                and animated display banners */
-            this.openWebContent(addressText,item.getItemType());
+        if(item.getItemType() == GopherItemType.FULLTEXT_SEARCH){
+            /* show the search interface */
+            this.searchInput.performSearch(item.getUserDisplayString(), new SearchInputListener(){
+                @Override
+                public void searchRequested(String text) {
+                    /* execute search through gopher */
+                    String searchQueryText = addressText + "\t" + text;
+                    fetchGopherContent(searchQueryText,GopherItemType.GOPHERMENU);               
+                }
+            });
         }else{
-            /* just fetch as regular gopher content */
-            this.fetchGopherContent(addressText,item.getItemType());
+            /* check what type of link was requested and execute
+                the appropriate external application or use the
+                default approach for gopher content */
+                if(addressText.startsWith("https://") == true 
+                || addressText.startsWith("http://") == true){
+                /* this is the World Wide Web using HTTP or HTTPS, 
+                    so try to open the systems browser so that the
+                    user can enjoy bloated javascript based html
+                    content with the fine-art of pop-up advertising
+                    and animated display banners */
+                this.openWebContent(addressText,item.getItemType());
+            }else{
+                /* just fetch as regular gopher content */
+                this.fetchGopherContent(addressText,item.getItemType());
+            }
         }
     }
 
