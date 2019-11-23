@@ -1,10 +1,12 @@
 package org.gophie.ui;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.HyperlinkEvent;
@@ -84,10 +86,30 @@ public class PageView extends JScrollPane{
                 FileOutputStream outputStream = new FileOutputStream(tempImageFile);
                 outputStream.write(content.getByteArray()); 
                 outputStream.close();
+
+                /* determine image size and rescale */
+                String imageHtmlCode = "<img src=\"" + tempImageFile.toURI()
+                                        .toURL().toExternalForm() + "\" />";
+                
+                try{
+                    BufferedImage bufferedImage = ImageIO.read(tempImageFile);
+                    int width = bufferedImage.getWidth();
+                    int height = bufferedImage.getHeight();
+                    if(width > 800){
+                        height = (height / (width / 800));
+                        imageHtmlCode = "<img src=\"" + tempImageFile.toURI()
+                                        .toURL().toExternalForm() + "\" "
+                                        + "width=\"800\" height=" + height + "\""
+                                        + "/>";
+                    }
+                }catch(Exception ex){
+                    /* failed to determine image size */
+                    System.out.println("Failed to determine image size: " + ex.getMessage());
+                }
     
                 /* display content as an image */
                 this.viewPane.setContentType("text/html");
-                this.viewPane.setText("<img src=\"" + tempImageFile.toURI().toURL().toExternalForm() + "\" />");
+                this.viewPane.setText(imageHtmlCode);
             }catch(Exception ex){
                 /* display exception cause as text inside the view */
                 this.viewPane.setContentType("text/plain");
