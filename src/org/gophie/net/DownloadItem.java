@@ -45,6 +45,10 @@ public class DownloadItem implements GopherClientEventListener {
         this.status = DownloadStatus.ACTIVE;
     }
 
+    public GopherItem getGopherItem(){
+        return this.item;
+    }
+
     /**
      * Returns the status of this download
      * 
