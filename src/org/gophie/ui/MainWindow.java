@@ -199,51 +199,78 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                 user can enjoy bloated javascript based html
                 content with the fine-art of pop-up advertising
                 and animated display banners */
-            String confirmText = "Open \"" + addressText + "\" with your web browser?";
-            String[] optionList = new String[2];
-            optionList[0] = "Open Website";
-            optionList[1] = "Dismiss";
-            this.messageView.showConfirm(confirmText, optionList, new MessageViewListener(){
-                @Override
-                public void optionSelected(int option) {
-                    if(option == 0){
-                        /* launch the system WWW browser */
-                        if (Desktop.isDesktopSupported() == true 
-                            && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                            try{
-                                /* launch the systems WWW browser */
-                                Desktop.getDesktop().browse(new URI(addressText));
-                            }catch(Exception ex){
-                                /* Error: cannot enjoy bloated javascript 
-                                        stuffed World Wide Web pages! */
-                                System.out.println("Unable to open system's "
-                                    + "world wide web browser: " + ex.getMessage());
-                            }
-                        }
-                        /* hide the message view */
-                        messageView.setVisible(false);
-                    }else{
-                        /* hide the message view */
-                        messageView.setVisible(false);
-                    }
-                }
-            });
+            this.openWebContent(addressText, contentType);
         }else{
-            /* this is default gopher content */
-            /* activate the load indicator in the address bar */
-            this.navigationBar.setIsLoading(true);
-
-            /* update the navigation bar with the new address */
-            this.navigationBar.setAddressText(addressText);
-
-            try{
-                /* try to execute the thread */
-                this.gopherClient.fetchAsync(addressText,contentType,this);
-            }catch(Exception ex){
-                /* might throw an ex when thread is interrupted */
-                System.out.println("Exception while fetching async: " + ex.getMessage());
-            }
+            /* just fetch as regular gopher content */
+            this.fetchGopherContent(addressText,contentType);
         }
+    }
+
+    /**
+     * Ask user to open web content through http
+     * 
+     * @param addressText
+     * The actual address requested
+     * 
+     * @param contentType
+     * The actual content type of the content
+     */
+    private void openWebContent(String addressText, GopherItemType contentType){
+        String confirmText = "Open \"" + addressText + "\" with your web browser?";
+        String[] optionList = new String[2];
+        optionList[0] = "Open Website";
+        optionList[1] = "Dismiss";
+        this.messageView.showConfirm(confirmText, optionList, new MessageViewListener(){
+            @Override
+            public void optionSelected(int option) {
+                if(option == 0){
+                    /* launch the system WWW browser */
+                    if (Desktop.isDesktopSupported() == true 
+                        && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                        try{
+                            /* launch the systems WWW browser */
+                            Desktop.getDesktop().browse(new URI(addressText));
+                        }catch(Exception ex){
+                            /* Error: cannot enjoy bloated javascript 
+                                    stuffed World Wide Web pages! */
+                            System.out.println("Unable to open system's "
+                                + "world wide web browser: " + ex.getMessage());
+                        }
+                    }
+                    /* hide the message view */
+                    messageView.setVisible(false);
+                }else{
+                    /* hide the message view */
+                    messageView.setVisible(false);
+                }
+            }
+        });
+    }
+
+    /**
+     * Fetches gopher menu or text content
+     * 
+     * @param addressText
+     * The address to fetch content from
+     * 
+     * @param contentType
+     * The actual content type requested
+     */
+    private void fetchGopherContent(String addressText, GopherItemType contentType){
+        /* this is default gopher content */
+        /* activate the load indicator in the address bar */
+        this.navigationBar.setIsLoading(true);
+
+        /* update the navigation bar with the new address */
+        this.navigationBar.setAddressText(addressText);
+
+        try{
+            /* try to execute the thread */
+            this.gopherClient.fetchAsync(addressText,contentType,this);
+        }catch(Exception ex){
+            /* might throw an ex when thread is interrupted */
+            System.out.println("Exception while fetching async: " + ex.getMessage());
+        }        
     }
 
     @Override
