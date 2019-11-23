@@ -3,13 +3,15 @@ package org.gophie.ui.dialog;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.*;
 
 import org.gophie.net.GopherItem;
 import org.gophie.config.*;
 
 public class DownloadPromptDialog {
+    /* local objects */
+    GopherItem fileItem;
+
     /* local components */
     private JDialog dialog;
     private JFrame parent;
@@ -62,6 +64,30 @@ public class DownloadPromptDialog {
         buttonPanel.add(this.cancelButton);
         this.dialog.getContentPane().add(buttonPanel);
 
+        /* just throw the file into the temp 
+            folder when user wants to open it */
+        this.openButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println(System.getProperty("user.home") + "/Downloads/");
+                dialog.setVisible(false);
+            }
+        });
+
+        /* prompt for storage location when asking to save  */
+        this.saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                /* close first to prevent overlap */
+                dialog.setVisible(false);
+                
+                /* present file chooser and let user pick the target */
+                FileDialog fileDialog = new FileDialog(new Frame(), "Save file", FileDialog.SAVE);
+                fileDialog.setFile("Untitled.txt");
+                fileDialog.setVisible(true);
+            }
+        });
+
         /* simply close the window when cancel was hit */
         this.cancelButton.addActionListener(new ActionListener() {
             @Override
@@ -72,6 +98,9 @@ public class DownloadPromptDialog {
     }
 
     public void display(GopherItem item){
+        /* set the item locally */
+        this.fileItem = item;
+
         /* update text and title with file name */
         String itemFileName = item.getFileName();
         this.fileNameLabel.setText(itemFileName);

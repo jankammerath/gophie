@@ -44,18 +44,6 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         /* create the instance of the client */
         this.gopherClient = new GopherClient();
 
-        try {
-            /* try setting to system look and feel */
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            /* exception when trying to set, but ignore it */
-            System.out.println("Error setting system look and feel");
-        }
-
-        /* remove the borders for the pane */
-        UIManager.getDefaults().put("SplitPane.border", BorderFactory.createEmptyBorder());
-        UIManager.getDefaults().put("ScrollPane.border", BorderFactory.createEmptyBorder());
-
         /* create the main window */
         this.frame = new JFrame(APPLICATION_TITLE);
         this.frame.setMinimumSize(new Dimension(800, 600));
@@ -201,9 +189,13 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
             will be handled differently (e.g. downloaded) */
         if(item.isBinaryFile()){
             /* binary files are handled by the download manager */
-            System.out.println("Download required: " + item.getUrlString());
-            DownloadPromptDialog promptDialog = new DownloadPromptDialog(this.frame);
-            promptDialog.display(item);
+            FileDialog fileDialog = new FileDialog(this.frame, "Download and save file", FileDialog.SAVE);
+            fileDialog.setFile(item.getFileName());
+            fileDialog.setVisible(true);
+            String targetFileName = fileDialog.getDirectory() + fileDialog.getFile();
+            if(targetFileName != null){
+                System.out.println("Download \"" + item.getUrlString() + "\" to \"" + targetFileName + "\"");
+            }
         }else{
             /* this is not a binary file, try to handle and render */
             switch(item.getItemType()){
