@@ -24,6 +24,10 @@ public class DownloadWindow{
         this.frame.setContentPane(this.contentPane);
     }
 
+    private void updateList(){
+
+    }
+
     public void show(JFrame parent){
         this.frame.setLocationRelativeTo(parent);
         this.frame.setVisible(true);
