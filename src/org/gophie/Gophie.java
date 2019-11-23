@@ -1,3 +1,5 @@
+package org.gophie;
+
 import javax.swing.BorderFactory;
 import javax.swing.UIManager;
 
