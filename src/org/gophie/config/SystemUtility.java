@@ -1,20 +1,15 @@
 package org.gophie.config;
 
-import java.io.File;
-import javax.swing.Icon;
-import javax.swing.filechooser.FileSystemView;
-
 public class SystemUtility {
-    public static Icon getFileExtIcon(String fileExt){
-        Icon result = null;
+    public static String getFileSizeString(float byteSize){
+        String result = byteSize + " Byte";
 
-        try{
-            File tempFile = File.createTempFile("gophericonextfile", "."+fileExt);
-            result = FileSystemView.getFileSystemView().getSystemIcon(tempFile);
-            tempFile.delete();
-        }catch(Exception ex){
-            /* failed to acquire icon */
-            System.out.println("Could not get icon for ext: " + ex.getMessage());
+        if(byteSize > 1000){
+            result = String.format("%.2f",(float)(byteSize / 1000)) + " KB";
+        }if(byteSize > 1000000){
+            result = String.format("%.2f",(float)(byteSize / 1000000)) + " MB";
+        }if(byteSize > 1000000000){
+            result = String.format("%.2f",(float)(byteSize / 1000000000)) + " GB";
         }
 
         return result;

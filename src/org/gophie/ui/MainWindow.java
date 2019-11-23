@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
+import org.gophie.config.SystemUtility;
 /* import gopher network client */
 import org.gophie.net.*;
 import org.gophie.net.GopherItem.GopherItemType;
@@ -353,8 +354,8 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     public void pageLoaded(GopherPage result) {
         /* set the window title to the url of this page */
         this.frame.setTitle(result.getUrl().getUrlString() 
-                            + " (" + result.getByteArray().length + " Byte)"
-                            + " - " + APPLICATION_TITLE);
+            + " (" + SystemUtility.getFileSizeString(result.getByteArray().length) + ")"
+            + " - " + APPLICATION_TITLE);
 
         /* update the address text with the loaded page */
         this.navigationBar.setAddressText(result.getUrl().getUrlString());
@@ -417,7 +418,8 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     @Override
     public void progress(GopherUrl url, long byteCount) {
         /* report the download size in the title bar */
-        this.frame.setTitle("Loading " + url.getUrlString() 
-            + " (" + byteCount + " Byte) ... - " + APPLICATION_TITLE);
+        this.frame.setTitle(url.getUrlString() 
+            + " (" + SystemUtility.getFileSizeString(byteCount) + ")"
+            + " - " + APPLICATION_TITLE);
     }
 }
