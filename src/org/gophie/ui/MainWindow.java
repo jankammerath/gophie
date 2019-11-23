@@ -173,6 +173,45 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         }
     }
 
+    public void confirmDownload(String addressText, GopherItem item){
+        /* binary files are handled by the download manager */
+        String confirmText = "Download \"" + item.getFileName() 
+                    + "\" from \"" + item.getHostName() + "\"?";
+        String[] optionList = new String[]{"Open", "Save", "Dismiss"};
+        this.messageView.showConfirm(confirmText, optionList, new MessageViewListener(){
+            @Override
+            public void optionSelected(int option) {
+                if(option == 0){
+                    /* download to download directory */
+                    String targetFileName = System.getProperty("user.home") 
+                                    + "/Downloads/" + item.getFileName();
+                                    
+                    System.out.println("Download \"" + item.getUrlString() + "\" to \"" + targetFileName + "\"");
+
+                    /* hide the message view */
+                    messageView.setVisible(false);
+                }if(option == 1){
+                    /* let user select where to store the file */
+                    FileDialog fileDialog = new FileDialog(frame, "Download and save file", FileDialog.SAVE);
+                    fileDialog.setFile(item.getFileName());
+                    fileDialog.setVisible(true);
+                    String targetFileName = fileDialog.getDirectory() + fileDialog.getFile();
+                    if(targetFileName.equals(null) == false
+                        && targetFileName.equals("nullnull") == false){
+                        /* pass url and target file to download manager */
+                        System.out.println("Download \"" + item.getUrlString() + "\" to \"" + targetFileName + "\"");
+                    }
+
+                    /* hide the message view */
+                    messageView.setVisible(false);
+                }
+
+                /* hide the message view */
+                messageView.setVisible(false);
+            }
+        });
+    }
+
     /**
      * Process a request to go to an address or URL
      * 
@@ -189,15 +228,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
             will be handled differently (e.g. downloaded) */
         if(item.isBinaryFile()){
             /* binary files are handled by the download manager */
-            FileDialog fileDialog = new FileDialog(this.frame, "Download and save file", FileDialog.SAVE);
-            fileDialog.setFile(item.getFileName());
-            fileDialog.setVisible(true);
-            String targetFileName = fileDialog.getDirectory() + fileDialog.getFile();
-            if(targetFileName.equals(null) == false
-                && targetFileName.equals("nullnull") == false){
-                /* pass url and target file to download manager */
-                System.out.println("Download \"" + item.getUrlString() + "\" to \"" + targetFileName + "\"");
-            }
+            this.confirmDownload(addressText,item);
         }else{
             /* this is not a binary file, try to handle and render */
             switch(item.getItemType()){
@@ -244,9 +275,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
      */
     private void openWebContent(String addressText, GopherItemType contentType){
         String confirmText = "Open \"" + addressText + "\" with your web browser?";
-        String[] optionList = new String[2];
-        optionList[0] = "Open Website";
-        optionList[1] = "Dismiss";
+        String[] optionList = new String[]{"Open Website", "Dismiss"};
         this.messageView.showConfirm(confirmText, optionList, new MessageViewListener(){
             @Override
             public void optionSelected(int option) {
