@@ -193,7 +193,9 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
             fileDialog.setFile(item.getFileName());
             fileDialog.setVisible(true);
             String targetFileName = fileDialog.getDirectory() + fileDialog.getFile();
-            if(targetFileName != null){
+            if(targetFileName.equals(null) == false
+                && targetFileName.equals("nullnull") == false){
+                /* pass url and target file to download manager */
                 System.out.println("Download \"" + item.getUrlString() + "\" to \"" + targetFileName + "\"");
             }
         }else{
