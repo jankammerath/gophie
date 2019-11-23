@@ -5,7 +5,7 @@ import java.awt.event.*;
 import javax.swing.border.*;
 
 import org.gophie.config.ConfigurationManager;
-import org.gophie.net.GopherItem.GopherItemType;
+import org.gophie.net.GopherItem;
 import org.gophie.ui.event.NavigationInputListener;
 
 import javax.swing.*;
@@ -230,7 +230,7 @@ public class NavigationBar extends JPanel {
                 String requestedAddress = inputField.getText().trim();
                 if(requestedAddress.length() > 0){
                     for (NavigationInputListener inputListener : inputListenerList){
-                        inputListener.addressRequested(requestedAddress, GopherItemType.UNKNOWN);
+                        inputListener.addressRequested(requestedAddress, new GopherItem());
                     }
                 }
             }

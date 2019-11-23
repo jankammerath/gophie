@@ -91,7 +91,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.frame.setVisible(true);
 
         /* fetch the default gopher home */
-        this.addressRequested(DEFAULT_GOPHERHOME, GopherItemType.GOPHERMENU);
+        this.fetchGopherContent(DEFAULT_GOPHERHOME, GopherItemType.GOPHERMENU);
     }
 
     public void show() {
@@ -188,7 +188,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
      * The expected content type of the content behind the address
      */
     @Override
-    public void addressRequested(String addressText, GopherItemType contentType) {
+    public void addressRequested(String addressText, GopherItem item) {
         /* check what type of link was requested and execute
             the appropriate external application or use the
             default approach for gopher content */
@@ -199,10 +199,10 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                 user can enjoy bloated javascript based html
                 content with the fine-art of pop-up advertising
                 and animated display banners */
-            this.openWebContent(addressText, contentType);
+            this.openWebContent(addressText,item.getItemType());
         }else{
             /* just fetch as regular gopher content */
-            this.fetchGopherContent(addressText,contentType);
+            this.fetchGopherContent(addressText,item.getItemType());
         }
     }
 
@@ -307,7 +307,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         GopherPage currentPage = this.history.get(this.historyPosition);
 
         /* reload practically means just requesting this page again */
-        this.addressRequested(currentPage.getUrl().getUrlString(), currentPage.getContentType());
+        this.fetchGopherContent(currentPage.getUrl().getUrlString(), currentPage.getContentType());
     }
 
     @Override

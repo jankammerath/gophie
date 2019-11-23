@@ -85,6 +85,14 @@ public class GopherItem{
         }
     }
 
+    /**
+     * Constructs an empty gopher item
+     * 
+     */
+    public GopherItem(){
+        /* nothing really happens here */
+    }
+
     /* 
         Returns the item type as GopherItemType enum
     */

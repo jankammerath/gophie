@@ -219,19 +219,20 @@ public class PageView extends JScrollPane{
                     String urlValue = e.getDescription();
 
                     /* determine the content type of the link target */
-                    GopherItemType contentType = GopherItemType.UNKNOWN;
+                    GopherItem itemObject = null;
                     if(currentPage != null){
                         /* determine the content type of the gopher item
                             by the definition of it in the gopher menu */
                         for(GopherItem contentItem : currentPage.getItemList()){
                             if(contentItem.getUrlString().equals(urlValue)){
-                                contentType = contentItem.getItemType();
+                                itemObject = contentItem;
                             }
                         }
                     }
 
+                    /* execute the handler */
                     for (NavigationInputListener inputListener : inputListenerList){
-                        inputListener.addressRequested(urlValue,contentType);
+                        inputListener.addressRequested(urlValue,itemObject);
                     }
                 }
             }
@@ -250,6 +251,15 @@ public class PageView extends JScrollPane{
         this.headerPane.setHighlighter(null);
     }
 
+    /**
+     * Returns the header icon for the gopher item type
+     * 
+     * @param code
+     * Code for the gopher item type
+     * 
+     * @return
+     * String with the icon for the item
+     */
     public String getGopherItemTypeIcon(String code){
         String result = "";
 
