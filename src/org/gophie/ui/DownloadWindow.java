@@ -12,7 +12,7 @@ public class DownloadWindow{
 
     /* local components */
     private JDialog frame;
-    private JScrollPane contentPane;
+    private JList<String> fileListView;
 
     public DownloadWindow(DownloadList downloadList){
         this.list = downloadList;
@@ -22,13 +22,27 @@ public class DownloadWindow{
         this.frame.setMinimumSize(new Dimension(400,200));
         this.frame.setLayout(new BorderLayout());
 
-        this.contentPane = new JScrollPane();
-        this.contentPane.setOpaque(false);
-        this.contentPane.getViewport().setOpaque(false);
+        this.fileListView = new JList<String>();
+        this.fileListView.setOpaque(false);
 
-        this.contentPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        this.contentPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        this.frame.add(this.contentPane,BorderLayout.CENTER);
+        this.fileListView.setListData(new String[]{
+            "What", "The", "Fuck", "Is", "This",
+            "What", "The", "Fuck", "Is", "This",
+            "What", "The", "Fuck", "Is", "This",
+            "What", "The", "Fuck", "Is", "This",
+            "What", "The", "Fuck", "Is", "This",
+            "What", "The", "Fuck", "Is", "This"
+        });
+
+        // this.fileListView.add(new DownloadItemView(null));
+        // this.fileListView.add(new DownloadItemView(null));
+        // this.fileListView.add(new DownloadItemView(null));
+        // itemContainer.add(new DownloadItemView(null));
+
+        JScrollPane listScrollPane = new JScrollPane(this.fileListView);
+        listScrollPane.setOpaque(false);
+        listScrollPane.getViewport().setOpaque(false);
+        this.frame.add(listScrollPane, BorderLayout.CENTER);
     }
 
     private void updateList(){

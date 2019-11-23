@@ -5,7 +5,7 @@ import javax.swing.*;
 
 import org.gophie.net.DownloadItem;
 
-public class DownloadItemView extends JLabel{
+public class DownloadItemView extends JPanel{
     private static final long serialVersionUID = 1L;
 
     /* private components */
@@ -20,11 +20,11 @@ public class DownloadItemView extends JLabel{
     public DownloadItemView(DownloadItem sourceItem){
         this.item = sourceItem;
 
-        this.setBackground(Color.decode("#000000"));
-        this.setLayout(new FlowLayout());
+        this.setSize(new Dimension(200,100));
+        this.setLayout(new FlowLayout(2));
         this.add(this.fileName);
-        this.add(this.sourceHost);
         this.add(this.fileSize);
+        this.add(this.sourceHost);
         this.add(this.bitRate);
 
         this.setVisible(true);
