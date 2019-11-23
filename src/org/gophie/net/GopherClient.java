@@ -34,7 +34,7 @@ public class GopherClient {
         this.thread = new Thread(new Runnable() { 
             public void run() { 
                 try{
-                    GopherPage resultPage = fetch(url, contentType);
+                    GopherPage resultPage = fetch(url, contentType, eventListener);
                     if (eventListener != null) { 
                         eventListener.pageLoaded(resultPage); 
                     } 
@@ -55,12 +55,12 @@ public class GopherClient {
 
         @url                the url of the gopher page to fetch
     */
-    public GopherPage fetch(String url, GopherItemType contentType) throws GopherNetworkException {
+    public GopherPage fetch(String url, GopherItemType contentType, GopherClientEventListener eventListener) throws GopherNetworkException {
         GopherPage result = null;
 
         try{
             /* string result with content */
-            byte[] content;
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
             System.out.println("Fetching (" + contentType.toString() + "): " + url);
 
@@ -69,13 +69,31 @@ public class GopherClient {
             Socket gopherSocket = new Socket(gopherUrl.getHost(), gopherUrl.getPort());
             byte[] gopherRequest = (gopherUrl.getSelector() + "\r\n").getBytes(StandardCharsets.US_ASCII);
             (new DataOutputStream(gopherSocket.getOutputStream())).write(gopherRequest);
-            content = gopherSocket.getInputStream().readAllBytes();
+
+            /* read byte in chunks and report progress */
+            int read;
+            InputStream socketStream = gopherSocket.getInputStream();
+            byte[] data = new byte[16384];
+            long totalByteCount = 0;
+
+            /* read byte by byte to be able to report progress */
+            while ((read = socketStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, read);
+
+                /* calculate total bytes read */
+                totalByteCount = totalByteCount + data.length;
+
+                /* report byte count to listener */
+                if(eventListener != null){
+                    eventListener.progress(gopherUrl, totalByteCount);
+                }
+            }
 
             /* close the socket to the server */
             gopherSocket.close();
 
             /* set the result page */
-            result = new GopherPage(content, contentType, gopherUrl);
+            result = new GopherPage(buffer.toByteArray(), contentType, gopherUrl);
         }catch(ConnectException ex){
             /* handle host connection errors */
             throw new GopherNetworkException(GopherError.CONNECT_FAILED, ex.getMessage());
