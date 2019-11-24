@@ -49,6 +49,7 @@ public class DownloadItem implements GopherClientEventListener {
      */
     public DownloadItem(){
         this.client = new GopherClient();
+        this.status = DownloadStatus.IDLE;
     }
 
     /**

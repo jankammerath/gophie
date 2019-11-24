@@ -53,11 +53,21 @@ public class SearchInput extends JPanel {
         this.searchText.addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent e) {
                 /* execute search when the ENTER key is pressed */
-                if(e.getKeyCode() == 10){
+                if(e.getKeyCode() == KeyEvent.VK_ENTER){
                     JTextField textField = (JTextField) e.getSource();
-                    listener.searchRequested(textField.getText());
+
+                    /* only execute search when text is not empty */
+                    if(textField.getText().length() > 0){
+                        listener.searchRequested(textField.getText());
+                    }
+
                     setVisible(false);
-                }                
+                }
+                
+                /* just cancel when the user hit ESC */
+                if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+                    setVisible(false);
+                }
             }
         });
         this.setVisible(true);

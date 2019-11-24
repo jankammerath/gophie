@@ -6,15 +6,14 @@ import javax.swing.border.*;
 
 import org.gophie.net.*;
 import org.gophie.net.DownloadItem.DownloadStatus;
+import org.gophie.config.ConfigurationManager;
 import org.gophie.config.SystemUtility;
 
 public class DownloadItemRenderer extends JPanel implements ListCellRenderer<DownloadItem> {
     private static final long serialVersionUID = 1L;
 
-    private JLabel fileName = new JLabel();
-    private JLabel fileSource = new JLabel();
-    private JLabel fileSize = new JLabel();
-    private JLabel fileStatus = new JLabel();
+    private JLabel titleLabel = new JLabel();
+    private JLabel textLabel = new JLabel();
 
     @Override
     public Component getListCellRendererComponent(JList<? extends DownloadItem> list, 
@@ -22,27 +21,44 @@ public class DownloadItemRenderer extends JPanel implements ListCellRenderer<Dow
                                                 boolean isSelected, boolean cellHasFocus) {
         /* render the cell for this download item */
         this.setOpaque(false);
-        this.setLayout(new GridLayout(2,2));
-        this.setBorder(new EmptyBorder(5,5,5,5));
+        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.setBorder(new EmptyBorder(5,10,5,10));
+
+        /* highlight if this eleemtn is selected */
+        if(isSelected == true){
+            this.setOpaque(true);
+            this.setBackground(Color.decode("#248AC2"));
+        }
 
         /* get the gopher item of this download */
         GopherItem item = value.getGopherItem();
-        this.fileName.setText(item.getFileName());
-        this.fileSource.setText(item.getHostName());
-        this.fileSize.setText(SystemUtility.getFileSizeString(value.getByteCountLoaded()));
 
-        if(value.getStatus() == DownloadStatus.ACTIVE){
-            this.fileStatus.setText("Downloading...");
-        }if(value.getStatus() == DownloadStatus.COMPLETED){
-            this.fileStatus.setText("Completed");
-        }if(value.getStatus() == DownloadStatus.FAILED){
-            this.fileStatus.setText("Failed");
+        /* show the file name in the title */
+        this.titleLabel.setText(item.getFileName());
+        Font titleFont = ConfigurationManager.getConsoleFont(15f);
+        this.titleLabel.setFont(titleFont.deriveFont(titleFont.getStyle() | Font.BOLD));
+        this.titleLabel.setForeground(Color.decode("#ffffff"));
+
+        /* create the information text based on the status */
+        String statusText = "Download not started";
+        String byteLoadedText = SystemUtility.getFileSizeString(value.getByteCountLoaded());
+
+        if(value.getStatus() == DownloadStatus.COMPLETED){
+            statusText = "Completed (" + byteLoadedText + ")";
         }
 
-        this.add(this.fileName,0);
-        this.add(this.fileSize,1);
-        this.add(this.fileSource,2);
-        this.add(this.fileStatus,3);
+        /* append the host name to the info text */
+        statusText += " — " + item.getHostName();
+
+        /* set the text to the status text label */
+        this.textLabel.setText(statusText);
+        this.textLabel.setBorder(new EmptyBorder(4,0,0,0));
+        this.textLabel.setForeground(Color.decode("#e0e0e0"));
+        Font textFont = ConfigurationManager.getConsoleFont(13f);
+        this.textLabel.setFont(textFont);
+
+        this.add(this.titleLabel);
+        this.add(this.textLabel);
 
         return this;
     }
