@@ -3,7 +3,6 @@ package org.gophie.net;
 import java.awt.*;
 import java.io.File;
 
-import org.gophie.config.SystemUtility;
 import org.gophie.net.event.*;
 
 public class DownloadItem implements GopherClientEventListener {
