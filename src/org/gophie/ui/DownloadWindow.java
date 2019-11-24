@@ -1,19 +1,15 @@
 package org.gophie.ui;
 
 import java.awt.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import javax.swing.*;
 
 import org.gophie.net.*;
+import org.gophie.net.event.*;
 
 public class DownloadWindow{
     /* local objects */
     private DownloadList list;
     private DownloadItem[] data;
-    private ScheduledExecutorService schedule;
 
     /* local components */
     private JDialog frame;
@@ -21,6 +17,12 @@ public class DownloadWindow{
 
     public DownloadWindow(DownloadList downloadList){
         this.list = downloadList;
+        this.list.addEventListener(new DownloadListEventListener(){
+            @Override
+            public void downloadListUpdated() {
+                updateList();
+            }
+        });
 
         this.frame = new JDialog();
         this.frame.setTitle("Downloads");
@@ -38,17 +40,8 @@ public class DownloadWindow{
         listScrollPane.getViewport().setOpaque(false);
         this.frame.add(listScrollPane, BorderLayout.CENTER);
 
+        /* update the list for the first time */
         this.updateList();
-
-        /* update the download list every second */
-        this.schedule = Executors.newSingleThreadScheduledExecutor();
-        this.schedule.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                updateList();
-            }
-            
-        },0,1,TimeUnit.SECONDS);
     }
 
     public void updateList(){
