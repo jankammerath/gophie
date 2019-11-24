@@ -21,6 +21,12 @@ public class Gophie {
         UIManager.getDefaults().put("SplitPane.border", BorderFactory.createEmptyBorder());
         UIManager.getDefaults().put("ScrollPane.border", BorderFactory.createEmptyBorder());
 
+        /* set to use the mac menu bar instead */
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
+
+        /* set the proper application title on mac */
+        System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Gophie");
+
         try {
             /* try setting to system look and feel */
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

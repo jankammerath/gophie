@@ -62,9 +62,6 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.pageView = new PageView(VIEW_TEXTCOLOR, VIEW_BACKGROUND);
         this.pageView.addListener(this);
 
-        /* create the menu bar */
-        this.frame.setJMenuBar(new MainMenu());
-
         /* create the navigation bar */
         this.navigationBar = new NavigationBar(NAVIGATIONBAR_BACKGROUND, NAVIGATIONBAR_TEXTCOLOR,
                 NAVIGATIONBAR_TEXTHOVERCOLOR);
