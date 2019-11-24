@@ -2,9 +2,10 @@ package org.gophie.net;
 
 import java.util.ArrayList;
 
+import org.gophie.net.event.DownloadItemEventListener;
 import org.gophie.net.event.DownloadListEventListener;
 
-public class DownloadList extends ArrayList<DownloadItem> {
+public class DownloadList extends ArrayList<DownloadItem> implements DownloadItemEventListener {
     private static final long serialVersionUID = 1L;
 
     /* event listeners for list updated */
@@ -40,6 +41,7 @@ public class DownloadList extends ArrayList<DownloadItem> {
     @Override
     public boolean add(DownloadItem e){
         boolean result = super.add(e);
+        e.addEventListener(this);
         this.notifyUpdate();        
         return result;
     }
@@ -48,5 +50,12 @@ public class DownloadList extends ArrayList<DownloadItem> {
     public void clear(){
         super.clear();
         this.notifyUpdate();   
+    }
+
+    @Override
+    public void downloadProgressReported() {
+        for(DownloadListEventListener listener: this.eventListener){
+            listener.downloadProgressReported();
+        }       
     }
 }

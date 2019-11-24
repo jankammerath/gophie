@@ -2,6 +2,7 @@ package org.gophie.net;
 
 import java.awt.*;
 import java.io.File;
+import java.util.ArrayList;
 
 import org.gophie.net.event.*;
 
@@ -20,6 +21,7 @@ public class DownloadItem implements GopherClientEventListener {
     private Boolean openFile = false;
     private long byteCountLoaded = 0;
     private DownloadStatus status = DownloadStatus.IDLE;
+    private ArrayList<DownloadItemEventListener> eventListenerList = new ArrayList<DownloadItemEventListener>();
 
     /* local variables for calculating the bit rate
         at which the download currently operates */
@@ -46,6 +48,16 @@ public class DownloadItem implements GopherClientEventListener {
         this.fileName = targetFile;
         this.openFile = openWhenFinished;
         this.start();
+    }
+
+    public void addEventListener(DownloadItemEventListener listener){
+        this.eventListenerList.add(listener);
+    }
+
+    private void notifyProgress(){
+        for(DownloadItemEventListener listener: this.eventListenerList){
+            listener.downloadProgressReported();
+        }
     }
 
     /**
@@ -139,6 +151,8 @@ public class DownloadItem implements GopherClientEventListener {
 
         /* update the local byte counter  */
         this.byteCountLoaded = byteCount;
+
+        this.notifyProgress();
     }
 
     @Override
@@ -171,10 +185,13 @@ public class DownloadItem implements GopherClientEventListener {
                                 + "(" + fileName + "):" + ex.getMessage());
             }
         }
+
+        this.notifyProgress();
     }
 
     @Override
     public void pageLoadFailed(GopherError error, GopherUrl url) {
         this.status = DownloadStatus.FAILED;
+        this.notifyProgress();
     }
 }

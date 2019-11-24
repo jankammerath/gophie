@@ -22,6 +22,11 @@ public class DownloadWindow{
             public void downloadListUpdated() {
                 updateList();
             }
+
+            @Override
+            public void downloadProgressReported() {
+                frame.repaint();
+            }
         });
 
         this.frame = new JDialog();
