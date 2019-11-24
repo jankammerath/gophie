@@ -4,8 +4,7 @@ import java.awt.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
-import org.gophie.Gophie;
+import javax.swing.ImageIcon;
 
 public class ConfigurationManager{
     public static String getConfigPath(){
@@ -73,6 +72,21 @@ public class ConfigurationManager{
         }catch(Exception ex){
             /* Ouchie, this will look bad... */
             System.out.println("Unable to load the icon font: " + ex.getMessage());
+        }
+
+        return result;
+    }
+
+    public static ImageIcon getImageIcon(String name){
+        ImageIcon result = null;
+
+        try{
+            /* try to open the font for icon display */
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            result = new ImageIcon(classLoader.getResource("res/"+name));            
+        }catch(Exception ex){
+            /* Ouchie, this will look bad... */
+            System.out.println("Unable to load the image icon (" + name + "): " + ex.getMessage());
         }
 
         return result;

@@ -175,7 +175,7 @@ public class NavigationBar extends JPanel {
         });
 
         /* create the status indicator */
-        ImageIcon statusIconImage = new ImageIcon("../resources/Image/loading.gif");
+        ImageIcon statusIconImage = ConfigurationManager.getImageIcon("loading.gif");
         this.statusIcon = new JLabel(statusIconImage);
         this.statusIcon.setBorder(new EmptyBorder(0,8,0,2));
         this.statusIcon.setOpaque(false);
