@@ -5,6 +5,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.gophie.Gophie;
+
 public class ConfigurationManager{
     public static String getConfigPath(){
         String result = System.getProperty("user.home") + "/.Gophie/";
@@ -64,12 +66,13 @@ public class ConfigurationManager{
         /* get the icon font for this navigation bar */
         try{
             /* try to open the font for icon display */
-            result = Font.createFont(Font.TRUETYPE_FONT, new File("../resources/Fonts/Feather.ttf")).deriveFont(size);
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            result = Font.createFont(Font.TRUETYPE_FONT, classLoader.getResourceAsStream("res/Feather.ttf")).deriveFont(size);
             GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
             graphicsEnvironment.registerFont(result);
         }catch(Exception ex){
             /* Ouchie, this will look bad... */
-            System.out.println("Unable to load the fonts!");
+            System.out.println("Unable to load the icon font: " + ex.getMessage());
         }
 
         return result;
@@ -79,12 +82,13 @@ public class ConfigurationManager{
         Font result = null;
         
         try{
-            result = Font.createFont(Font.TRUETYPE_FONT, new File("../resources/Fonts/Inconsolata-Regular.ttf")).deriveFont(17f);
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            result = Font.createFont(Font.TRUETYPE_FONT, classLoader.getResourceAsStream("res/Inconsolata-Regular.ttf")).deriveFont(17f);
             GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
             graphicsEnvironment.registerFont(result);
         }catch(Exception ex){
             /* Ouchie, this will look bad... */
-            System.out.println("Unable to load the fonts!");
+            System.out.println("Unable to load the text font:" + ex.getMessage());
         }
 
         return result;
