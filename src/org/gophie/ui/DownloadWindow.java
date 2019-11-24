@@ -2,6 +2,7 @@ package org.gophie.ui;
 
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
 import org.gophie.net.*;
 import org.gophie.net.event.*;
@@ -14,6 +15,9 @@ public class DownloadWindow{
     /* local components */
     private JDialog frame;
     private JList<DownloadItem> fileListView;
+    private JPanel actionBar = new JPanel();
+    private JLabel actionButton = new JLabel("Cancel");
+    private JLabel clearButton = new JLabel("Clear List");
 
     public DownloadWindow(DownloadList downloadList){
         this.list = downloadList;
@@ -44,6 +48,18 @@ public class DownloadWindow{
         listScrollPane.setOpaque(false);
         listScrollPane.getViewport().setOpaque(false);
         this.frame.add(listScrollPane, BorderLayout.CENTER);
+
+        this.clearButton.setForeground(Color.decode("#ffffff"));
+        this.clearButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        this.actionButton.setForeground(Color.decode("#ffffff"));
+        this.actionButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        this.actionBar.setLayout(new BorderLayout());
+        this.actionBar.setBorder(new EmptyBorder(8,16,10,16));
+        this.actionBar.setBackground(Color.decode("#248AC2"));
+        this.actionBar.add(this.clearButton,BorderLayout.EAST);
+        this.actionBar.add(this.actionButton,BorderLayout.WEST);
+        this.frame.add(this.actionBar, BorderLayout.SOUTH);
 
         /* update the list for the first time */
         this.updateList();
