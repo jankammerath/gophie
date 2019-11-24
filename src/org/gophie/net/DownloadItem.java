@@ -39,12 +39,53 @@ public class DownloadItem implements GopherClientEventListener {
         this.item = gopherItem;
         this.fileName = targetFile;
         this.openFile = openWhenFinished;
+        this.start();
+    }
 
+    /**
+     * Constructor creates the item with
+     * default values and does not do anything
+     * 
+     */
+    public DownloadItem(){
+        this.client = new GopherClient();
+    }
+
+    /**
+     * Starts the download of the file
+     */
+    public void start(){
         /* start the download process */
-        this.client.downloadAsync(gopherItem.getUrlString(), targetFile, this);
+        this.client.downloadAsync(this.item.getUrlString(), this.fileName, this);
         this.status = DownloadStatus.ACTIVE;
     }
 
+    /**
+     * Sets the target file to download to
+     * 
+     * @param targetFile
+     * Path of the file to store data in
+     */
+    public void setTargetFile(String targetFile){
+        this.fileName = targetFile;
+    }
+
+    /**
+     * Sets the gopher item
+     * 
+     * @param gopherItem
+     * The gopher item to download
+     */
+    public void setGopherItem(GopherItem gopherItem){
+        this.item = gopherItem;
+    }
+
+    /**
+     * Returns the gopher item
+     * 
+     * @return
+     * Returns the gopher item to download
+     */
     public GopherItem getGopherItem(){
         return this.item;
     }

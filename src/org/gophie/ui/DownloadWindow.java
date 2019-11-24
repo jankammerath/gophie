@@ -12,7 +12,7 @@ public class DownloadWindow{
 
     /* local components */
     private JDialog frame;
-    private JList<String> fileListView;
+    private JList<DownloadItem> fileListView;
 
     public DownloadWindow(DownloadList downloadList){
         this.list = downloadList;
@@ -22,19 +22,20 @@ public class DownloadWindow{
         this.frame.setMinimumSize(new Dimension(400,200));
         this.frame.setLayout(new BorderLayout());
 
-        this.fileListView = new JList<String>();
+        this.fileListView = new JList<DownloadItem>();
+        this.fileListView.setCellRenderer(new DownloadItemRenderer());
         this.fileListView.setOpaque(false);
 
         JScrollPane listScrollPane = new JScrollPane(this.fileListView);
         listScrollPane.setOpaque(false);
         listScrollPane.getViewport().setOpaque(false);
         this.frame.add(listScrollPane, BorderLayout.CENTER);
+
+        this.updateList();
     }
 
-    private void updateList(){
-        for(DownloadItem fileItem: this.list){
-            // process the list here
-        }
+    public void updateList(){
+        this.fileListView.setListData(this.list.getDownloadItemArray());
     }
 
     public void show(JFrame parent){
