@@ -3,6 +3,7 @@ package org.gophie.net;
 import java.awt.*;
 import java.io.File;
 
+import org.gophie.config.SystemUtility;
 import org.gophie.net.event.*;
 
 public class DownloadItem implements GopherClientEventListener {
@@ -20,6 +21,12 @@ public class DownloadItem implements GopherClientEventListener {
     private Boolean openFile = false;
     private long byteCountLoaded = 0;
     private DownloadStatus status = DownloadStatus.IDLE;
+
+    /* local variables for calculating the bit rate
+        at which the download currently operates */
+    private long startTimeMillis = 0;
+    private long finishTimeMillis = 0;
+    private long bytePerSecond = 0;
 
     /**
      * Constructor creates the download 
@@ -111,16 +118,43 @@ public class DownloadItem implements GopherClientEventListener {
         return this.byteCountLoaded;
     }
 
+    
+    public long getBytePerSecond() {
+        return this.bytePerSecond;
+    }
+
     @Override
     public void progress(GopherUrl url, long byteCount) {
+        /* set start time to calculate total duration */
+        if(this.startTimeMillis == 0){
+            /* use time in milliseconds */
+            this.startTimeMillis = System.currentTimeMillis();
+        }
+
+        /* calculate the bitrate of the download */
+        long timeNow = System.currentTimeMillis();
+        long duration = ((timeNow-this.startTimeMillis)/1000);
+        if(duration > 0 && byteCount > 0){
+            this.bytePerSecond = (byteCount / duration);
+        }
+
         /* update the local byte counter  */
         this.byteCountLoaded = byteCount;
     }
 
     @Override
     public void pageLoaded(GopherPage result) {
+        /* set the status to complete */
         this.status = DownloadStatus.COMPLETED;
-        System.out.println("Download completed: " + this.item.getUrlString());
+
+        /* set the finish time */
+        this.finishTimeMillis = System.currentTimeMillis();
+
+        /* output the total duration */
+        System.out.println("Download completed (" 
+            + this.byteCountLoaded + " byte in " 
+            + ((this.finishTimeMillis-this.startTimeMillis)/1000) 
+            + " secs): " + this.item.getUrlString());
 
         /* check if file open was requested */
         if(this.openFile){

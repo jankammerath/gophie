@@ -45,6 +45,10 @@ public class DownloadItemRenderer extends JPanel implements ListCellRenderer<Dow
 
         if(value.getStatus() == DownloadStatus.COMPLETED){
             statusText = "Completed (" + byteLoadedText + ")";
+        }if(value.getStatus() == DownloadStatus.ACTIVE){
+            statusText = byteLoadedText + " (1.25 MB/s)";
+        }if(value.getStatus() == DownloadStatus.FAILED){
+            statusText = "Failed (" + byteLoadedText + ")";
         }
 
         /* append the host name to the info text */

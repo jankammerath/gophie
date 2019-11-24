@@ -81,6 +81,14 @@ public class GopherClient {
                         eventListener.pageLoaded(null); 
                     } 
                 }catch(Exception ex){
+                    /* log the exception message */
+                    System.out.println("Download failed (" + url + "):" + ex.getMessage());
+
+                    /* remove the file if already created */
+                    File createdFile = new File(targetFile);
+                    if(createdFile.exists()){ createdFile.delete(); }
+
+                    /* notify the handlers */
                     if (eventListener != null) { 
                         eventListener.pageLoadFailed(GopherError.EXCEPTION,new GopherUrl(url));
                     } 
