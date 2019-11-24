@@ -37,6 +37,7 @@ public class MessageView extends JPanel {
         this.messageIcon.setFont(this.iconFont);
         this.messageIcon.setBorder(new EmptyBorder(0, 5, 0, 10));
         this.messageText = new JLabel();
+        this.messageText.setFont(ConfigurationManager.getDefaultFont(11f));
         this.buttonPanel = new JPanel();
         this.buttonPanel.setBorder(new EmptyBorder(0, 30, 0, 0));
         this.buttonPanel.setLayout(new BoxLayout(this.buttonPanel, BoxLayout.X_AXIS));
@@ -62,6 +63,7 @@ public class MessageView extends JPanel {
         JLabel customButton = new JLabel("<html><div style=\"border:1px solid #000000;"
                 + "padding:2px 6px 2px 6px;border-radius:6px;\">" + text + "</div></html>");
         customButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        customButton.setFont(ConfigurationManager.getDefaultFont(11f));
         customButton.setBorder(new EmptyBorder(0, 5, 0, 5));
         return customButton;
     }

@@ -41,6 +41,7 @@ public class SearchInput extends JPanel {
         this.searchText.setBackground(Color.decode(SEARCH_BACKGROUND));
         this.searchText.setForeground(Color.decode(SEARCH_TEXTCOLOR));
         this.searchText.setCaretColor(Color.decode(SEARCH_TEXTCOLOR));
+        this.searchText.setFont(ConfigurationManager.getDefaultFont(13f));
         this.add(this.searchText);
 
         this.setVisible(false);
@@ -48,6 +49,7 @@ public class SearchInput extends JPanel {
 
     public void performSearch(String title, SearchInputListener listener){
         this.searchTitle.setText(title);
+        this.searchTitle.setFont(ConfigurationManager.getDefaultFont(13f));
         this.searchText.addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent e) {
                 /* execute search when the ENTER key is pressed */

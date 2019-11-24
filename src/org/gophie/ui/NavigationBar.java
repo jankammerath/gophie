@@ -245,6 +245,7 @@ public class NavigationBar extends JPanel {
     private JTextField createAddressInput(){
         JTextField inputField = new JTextField();
         inputField.setBorder(new EmptyBorder(4,10,6,4));
+        inputField.setFont(ConfigurationManager.getDefaultFont(13f));
         inputField.setForeground(Color.decode(NavigationBar.textColorHex));
         inputField.setOpaque(false);
         this.add(inputField);

@@ -50,6 +50,22 @@ public class ConfigurationManager{
         return result;
     }
 
+    public static Font getFont(String fileName, float size){
+        Font result = null;
+
+        try{
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            result = Font.createFont(Font.TRUETYPE_FONT, classLoader.getResourceAsStream("res/" + fileName)).deriveFont(size);
+            GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            graphicsEnvironment.registerFont(result);
+        }catch(Exception ex){
+            /* Ouchie, this will look bad... */
+            System.out.println("Unable to load font: " + ex.getMessage());
+        }
+
+        return result;
+    }
+
     /**
      * Returns the font for icon display
      * 
@@ -60,21 +76,7 @@ public class ConfigurationManager{
      * A Font object containing the icon font
      */
     public static Font getIconFont(float size){
-        Font result = null;
-
-        /* get the icon font for this navigation bar */
-        try{
-            /* try to open the font for icon display */
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            result = Font.createFont(Font.TRUETYPE_FONT, classLoader.getResourceAsStream("res/Feather.ttf")).deriveFont(size);
-            GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            graphicsEnvironment.registerFont(result);
-        }catch(Exception ex){
-            /* Ouchie, this will look bad... */
-            System.out.println("Unable to load the icon font: " + ex.getMessage());
-        }
-
-        return result;
+        return ConfigurationManager.getFont("Feather.ttf", size);
     }
 
     public static ImageIcon getImageIcon(String name){
@@ -93,19 +95,11 @@ public class ConfigurationManager{
     }
 
     public static Font getConsoleFont(float size){
-        Font result = null;
-        
-        try{
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            result = Font.createFont(Font.TRUETYPE_FONT, classLoader.getResourceAsStream("res/Inconsolata-Regular.ttf")).deriveFont(17f);
-            GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            graphicsEnvironment.registerFont(result);
-        }catch(Exception ex){
-            /* Ouchie, this will look bad... */
-            System.out.println("Unable to load the text font:" + ex.getMessage());
-        }
+        return ConfigurationManager.getFont("Inconsolata-Regular.ttf", size);
+    }
 
-        return result;
+    public static Font getDefaultFont(float size){
+        return ConfigurationManager.getFont("OpenSans-Regular.ttf", size);
     }
 
     public static String getDownloadPath(){
