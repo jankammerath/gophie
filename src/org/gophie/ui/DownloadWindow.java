@@ -4,6 +4,7 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+import org.gophie.config.ConfigurationManager;
 import org.gophie.net.*;
 import org.gophie.net.event.*;
 
@@ -16,8 +17,8 @@ public class DownloadWindow{
     private JDialog frame;
     private JList<DownloadItem> fileListView;
     private JPanel actionBar = new JPanel();
-    private JLabel actionButton = new JLabel("Cancel");
-    private JLabel clearButton = new JLabel("Clear List");
+    private JPanel clearButton;
+    private JPanel actionButton;
 
     public DownloadWindow(DownloadList downloadList){
         this.list = downloadList;
@@ -49,10 +50,16 @@ public class DownloadWindow{
         listScrollPane.getViewport().setOpaque(false);
         this.frame.add(listScrollPane, BorderLayout.CENTER);
 
-        this.clearButton.setForeground(Color.decode("#ffffff"));
-        this.clearButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        this.actionButton.setForeground(Color.decode("#ffffff"));
-        this.actionButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        this.clearButton = this.createButton("", "Clear List");
+
+        /*
+            TODO: action button actions shall be...
+
+            1. "open file" for completed files
+            2. "retry" for failed files
+            3. "abort" for active files
+        */
+        this.actionButton = this.createButton("", "Abort");
 
         this.actionBar.setLayout(new BorderLayout());
         this.actionBar.setBorder(new EmptyBorder(8,16,10,16));
@@ -63,6 +70,29 @@ public class DownloadWindow{
 
         /* update the list for the first time */
         this.updateList();
+    }
+
+    public JPanel createButton(String iconText, String text){
+        JPanel result = new JPanel();
+
+        result.setLayout(new BorderLayout());
+        result.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        result.setOpaque(false);
+
+        JLabel iconLabel = new JLabel(iconText);
+        iconLabel.setBorder(new EmptyBorder(0,0,0,6));
+        iconLabel.setOpaque(false);
+        iconLabel.setFont(ConfigurationManager.getIconFont(15f));
+        iconLabel.setForeground(Color.decode("#ffffff"));
+        result.add(iconLabel,BorderLayout.WEST);
+
+        JLabel textLabel = new JLabel(text);
+        textLabel.setOpaque(false);
+        textLabel.setFont(ConfigurationManager.getDefaultFont(13f));
+        textLabel.setForeground(Color.decode("#ffffff"));
+        result.add(textLabel,BorderLayout.EAST);
+
+        return result;
     }
 
     public void updateList(){
