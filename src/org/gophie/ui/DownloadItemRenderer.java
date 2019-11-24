@@ -27,7 +27,7 @@ public class DownloadItemRenderer extends JPanel implements ListCellRenderer<Dow
         /* highlight if this eleemtn is selected */
         if(isSelected == true){
             this.setOpaque(true);
-            this.setBackground(Color.decode("#248AC2"));
+            this.setBackground(Color.decode("#cf9a0c"));
         }
 
         /* get the gopher item of this download */
@@ -43,12 +43,19 @@ public class DownloadItemRenderer extends JPanel implements ListCellRenderer<Dow
         String statusText = "Download not started";
         String byteLoadedText = SystemUtility.getFileSizeString(value.getByteCountLoaded());
 
+        /* show message for completed downloads */
         if(value.getStatus() == DownloadStatus.COMPLETED){
             statusText = "Completed (" + byteLoadedText + ")";
-        }if(value.getStatus() == DownloadStatus.ACTIVE){
+        }
+        
+        /* show message for active downloads */
+        if(value.getStatus() == DownloadStatus.ACTIVE){
             String transferRate = SystemUtility.getFileSizeString(value.getBytePerSecond());
             statusText = byteLoadedText + " (" + transferRate + "/sec)";
-        }if(value.getStatus() == DownloadStatus.FAILED){
+        }
+        
+        /* show message for failed downloads */
+        if(value.getStatus() == DownloadStatus.FAILED){
             statusText = "Failed (" + byteLoadedText + ")";
         }
 
