@@ -1,6 +1,10 @@
 package org.gophie.ui;
 
 import java.awt.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import javax.swing.*;
 
 import org.gophie.net.*;
@@ -8,6 +12,8 @@ import org.gophie.net.*;
 public class DownloadWindow{
     /* local objects */
     private DownloadList list;
+    private DownloadItem[] data;
+    private ScheduledExecutorService schedule;
 
     /* local components */
     private JDialog frame;
@@ -33,40 +39,39 @@ public class DownloadWindow{
         this.frame.add(listScrollPane, BorderLayout.CENTER);
 
         this.updateList();
+
+        /* update the download list every second */
+        this.schedule = Executors.newSingleThreadScheduledExecutor();
+        this.schedule.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                updateList();
+            }
+            
+        },0,1,TimeUnit.SECONDS);
     }
 
     public void updateList(){
-        // this.fileListView.setListData(this.list.getDownloadItemArray());
-        /*
+        this.data = this.list.getDownloadItemArray();
 
-        TODO: this is test data !!!!
-        
-        */
+        int selectedIndex = this.fileListView.getSelectedIndex();
+        this.fileListView.setListData(this.data);
 
-
-        String[] textLines = {
-            "9MahJongg_8932_EasyLongFileName_324_ItJustNeverEndsHere.prc	/users/tfurrows/files/PalmOS/MahJongg_8932_EasyLongFileName_324_ItJustNeverEndsHere.prc	sdf.org	70",
-            "9McChords.prc	/users/tfurrows/files/PalmOS/McChords.prc	sdf.org	70",
-            "9Poly.PRC	/users/tfurrows/files/PalmOS/Poly.PRC	gopher.firebladeservices.org	70",
-            "9SFCave_0.03.prc	/users/tfurrows/files/PalmOS/SFCave_0.03.prc	sdf.org	70",
-            "9Bunny2.PRC	/users/tfurrows/files/PalmOS/Bunny2.PRC	sdf.org	70",
-            "9Afterburner3.1.zip	/users/tfurrows/files/PalmOS/Afterburner3.1.zip	sdf.org	70"
-        };
-
-        DownloadItem[] itemList = new DownloadItem[textLines.length];
-        for(int i=0; i<textLines.length; i++){
-            DownloadItem sample = new DownloadItem();
-            sample.setGopherItem(new GopherItem(textLines[i]));
-            itemList[i] = sample;
+        if(selectedIndex < this.data.length){
+            this.fileListView.setSelectedIndex(selectedIndex);
+        }else{
+            if(this.data.length > 0){
+                this.fileListView.setSelectedIndex(this.data.length-1);
+            }
         }
+    }
 
-        this.fileListView.setListData(itemList);
+    public boolean isVisible(){
+        return this.frame.isVisible();
+    }
 
-        /* 
-        
-        TODO: end of test data !!!
-
-        */
+    public void hide(){
+        this.frame.setVisible(false);
     }
 
     public void show(JFrame parent){

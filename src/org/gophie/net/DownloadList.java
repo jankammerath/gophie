@@ -14,7 +14,8 @@ public class DownloadList extends ArrayList<DownloadItem> {
     public DownloadItem[] getDownloadItemArray(){
         DownloadItem[] result = new DownloadItem[this.size()];
 
-        for(int i=0; i<this.size(); i++){
+        /* create the list upside down with the latest first */
+        for(int i=this.size()-1; i>=0; i--){
             result[i] = this.get(i);
         }
 

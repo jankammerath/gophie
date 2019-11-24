@@ -463,6 +463,10 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
     @Override
     public void showDownloadRequested() {
-        this.downloadWindow.show(this.frame);
+        if(this.downloadWindow.isVisible()){
+            this.downloadWindow.hide();
+        }else{
+            this.downloadWindow.show(this.frame);
+        }
     }
 }
