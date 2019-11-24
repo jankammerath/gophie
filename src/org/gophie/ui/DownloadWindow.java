@@ -25,20 +25,6 @@ public class DownloadWindow{
         this.fileListView = new JList<String>();
         this.fileListView.setOpaque(false);
 
-        this.fileListView.setListData(new String[]{
-            "What", "The", "Fuck", "Is", "This",
-            "What", "The", "Fuck", "Is", "This",
-            "What", "The", "Fuck", "Is", "This",
-            "What", "The", "Fuck", "Is", "This",
-            "What", "The", "Fuck", "Is", "This",
-            "What", "The", "Fuck", "Is", "This"
-        });
-
-        // this.fileListView.add(new DownloadItemView(null));
-        // this.fileListView.add(new DownloadItemView(null));
-        // this.fileListView.add(new DownloadItemView(null));
-        // itemContainer.add(new DownloadItemView(null));
-
         JScrollPane listScrollPane = new JScrollPane(this.fileListView);
         listScrollPane.setOpaque(false);
         listScrollPane.getViewport().setOpaque(false);
