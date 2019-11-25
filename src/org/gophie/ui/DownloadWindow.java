@@ -4,12 +4,15 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import org.gophie.config.ConfigurationManager;
 import org.gophie.net.*;
+import org.gophie.net.DownloadItem.DownloadStatus;
 import org.gophie.net.event.*;
 
-public class DownloadWindow{
+public class DownloadWindow {
     private static final String ACTIONBAR_BACKGROUND = "#248AC2";
     private static final String ACTIONBAR_TEXTCOLOR = "#ffffff";
     private static final String ACTIONBAR_INACTIVE_TEXTCOLOR = "#76bce3";
@@ -26,9 +29,9 @@ public class DownloadWindow{
     private JPanel clearButton;
     private JPanel actionButton;
 
-    public DownloadWindow(DownloadList downloadList){
+    public DownloadWindow(DownloadList downloadList) {
         this.list = downloadList;
-        this.list.addEventListener(new DownloadListEventListener(){
+        this.list.addEventListener(new DownloadListEventListener() {
             @Override
             public void downloadListUpdated() {
                 updateList();
@@ -42,10 +45,11 @@ public class DownloadWindow{
 
         this.frame = new JDialog();
         this.frame.setTitle("Downloads");
-        this.frame.setMinimumSize(new Dimension(400,200));
+        this.frame.setMinimumSize(new Dimension(400, 200));
         this.frame.setLayout(new BorderLayout());
 
         this.fileListView = new JList<DownloadItem>();
+        this.fileListView.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         this.fileListView.setCellRenderer(new DownloadItemRenderer());
         this.fileListView.setFixedCellWidth(this.fileListView.getWidth());
         this.fileListView.setOpaque(true);
@@ -56,80 +60,53 @@ public class DownloadWindow{
         listScrollPane.getViewport().setOpaque(false);
         this.frame.add(listScrollPane, BorderLayout.CENTER);
 
-        this.clearButton = this.createButton("", "Clear List");
+        this.clearButton = new ActionButton("", "Clear List",
+            ACTIONBAR_TEXTCOLOR,ACTIONBAR_INACTIVE_TEXTCOLOR);
+        this.clearButton.setEnabled(false);
 
-        /*
-            TODO: action button actions shall be...
-
-            1. "open file" for completed files
-            2. "retry" for failed files
-            3. "abort" for active files
-        */
-        this.actionButton = this.createButton("", "Abort");
+        this.actionButton = new ActionButton("", "Abort",
+            ACTIONBAR_TEXTCOLOR,ACTIONBAR_INACTIVE_TEXTCOLOR);
 
         this.actionBar.setLayout(new BorderLayout());
-        this.actionBar.setBorder(new EmptyBorder(8,16,10,16));
+        this.actionBar.setBorder(new EmptyBorder(8, 16, 10, 16));
         this.actionBar.setBackground(Color.decode(ACTIONBAR_BACKGROUND));
-        this.actionBar.add(this.clearButton,BorderLayout.EAST);
-        this.actionBar.add(this.actionButton,BorderLayout.WEST);
+        this.actionBar.add(this.clearButton, BorderLayout.EAST);
+        this.actionBar.add(this.actionButton, BorderLayout.WEST);
         this.frame.add(this.actionBar, BorderLayout.SOUTH);
 
         /* hide the action button for empty lists */
         this.actionButton.setVisible(false);
 
+        this.fileListView.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                DownloadItem selected = fileListView.getSelectedValue();
+                if(selected == null){
+                    actionButton.setVisible(false);
+                }else{
+                    if(selected.getStatus() == DownloadStatus.ACTIVE){
+                        
+                    }if(selected.getStatus() == DownloadStatus.FAILED){
+                        
+                    }if(selected.getStatus() == DownloadStatus.COMPLETED){
+                        
+                    }
+                    actionButton.setVisible(true);
+                }
+            }        
+        });
+
         /* update the list for the first time */
         this.updateList();
     }
 
-    public JPanel createButton(String iconText, String text){
-        JPanel result = new JPanel();
-
-        result.setLayout(new BorderLayout());
-        result.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        result.setOpaque(false);
-
-        /* icon for the button using the icon font */
-        JLabel iconLabel = new JLabel(iconText);
-        iconLabel.setBorder(new EmptyBorder(0,0,0,6));
-        iconLabel.setOpaque(false);
-        iconLabel.setFont(ConfigurationManager.getIconFont(14f));
-        iconLabel.setForeground(Color.decode(ACTIONBAR_INACTIVE_TEXTCOLOR));
-        result.add(iconLabel,BorderLayout.WEST);
-
-        /* text for the button using the default text font */
-        JLabel textLabel = new JLabel(text);
-        textLabel.setOpaque(false);
-        textLabel.setFont(ConfigurationManager.getDefaultFont(12f));
-        textLabel.setForeground(Color.decode(ACTIONBAR_INACTIVE_TEXTCOLOR));
-        result.add(textLabel,BorderLayout.EAST);
-        result.addMouseListener(new MouseAdapter() {
-            /* notify the listeners of the forward move request */
-            public void mouseReleased(MouseEvent evt){
-                /* will be handled by another handler */
-            }
-
-            /* set the color to the hover color and use the hand cursor */
-            public void mouseEntered(MouseEvent evt) {
-                iconLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                iconLabel.setForeground(Color.decode(ACTIONBAR_TEXTCOLOR));
-                textLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                textLabel.setForeground(Color.decode(ACTIONBAR_TEXTCOLOR));
-            }
-        
-            /* revert back to the default cursor and default color */
-            public void mouseExited(MouseEvent evt) {
-                iconLabel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-                iconLabel.setForeground(Color.decode(ACTIONBAR_INACTIVE_TEXTCOLOR));
-                textLabel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-                textLabel.setForeground(Color.decode(ACTIONBAR_INACTIVE_TEXTCOLOR));
-            }
-        });
-
-        return result;
-    }
-
     public void updateList(){
         this.data = this.list.getDownloadItemArray();
+
+        /* disable the clear list button for empty lists */
+        if(this.data.length == 0){
+            this.clearButton.setEnabled(false);
+        }
 
         int selectedIndex = this.fileListView.getSelectedIndex();
         this.fileListView.setListData(this.data);
