@@ -53,8 +53,8 @@ public class Gophie {
             System.out.println("Error setting system look and feel");
         }
 
-        //Schedule a job for the event-dispatching thread:
-        //creating and showing this application's GUI.
+        /* Schedule a job for the event-dispatching thread:
+            creating and showing this application's GUI. */
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 createAndShowGUI();
