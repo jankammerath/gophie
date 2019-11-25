@@ -5,9 +5,8 @@ import javax.swing.*;
 import javax.swing.border.*;
 
 import org.gophie.net.*;
+import org.gophie.config.*;
 import org.gophie.net.DownloadItem.DownloadStatus;
-import org.gophie.config.ConfigurationManager;
-import org.gophie.config.SystemUtility;
 
 public class DownloadItemRenderer extends JPanel implements ListCellRenderer<DownloadItem> {
     private static final long serialVersionUID = 1L;
@@ -19,15 +18,19 @@ public class DownloadItemRenderer extends JPanel implements ListCellRenderer<Dow
     public Component getListCellRendererComponent(JList<? extends DownloadItem> list, 
                                                 DownloadItem value, int index,
                                                 boolean isSelected, boolean cellHasFocus) {
+        /* get the config file for the color schemes */
+        ConfigFile configFile = ConfigurationManager.getConfigFile();
+
         /* render the cell for this download item */
         this.setOpaque(false);
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.setBorder(new EmptyBorder(5,10,5,10));
 
-        /* highlight if this eleemtn is selected */
+        /* highlight if this element is selected */
         if(isSelected == true){
             this.setOpaque(true);
-            this.setBackground(Color.decode("#cf9a0c"));
+            this.setBackground(Color.decode(configFile.getSetting
+                ("DOWNLOAD_SELECTED_COLOR", "Appearance", "#cf9a0c")));
         }
 
         /* get the gopher item of this download */
@@ -37,7 +40,8 @@ public class DownloadItemRenderer extends JPanel implements ListCellRenderer<Dow
         this.titleLabel.setText(item.getFileName());
         Font titleFont = ConfigurationManager.getConsoleFont(15f);
         this.titleLabel.setFont(titleFont.deriveFont(titleFont.getStyle() | Font.BOLD));
-        this.titleLabel.setForeground(Color.decode("#ffffff"));
+        this.titleLabel.setForeground(Color.decode(configFile.getSetting
+                    ("DOWNLOAD_TITLE_COLOR", "Appearance", "#ffffff")));
 
         /* create the information text based on the status */
         String statusText = "Download not started";
@@ -65,7 +69,8 @@ public class DownloadItemRenderer extends JPanel implements ListCellRenderer<Dow
         /* set the text to the status text label */
         this.textLabel.setText(statusText);
         this.textLabel.setBorder(new EmptyBorder(4,0,0,0));
-        this.textLabel.setForeground(Color.decode("#e0e0e0"));
+        this.textLabel.setForeground(Color.decode(configFile.getSetting
+                    ("DOWNLOAD_TEXT_COLOR", "Appearance", "#e0e0e0")));
         Font textFont = ConfigurationManager.getConsoleFont(13f);
         this.textLabel.setFont(textFont);
 
