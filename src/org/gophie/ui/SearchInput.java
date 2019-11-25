@@ -26,7 +26,7 @@ public class SearchInput extends JPanel {
         this.setBackground(Color.decode(SEARCH_BACKGROUND));
         
         this.searchIcon = new JLabel("");
-        this.searchIcon.setFont(ConfigurationManager.getIconFont(14f));
+        this.searchIcon.setFont(ConfigurationManager.getIconFont(16f));
         this.searchIcon.setBorder(new EmptyBorder(0,0,0,8));
         this.searchIcon.setForeground(Color.decode(SEARCH_TITLECOLOR));
         this.add(this.searchIcon);
@@ -41,7 +41,7 @@ public class SearchInput extends JPanel {
         this.searchText.setBackground(Color.decode(SEARCH_BACKGROUND));
         this.searchText.setForeground(Color.decode(SEARCH_TEXTCOLOR));
         this.searchText.setCaretColor(Color.decode(SEARCH_TEXTCOLOR));
-        this.searchText.setFont(ConfigurationManager.getDefaultFont(13f));
+        this.searchText.setFont(ConfigurationManager.getDefaultFont(14f));
         this.add(this.searchText);
 
         this.setVisible(false);
@@ -49,7 +49,7 @@ public class SearchInput extends JPanel {
 
     public void performSearch(String title, SearchInputListener listener){
         this.searchTitle.setText(title);
-        this.searchTitle.setFont(ConfigurationManager.getDefaultFont(13f));
+        this.searchTitle.setFont(ConfigurationManager.getDefaultFont(14f));
         this.searchText.addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent e) {
                 /* execute search when the ENTER key is pressed */

@@ -82,13 +82,13 @@ public class DownloadWindow{
         JLabel iconLabel = new JLabel(iconText);
         iconLabel.setBorder(new EmptyBorder(0,0,0,6));
         iconLabel.setOpaque(false);
-        iconLabel.setFont(ConfigurationManager.getIconFont(15f));
+        iconLabel.setFont(ConfigurationManager.getIconFont(14f));
         iconLabel.setForeground(Color.decode("#ffffff"));
         result.add(iconLabel,BorderLayout.WEST);
 
         JLabel textLabel = new JLabel(text);
         textLabel.setOpaque(false);
-        textLabel.setFont(ConfigurationManager.getDefaultFont(13f));
+        textLabel.setFont(ConfigurationManager.getDefaultFont(12f));
         textLabel.setForeground(Color.decode("#ffffff"));
         result.add(textLabel,BorderLayout.EAST);
 
