@@ -5,13 +5,14 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
 
-import org.gophie.config.ConfigurationManager;
+import org.gophie.config.*;
 import org.gophie.ui.event.MessageViewListener;
 
 public class MessageView extends JPanel {
     /* constants */
     private static final long serialVersionUID = 1L;
-    private static final String BACKGROUND_COLOR = "#fcba03";
+    private static final String MESSAGEVIEW_BACKGROUND_COLOR = "#fcba03";
+    private static final String MESSAGEVIEW_FOREGROUND_COLOR = "#000000";
 
     /* local components */
     private JLabel messageIcon;
@@ -24,24 +25,40 @@ public class MessageView extends JPanel {
      * show-methods should be called
      */
     public MessageView() {
+        /* get the config file */
+        ConfigFile configFile = ConfigurationManager.getConfigFile();
+
         /* get the icon font for this navigation bar */
         this.iconFont = ConfigurationManager.getIconFont(19f);
 
         /* set box layout for this message view */
         this.setLayout(new BorderLayout());
         this.setBorder(new EmptyBorder(10, 10, 10, 16));
-        this.setBackground(Color.decode(BACKGROUND_COLOR));
+        this.setBackground(Color.decode(configFile.getSetting
+                ("MESSAGEVIEW_BACKGROUND_COLOR", "Appearance", 
+                MESSAGEVIEW_BACKGROUND_COLOR)));
 
         /* create the label instance */
         this.messageIcon = new JLabel();
         this.messageIcon.setFont(this.iconFont);
         this.messageIcon.setBorder(new EmptyBorder(0, 5, 0, 10));
+        this.messageIcon.setForeground(Color.decode(configFile.getSetting
+                ("MESSAGEVIEW_FOREGROUND_COLOR", "Appearance", 
+                MESSAGEVIEW_FOREGROUND_COLOR)));
+
         this.messageText = new JLabel();
         this.messageText.setFont(ConfigurationManager.getDefaultFont(11f));
+        this.messageText.setForeground(Color.decode(configFile.getSetting
+                ("MESSAGEVIEW_FOREGROUND_COLOR", "Appearance", 
+                MESSAGEVIEW_FOREGROUND_COLOR)));
+
         this.buttonPanel = new JPanel();
         this.buttonPanel.setBorder(new EmptyBorder(0, 30, 0, 0));
         this.buttonPanel.setLayout(new BoxLayout(this.buttonPanel, BoxLayout.X_AXIS));
-        this.buttonPanel.setBackground(Color.decode(BACKGROUND_COLOR));
+        this.buttonPanel.setBackground(Color.decode(configFile.getSetting
+                        ("MESSAGEVIEW_BACKGROUND_COLOR", "Appearance", 
+                        MESSAGEVIEW_BACKGROUND_COLOR)));
+
         this.add(this.messageIcon, BorderLayout.WEST);
         this.add(this.messageText, BorderLayout.CENTER);
         this.add(this.buttonPanel, BorderLayout.EAST);
@@ -60,11 +77,17 @@ public class MessageView extends JPanel {
      * The button in the form of a JLabel
      */
     private JLabel createButton(String text) {
-        JLabel customButton = new JLabel("<html><div style=\"border:1px solid #000000;"
+        /* get the config file */
+        ConfigFile configFile = ConfigurationManager.getConfigFile();
+        String buttonColor = configFile.getSetting("MESSAGEVIEW_FOREGROUND_COLOR", 
+                                        "Appearance", MESSAGEVIEW_FOREGROUND_COLOR);
+
+        JLabel customButton = new JLabel("<html><div style=\"border:1px solid " + buttonColor + ";"
                 + "padding:2px 6px 2px 6px;border-radius:6px;\">" + text + "</div></html>");
         customButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         customButton.setFont(ConfigurationManager.getDefaultFont(11f));
         customButton.setBorder(new EmptyBorder(0, 5, 0, 5));
+        customButton.setForeground(Color.decode(buttonColor));
         return customButton;
     }
 
