@@ -7,7 +7,7 @@ import javax.swing.ImageIcon;
 public class ConfigurationManager{
     private static ConfigFile configFile;
     private static final String MAIN_CONFIG_FILENAME = "config.ini";
-    private static final String CONFIG_FOLDERNAME = ".Gophie";
+    private static final String CONFIG_FOLDERNAME = "Gophie";
 
     /**
      * Returns the main configuration file
