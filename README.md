@@ -21,4 +21,10 @@ In order to stay small, reproducable and trustworthy, Gophie was not build with 
 ./make.sh
 ```
 
-The script will create a JAR-file in the build directory for you to run.
+The script will create a JAR-file in the build directory for you to run. If you wish to launch Gophie's jar file from the command line, simply use the java cli.
+
+```
+java -jar Gophie.jar
+```
+
+If you're having trouble with Gophie, it is quite verbose when it comes to errors and exceptions. It is recommended that you run Gophie through Java on the command line to get the exception and error message output it might report.
