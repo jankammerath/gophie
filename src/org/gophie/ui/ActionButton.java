@@ -13,6 +13,7 @@ public class ActionButton extends JPanel {
     private static final long serialVersionUID = 1L;
     
     /* private variables */
+    private int buttonId = 0;
     private String inactiveTextColor = "";
     private String textColor = "";
     private Boolean isEnabledButton = false;
@@ -55,7 +56,7 @@ public class ActionButton extends JPanel {
             public void mouseReleased(MouseEvent evt){
                 /* will be handled by another handler */
                 for(ActionButtonEventListener listener: eventListenerList){
-                    listener.buttonPressed();
+                    listener.buttonPressed(buttonId);
                 }
             }
 
@@ -74,6 +75,10 @@ public class ActionButton extends JPanel {
                 textLabel.setForeground(Color.decode(inactiveTextColor));
             }
         });
+    }
+
+    public void setButtonId(int value){
+        this.buttonId = value;
     }
 
     /**

@@ -1,5 +1,5 @@
 package org.gophie.ui.event;
 
 public interface ActionButtonEventListener {
-    void buttonPressed();
+    void buttonPressed(int buttonId);
 }

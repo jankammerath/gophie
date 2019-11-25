@@ -41,6 +41,19 @@ public class DownloadList extends ArrayList<DownloadItem> implements DownloadIte
         return result;
     }
 
+    public void clearNonActiveItems(){
+        ArrayList<DownloadItem> currentList = this;
+        this.clear();
+
+        for(DownloadItem item: currentList){
+            if(item.getStatus() == DownloadStatus.ACTIVE){
+                this.add(item);
+            }
+        }
+
+        this.notifyUpdate();
+    }
+
     public void addEventListener(DownloadListEventListener listener){
         this.eventListener.add(listener);
     }

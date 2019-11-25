@@ -80,6 +80,28 @@ public class DownloadItem implements GopherClientEventListener {
     }
 
     /**
+     * Tries to delete the file
+     */
+    public void deleteFile(){
+        try{
+            File file = new File(this.fileName);
+            file.delete();
+        }catch(Exception ex){
+            /* just log the error and keep the crap, what else to do? */
+            System.out.println("Failed to delete downloaded file (" 
+                        + this.fileName + "): " + ex.getMessage());
+        }
+    }
+
+    /**
+     * Cancels this download
+     * 
+     */
+    public void cancel(){
+        this.client.cancelFetch();
+    }
+
+    /**
      * Sets the target file to download to
      * 
      * @param targetFile
@@ -128,10 +150,28 @@ public class DownloadItem implements GopherClientEventListener {
     public long getByteCountLoaded(){
         return this.byteCountLoaded;
     }
-
     
     public long getBytePerSecond() {
         return this.bytePerSecond;
+    }
+
+    /**
+     * Opens the file on the users desktop
+     */
+    public void openFileOnDesktop(){
+        try{
+            /* use the desktop to open the file */
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(new File(this.fileName));
+            }else{
+                /* no desktop support here, report one level up */
+                throw new Exception("Desktop not supported");
+            }
+        }catch(Exception ex){
+            /* output the exception that the file could not be opened */
+            System.out.println("Unable to open file after download "
+                            + "(" + fileName + "):" + ex.getMessage());
+        }     
     }
 
     @Override
@@ -170,21 +210,7 @@ public class DownloadItem implements GopherClientEventListener {
             + " secs): " + this.item.getUrlString());
 
         /* check if file open was requested */
-        if(this.openFile){
-            try{
-                /* use the desktop to open the file */
-                if (Desktop.isDesktopSupported()) {
-                    Desktop.getDesktop().open(new File(this.fileName));
-                }else{
-                    /* no desktop support here, report one level up */
-                    throw new Exception("Desktop not supported");
-                }
-            }catch(Exception ex){
-                /* output the exception that the file could not be opened */
-                System.out.println("Unable to open file after download "
-                                + "(" + fileName + "):" + ex.getMessage());
-            }
-        }
+        if(this.openFile){ this.openFileOnDesktop(); }
 
         this.notifyProgress();
     }

@@ -9,8 +9,9 @@ import javax.swing.event.ListSelectionListener;
 import org.gophie.net.*;
 import org.gophie.net.DownloadItem.DownloadStatus;
 import org.gophie.net.event.*;
+import org.gophie.ui.event.ActionButtonEventListener;
 
-public class DownloadWindow {
+public class DownloadWindow implements ActionButtonEventListener {
     private static final String ACTIONBAR_BACKGROUND = "#248AC2";
     private static final String ACTIONBAR_TEXTCOLOR = "#ffffff";
     private static final String ACTIONBAR_INACTIVE_TEXTCOLOR = "#76bce3";
@@ -62,9 +63,13 @@ public class DownloadWindow {
         this.clearButton = new ActionButton("", "Clear List",
             ACTIONBAR_TEXTCOLOR,ACTIONBAR_INACTIVE_TEXTCOLOR);
         this.clearButton.setButtonEnabled(false);
+        this.clearButton.setButtonId(1);
+        this.clearButton.addEventListener(this);
 
         this.actionButton = new ActionButton("", "Abort",
             ACTIONBAR_TEXTCOLOR,ACTIONBAR_INACTIVE_TEXTCOLOR);
+        this.actionButton.setButtonId(0);
+        this.actionButton.addEventListener(this);
 
         this.actionBar.setLayout(new BorderLayout());
         this.actionBar.setBorder(new EmptyBorder(8, 16, 10, 16));
@@ -143,5 +148,38 @@ public class DownloadWindow {
         this.updateList();
         this.frame.setLocationRelativeTo(parent);
         this.frame.setVisible(true);
+    }
+
+    @Override
+    public void buttonPressed(int buttonId) {
+        if(buttonId == 0){
+            /* the action button */
+            DownloadItem item = this.fileListView.getSelectedValue();
+            if(item.getStatus() == DownloadStatus.ACTIVE){
+                /* cancel the currently active item */
+                item.cancel();
+
+                /* remove the item from the list */
+                this.list.remove(item);
+
+                /* delete the file form disk */
+                item.deleteFile();
+            }if(item.getStatus() == DownloadStatus.FAILED){
+                /* retry failed item */
+                item.start();
+            }if(item.getStatus() == DownloadStatus.COMPLETED){
+                /* open completed item file */
+                item.openFileOnDesktop();
+            }if(item.getStatus() == DownloadStatus.IDLE){
+                /* start item in idle item */
+                item.start();
+            }
+        }if(buttonId == 1){
+            /* the clear list button */
+            this.list.clearNonActiveItems();
+        }
+
+        /* update our local list */
+        this.updateList();
     }
 }
