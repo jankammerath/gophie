@@ -13,7 +13,7 @@ public class ActionButton extends JPanel {
     /* private variables */
     private String inactiveTextColor = "";
     private String textColor = "";
-    private Boolean isEnabled = true;
+    private Boolean isEnabled = false;
 
     /* private components */
     private JLabel iconLabel;
@@ -57,6 +57,7 @@ public class ActionButton extends JPanel {
             public void mouseEntered(MouseEvent evt) {
                 /* only show hover effect when button is enabled */
                 if(isButtonEnabled() == true){
+                    System.out.println("Button is enabled");
                     iconLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
                     iconLabel.setForeground(Color.decode(textColor));
                     textLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -72,6 +73,11 @@ public class ActionButton extends JPanel {
                 textLabel.setForeground(Color.decode(inactiveTextColor));
             }
         });
+    }
+
+    public void setContent(String iconText, String text){
+        this.iconLabel.setText(iconText);
+        this.textLabel.setText(text);
     }
 
     public void setTextColor(String colorHex){

@@ -1,13 +1,11 @@
 package org.gophie.ui;
 
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.gophie.config.ConfigurationManager;
 import org.gophie.net.*;
 import org.gophie.net.DownloadItem.DownloadStatus;
 import org.gophie.net.event.*;
@@ -26,8 +24,8 @@ public class DownloadWindow {
     private JDialog frame;
     private JList<DownloadItem> fileListView;
     private JPanel actionBar = new JPanel();
-    private JPanel clearButton;
-    private JPanel actionButton;
+    private ActionButton clearButton;
+    private ActionButton actionButton;
 
     public DownloadWindow(DownloadList downloadList) {
         this.list = downloadList;
@@ -85,12 +83,15 @@ public class DownloadWindow {
                     actionButton.setVisible(false);
                 }else{
                     if(selected.getStatus() == DownloadStatus.ACTIVE){
-                        
+                        actionButton.setContent("","Abort");
                     }if(selected.getStatus() == DownloadStatus.FAILED){
-                        
+                        actionButton.setContent("","Retry");
                     }if(selected.getStatus() == DownloadStatus.COMPLETED){
-                        
+                        actionButton.setContent("","Open");
+                    }if(selected.getStatus() == DownloadStatus.IDLE){
+                        actionButton.setContent("","Start");
                     }
+
                     actionButton.setVisible(true);
                 }
             }        
@@ -104,7 +105,7 @@ public class DownloadWindow {
         this.data = this.list.getDownloadItemArray();
 
         /* disable the clear list button for empty lists */
-        if(this.data.length == 0){
+        if(this.list.hasNonActiveItems()){
             this.clearButton.setEnabled(false);
         }
 

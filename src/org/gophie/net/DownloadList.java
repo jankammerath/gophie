@@ -2,6 +2,7 @@ package org.gophie.net;
 
 import java.util.ArrayList;
 
+import org.gophie.net.DownloadItem.DownloadStatus;
 import org.gophie.net.event.DownloadItemEventListener;
 import org.gophie.net.event.DownloadListEventListener;
 
@@ -22,7 +23,19 @@ public class DownloadList extends ArrayList<DownloadItem> implements DownloadIte
 
         /* create the list upside down with the latest first */
         for(int i=this.size()-1; i>=0; i--){
-            result[i] = this.get(i);
+            result[(this.size()-1)-i] = this.get(i);
+        }
+
+        return result;
+    }
+
+    public Boolean hasNonActiveItems(){
+        Boolean result = false;
+
+        for(DownloadItem item: this){
+            if(item.getStatus() != DownloadStatus.ACTIVE){
+                result = true;
+            }
         }
 
         return result;
