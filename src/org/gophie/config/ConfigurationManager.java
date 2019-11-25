@@ -2,54 +2,57 @@ package org.gophie.config;
 
 import java.awt.*;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import javax.swing.ImageIcon;
 
 public class ConfigurationManager{
+    private static ConfigFile configFile;
+    private static final String MAIN_CONFIG_FILENAME = "config.ini";
+    private static final String CONFIG_FOLDERNAME = ".Gophie";
+
+    /**
+     * Returns the main configuration file
+     * 
+     * @return
+     * The main configuration file as ConfigFile
+     */
+    public static ConfigFile getConfigFile(){
+        if(ConfigurationManager.configFile == null){
+            String configFileName = ConfigurationManager.getConfigPath() + MAIN_CONFIG_FILENAME;
+            ConfigurationManager.configFile = new ConfigFile(configFileName);
+        }
+
+        return ConfigurationManager.configFile;
+    }
+
+    /**
+     * Returns the configuration directory's path
+     * 
+     * @return
+     * The full path to the configuration directory
+     */
     public static String getConfigPath(){
-        String result = System.getProperty("user.home") + "/.Gophie/";
+        /* define the full path of the configuration directory */
+        String result = System.getProperty("user.home") + "/" + CONFIG_FOLDERNAME + "/";
 
         /* make sure all the directories exist */
-        File mainConfigFile = new File(result + "config.ini");
+        File mainConfigFile = new File(result + MAIN_CONFIG_FILENAME);
         mainConfigFile.getParentFile().mkdirs();
 
         return result;
     }
 
-    public static String getConfigFile(String fileName){
-        String result = "";
-
-        try{
-            String configFileName = ConfigurationManager.getConfigPath() + fileName;
-            result = new String(Files.readAllBytes(Paths.get(configFileName)));    
-        }catch(Exception ex){
-            /* output the message to the console */
-            System.out.println("Failed to read file (" 
-                + fileName + "): " + ex.getMessage());
-        }       
-
-        return result;
-    }
-
-    public static Boolean saveConfigFile(String fileName, String content){
-        Boolean result = false;
-
-        try{
-            File configFile = new File(ConfigurationManager.getConfigPath() + fileName);
-            FileWriter writer = new FileWriter(configFile);
-            writer.write(content);
-            writer.close();
-            result = true;
-        }catch(Exception ex){
-            /* output the message to the console */
-            System.out.println("Failed to write file (" 
-                + fileName + "): " + ex.getMessage());
-        }
-    
-        return result;
-    }
-
+    /**
+     * Returns a Font from the resources
+     * 
+     * @param fileName
+     * Filename of the font in the resources path
+     * 
+     * @param size
+     * Size of the Font
+     * 
+     * @return
+     * The Font object with the font
+     */
     public static Font getFont(String fileName, float size){
         Font result = null;
 
@@ -79,6 +82,15 @@ public class ConfigurationManager{
         return ConfigurationManager.getFont("Feather.ttf", size);
     }
 
+    /**
+     * Returns an image icon from the resources
+     * 
+     * @param name
+     * Name of the image icon file from the resources
+     * 
+     * @return
+     * The ImageIcon object from the resources
+     */
     public static ImageIcon getImageIcon(String name){
         ImageIcon result = null;
 
@@ -94,14 +106,41 @@ public class ConfigurationManager{
         return result;
     }
 
+    /**
+     * Returns the default console font
+     * 
+     * @param size
+     * Size of the requested font
+     * 
+     * @return
+     * The Font object
+     */
     public static Font getConsoleFont(float size){
         return ConfigurationManager.getFont("Inconsolata-Regular.ttf", size);
     }
 
+    /**
+     * Returns the default text font
+     * 
+     * @param size
+     * Size of the requested font
+     * 
+     * @return
+     * The Font object
+     */
     public static Font getDefaultFont(float size){
         return ConfigurationManager.getFont("OpenSans-Regular.ttf", size);
     }
 
+    /**
+     * Returns the directory where all
+     * the downloads should be stored in
+     * which usually resides in the user 
+     * home
+     * 
+     * @return
+     * Path to the download directory
+     */
     public static String getDownloadPath(){
         return System.getProperty("user.home") + "/Downloads/";
     }
