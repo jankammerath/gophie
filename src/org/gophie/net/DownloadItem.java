@@ -26,7 +26,6 @@ public class DownloadItem implements GopherClientEventListener {
     /* local variables for calculating the bit rate
         at which the download currently operates */
     private long startTimeMillis = 0;
-    private long finishTimeMillis = 0;
     private long bytePerSecond = 0;
 
     /**
@@ -199,9 +198,6 @@ public class DownloadItem implements GopherClientEventListener {
     public void pageLoaded(GopherPage result) {
         /* set the status to complete */
         this.status = DownloadStatus.COMPLETED;
-
-        /* set the finish time */
-        this.finishTimeMillis = System.currentTimeMillis();
 
         /* check if file open was requested */
         if(this.openFile){ this.openFileOnDesktop(); }
