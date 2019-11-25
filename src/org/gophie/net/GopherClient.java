@@ -13,6 +13,7 @@ import org.gophie.net.event.*;
 public class GopherClient {
     /* thread with the active fetch process */
     private Thread thread;
+    private Boolean cancelled = false;
 
     /**
      * Cancels a current fetch operation
@@ -20,7 +21,19 @@ public class GopherClient {
     public void cancelFetch(){
         if(this.thread != null){
             this.thread.interrupt();
+            this.cancelled = true;
         }
+    }
+
+    /**
+     * Returns whether the current 
+     * operation was cancelled or not
+     * 
+     * @return
+     * true when cancelled, false otherwise
+     */
+    public Boolean isCancelled(){
+        return this.cancelled;
     }
 
     /**
@@ -38,6 +51,7 @@ public class GopherClient {
      */
     public void downloadAsync(String url, String targetFile, GopherClientEventListener eventListener){
         /* instanciate the new thread */
+        GopherClient clientObject = this;
         this.thread = new Thread(new Runnable() { 
             public void run() { 
                 try{
@@ -66,8 +80,10 @@ public class GopherClient {
                         totalByteCount = totalByteCount + data.length;
 
                         /* report byte count to listener */
-                        if(eventListener != null){
-                            eventListener.progress(gopherUrl, totalByteCount);
+                        if(!clientObject.isCancelled()){
+                            if(eventListener != null){
+                                eventListener.progress(gopherUrl, totalByteCount);
+                            }
                         }
                     }
 
@@ -77,9 +93,11 @@ public class GopherClient {
                     /* close the file stream */
                     fileStream.close();
 
-                    if (eventListener != null) { 
-                        eventListener.pageLoaded(null); 
-                    } 
+                    if(!clientObject.isCancelled()){
+                        if (eventListener != null) { 
+                            eventListener.pageLoaded(null); 
+                        } 
+                    }
                 }catch(Exception ex){
                     /* log the exception message */
                     System.out.println("Download failed (" + url + "):" + ex.getMessage());
@@ -89,9 +107,11 @@ public class GopherClient {
                     if(createdFile.exists()){ createdFile.delete(); }
 
                     /* notify the handlers */
-                    if (eventListener != null) { 
-                        eventListener.pageLoadFailed(GopherError.EXCEPTION,new GopherUrl(url));
-                    } 
+                    if(!clientObject.isCancelled()){
+                        if (eventListener != null) { 
+                            eventListener.pageLoadFailed(GopherError.EXCEPTION,new GopherUrl(url));
+                        } 
+                    }
                 }
             } 
         });
@@ -114,17 +134,23 @@ public class GopherClient {
      */
     public void fetchAsync(String url, GopherItemType contentType, GopherClientEventListener eventListener){
         /* instanciate the new thread */
+        GopherClient clientObject = this;
         this.thread = new Thread(new Runnable() { 
             public void run() { 
                 try{
                     GopherPage resultPage = fetch(url, contentType, eventListener);
-                    if (eventListener != null) { 
-                        eventListener.pageLoaded(resultPage); 
-                    } 
+
+                    if(!clientObject.isCancelled()){
+                        if (eventListener != null) { 
+                            eventListener.pageLoaded(resultPage); 
+                        } 
+                    }
                 }catch(GopherNetworkException ex){
-                    if (eventListener != null) { 
-                        eventListener.pageLoadFailed(ex.getGopherErrorType(),new GopherUrl(url));
-                    } 
+                    if(!clientObject.isCancelled()){
+                        if (eventListener != null) { 
+                            eventListener.pageLoadFailed(ex.getGopherErrorType(),new GopherUrl(url));
+                        } 
+                    }
                 }
             } 
         });
@@ -180,8 +206,10 @@ public class GopherClient {
                 totalByteCount = totalByteCount + data.length;
 
                 /* report byte count to listener */
-                if(eventListener != null){
-                    eventListener.progress(gopherUrl, totalByteCount);
+                if(!this.isCancelled()){
+                    if(eventListener != null){
+                        eventListener.progress(gopherUrl, totalByteCount);
+                    }
                 }
             }
 
