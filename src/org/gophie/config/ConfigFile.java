@@ -2,6 +2,7 @@ package org.gophie.config;
 
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.HashMap;
@@ -91,29 +92,32 @@ public class ConfigFile {
      */
     private void parse(){
         try{
-            /* read all lines from the defined file */
-            List<String> lineList = Files.readAllLines(Paths.get(this.fileName),Charset.defaultCharset());
+            /* make sure that config file exists */
+            if(Files.exists(Paths.get(this.fileName))){
+                /* read all lines from the defined file */
+                List<String> lineList = Files.readAllLines(Paths.get(this.fileName),Charset.defaultCharset());
 
-            /* go through each line */
-            String configSection = "NONE";
-            for (String line : lineList) {
-                /* check the type of line */
-                String value = line.trim();
-                if(value.length() > 0){
-                    /* ignore comments */
-                    if(!value.startsWith(";")){
-                        /* check if this is a section */
-                        if(value.startsWith("[") == true && value.endsWith("]")){
-                            /* this is a section, track it to assign values */
-                            configSection = value.substring(1, value.length()-1);
-                        }
+                /* go through each line */
+                String configSection = "NONE";
+                for (String line : lineList) {
+                    /* check the type of line */
+                    String value = line.trim();
+                    if(value.length() > 0){
+                        /* ignore comments */
+                        if(!value.startsWith(";")){
+                            /* check if this is a section */
+                            if(value.startsWith("[") == true && value.endsWith("]")){
+                                /* this is a section, track it to assign values */
+                                configSection = value.substring(1, value.length()-1);
+                            }
 
-                        /* check if this is a value assignment */
-                        if(value.indexOf("=") > 0){
-                            String[] setting = value.split("=");
-                            if(setting.length == 2){
-                                /* apply the setting to the config */
-                                this.setSetting(setting[0].trim(), setting[1].trim(), configSection);
+                            /* check if this is a value assignment */
+                            if(value.indexOf("=") > 0){
+                                String[] setting = value.split("=");
+                                if(setting.length == 2){
+                                    /* apply the setting to the config */
+                                    this.setSetting(setting[0].trim(), setting[1].trim(), configSection);
+                                }
                             }
                         }
                     }
