@@ -37,6 +37,7 @@ public class DownloadWindow {
 
             @Override
             public void downloadProgressReported() {
+                handleSelectionChange();
                 frame.repaint();
             }
         });
@@ -78,22 +79,7 @@ public class DownloadWindow {
         this.fileListView.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                DownloadItem selected = fileListView.getSelectedValue();
-                if(selected == null){
-                    actionButton.setVisible(false);
-                }else{
-                    if(selected.getStatus() == DownloadStatus.ACTIVE){
-                        actionButton.setContent("","Abort");
-                    }if(selected.getStatus() == DownloadStatus.FAILED){
-                        actionButton.setContent("","Retry");
-                    }if(selected.getStatus() == DownloadStatus.COMPLETED){
-                        actionButton.setContent("","Open");
-                    }if(selected.getStatus() == DownloadStatus.IDLE){
-                        actionButton.setContent("","Start");
-                    }
-
-                    actionButton.setVisible(true);
-                }
+                handleSelectionChange();
             }        
         });
 
@@ -101,13 +87,35 @@ public class DownloadWindow {
         this.updateList();
     }
 
-    public void updateList(){
-        this.data = this.list.getDownloadItemArray();
+    private void handleSelectionChange(){
+        DownloadItem selected = this.fileListView.getSelectedValue();
+        if(selected == null){
+            this.actionButton.setVisible(false);
+        }else{
+            if(selected.getStatus() == DownloadStatus.ACTIVE){
+                this.actionButton.setContent("","Abort");
+            }if(selected.getStatus() == DownloadStatus.FAILED){
+                this.actionButton.setContent("","Retry");
+            }if(selected.getStatus() == DownloadStatus.COMPLETED){
+                this.actionButton.setContent("","Open");
+            }if(selected.getStatus() == DownloadStatus.IDLE){
+                this.actionButton.setContent("","Start");
+            }
 
+            this.actionButton.setVisible(true);
+            this.actionButton.setEnabled(true);
+        }
+    
         /* disable the clear list button for empty lists */
         if(this.list.hasNonActiveItems()){
+            this.clearButton.setEnabled(true);
+        }else{
             this.clearButton.setEnabled(false);
         }
+    }
+
+    public void updateList(){
+        this.data = this.list.getDownloadItemArray();
 
         int selectedIndex = this.fileListView.getSelectedIndex();
         this.fileListView.setListData(this.data);
@@ -119,6 +127,8 @@ public class DownloadWindow {
                 this.fileListView.setSelectedIndex(this.data.length-1);
             }
         }
+
+        this.handleSelectionChange();
     }
 
     public boolean isVisible(){
