@@ -10,7 +10,7 @@ Gophe is a modern, graphical and cross-platform client, or browser if you like, 
 
 Gophie is very eas to install as it comes as a portable Java application in a JAR-file. Simply download the file and execute it on your computer. All Gophie requires is a Java Runtime Environment. It was built to work also with older JRE version and currently only requires JVM version 8.
 
-- [Download Gophie for Windows, Mac and Linux (Java JAR-file)](build/Gophie.jar)
+- [Download Gophie for Windows, Mac and Linux (Java JAR-file)](https://github.com/jankammerath/gophie/raw/master/build/Gophie.jar)
 
 Double-click the file on Windows, Mac and Linux will automatically launch Gophie, if you have Java installed. If you do not have Java installed, you can get it from (java.com/download).
 
