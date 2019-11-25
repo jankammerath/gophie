@@ -6,8 +6,11 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
+/* import application config classes */
+import org.gophie.config.ConfigFile;
 import org.gophie.config.ConfigurationManager;
 import org.gophie.config.SystemUtility;
+
 /* import gopher network client */
 import org.gophie.net.*;
 import org.gophie.net.GopherItem.GopherItemType;
@@ -44,6 +47,9 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     private DownloadWindow downloadWindow;
 
     public MainWindow() {
+        /* get the config file */
+        ConfigFile configFile = ConfigurationManager.getConfigFile();
+
         /* create the instance of the client */
         this.gopherClient = new GopherClient();
 
@@ -63,9 +69,17 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.pageView.addListener(this);
 
         /* create the navigation bar */
-        this.navigationBar = new NavigationBar(NAVIGATIONBAR_BACKGROUND, NAVIGATIONBAR_TEXTCOLOR,
-                NAVIGATIONBAR_TEXTHOVERCOLOR);
-        this.navigationBar.setAddressText(DEFAULT_GOPHERHOME);
+        this.navigationBar = new NavigationBar(
+            /* get the appearance configuration from the config file */
+            configFile.getSetting("NAVIGATIONBAR_BACKGROUND", "Appearance", NAVIGATIONBAR_BACKGROUND), 
+            configFile.getSetting("NAVIGATIONBAR_TEXTCOLOR", "Appearance", NAVIGATIONBAR_TEXTCOLOR),
+            configFile.getSetting("NAVIGATIONBAR_TEXTHOVERCOLOR", "Appearance", NAVIGATIONBAR_TEXTHOVERCOLOR)
+        );
+        
+        /* set the gopher home as defined in the config
+            or use the default one if none is defined */
+        String gopherHome = configFile.getSetting("GOPHERHOME", "Navigation", DEFAULT_GOPHERHOME);
+        this.navigationBar.setAddressText(gopherHome);
 
         /* attach listener to navigation bar */
         this.navigationBar.addListener(this);
@@ -92,7 +106,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.frame.setVisible(true);
 
         /* fetch the default gopher home */
-        this.fetchGopherContent(DEFAULT_GOPHERHOME, GopherItemType.GOPHERMENU);
+        this.fetchGopherContent(gopherHome, GopherItemType.GOPHERMENU);
     }
 
     public void show() {
