@@ -3,6 +3,7 @@ package org.gophie.net;
 import java.util.ArrayList;
 import java.util.Base64;
 
+import org.gophie.config.ConfigurationManager;
 import org.gophie.net.GopherItem.GopherItemType;
 
 /**
@@ -112,7 +113,8 @@ public class GopherPage {
      */
     public String getSourceCode(){
         try{
-            return new String(this.sourceCode, GOPHERPAGE_DEFAULT_CHARSET);
+            return new String(this.sourceCode, ConfigurationManager.getConfigFile()
+                .getSetting("DEFAULT_CHARSET", "Network", GOPHERPAGE_DEFAULT_CHARSET));
         }catch(Exception ex){
             /* drop a quick info on the console when decoding fails */
             System.out.println("Failed to decode bytes of Gopher Page: " + ex.getMessage());
