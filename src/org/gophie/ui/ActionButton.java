@@ -13,7 +13,7 @@ public class ActionButton extends JPanel {
     /* private variables */
     private String inactiveTextColor = "";
     private String textColor = "";
-    private Boolean isEnabled = false;
+    private Boolean isEnabledButton = false;
 
     /* private components */
     private JLabel iconLabel;
@@ -57,19 +57,14 @@ public class ActionButton extends JPanel {
             public void mouseEntered(MouseEvent evt) {
                 /* only show hover effect when button is enabled */
                 if(isButtonEnabled() == true){
-                    System.out.println("Button is enabled");
-                    iconLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
                     iconLabel.setForeground(Color.decode(textColor));
-                    textLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
                     textLabel.setForeground(Color.decode(textColor));
                 }
             }
         
             /* revert back to the default cursor and default color */
             public void mouseExited(MouseEvent evt) {
-                iconLabel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 iconLabel.setForeground(Color.decode(inactiveTextColor));
-                textLabel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 textLabel.setForeground(Color.decode(inactiveTextColor));
             }
         });
@@ -100,11 +95,17 @@ public class ActionButton extends JPanel {
      * @param value
      * true means enabled, false is otherwise
      */
-    public void setEnabled(Boolean value){
-        this.isEnabled = value;
+    public void setButtonEnabled(Boolean value){
+        this.isEnabledButton = value;
+
+        if(value == true){
+            this.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        }else{
+            this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        }
     }
 
     public Boolean isButtonEnabled(){
-        return this.isEnabled;
+        return this.isEnabledButton;
     }
 }

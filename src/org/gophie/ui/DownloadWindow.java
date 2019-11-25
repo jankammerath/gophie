@@ -61,7 +61,7 @@ public class DownloadWindow {
 
         this.clearButton = new ActionButton("", "Clear List",
             ACTIONBAR_TEXTCOLOR,ACTIONBAR_INACTIVE_TEXTCOLOR);
-        this.clearButton.setEnabled(false);
+        this.clearButton.setButtonEnabled(false);
 
         this.actionButton = new ActionButton("", "Abort",
             ACTIONBAR_TEXTCOLOR,ACTIONBAR_INACTIVE_TEXTCOLOR);
@@ -103,14 +103,14 @@ public class DownloadWindow {
             }
 
             this.actionButton.setVisible(true);
-            this.actionButton.setEnabled(true);
+            this.actionButton.setButtonEnabled(true);
         }
     
         /* disable the clear list button for empty lists */
         if(this.list.hasNonActiveItems()){
-            this.clearButton.setEnabled(true);
+            this.clearButton.setButtonEnabled(true);
         }else{
-            this.clearButton.setEnabled(false);
+            this.clearButton.setButtonEnabled(false);
         }
     }
 
