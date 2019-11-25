@@ -2,10 +2,12 @@ package org.gophie.ui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.border.*;
 
 import org.gophie.config.ConfigurationManager;
+import org.gophie.ui.event.*;
 
 public class ActionButton extends JPanel {
     private static final long serialVersionUID = 1L;
@@ -14,6 +16,7 @@ public class ActionButton extends JPanel {
     private String inactiveTextColor = "";
     private String textColor = "";
     private Boolean isEnabledButton = false;
+    private ArrayList<ActionButtonEventListener> eventListenerList = new ArrayList<ActionButtonEventListener>();
 
     /* private components */
     private JLabel iconLabel;
@@ -48,9 +51,12 @@ public class ActionButton extends JPanel {
         this.add(textLabel,BorderLayout.EAST);
 
         this.addMouseListener(new MouseAdapter() {
-            /* notify the listeners of the forward move request */
+            /* notify the listeners of the button pressed event */
             public void mouseReleased(MouseEvent evt){
                 /* will be handled by another handler */
+                for(ActionButtonEventListener listener: eventListenerList){
+                    listener.buttonPressed();
+                }
             }
 
             /* set the color to the hover color and use the hand cursor */
@@ -68,6 +74,16 @@ public class ActionButton extends JPanel {
                 textLabel.setForeground(Color.decode(inactiveTextColor));
             }
         });
+    }
+
+    /**
+     * Adds a new event listener to this button
+     * 
+     * @param listener
+     * The event listener to add to this button
+     */
+    public void addEventListener(ActionButtonEventListener listener){
+        this.eventListenerList.add(listener);
     }
 
     public void setContent(String iconText, String text){
