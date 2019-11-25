@@ -3,13 +3,12 @@ package org.gophie.ui;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.border.*;
-
-import org.gophie.config.ConfigurationManager;
-import org.gophie.net.GopherItem;
-import org.gophie.ui.event.NavigationInputListener;
-
 import javax.swing.*;
 import java.util.*;
+
+import org.gophie.config.*;
+import org.gophie.net.GopherItem;
+import org.gophie.ui.event.NavigationInputListener;
 
 public class NavigationBar extends JPanel {
     /* constants */
@@ -44,6 +43,9 @@ public class NavigationBar extends JPanel {
     */
     public NavigationBar(String backgroundColor, String textColor, String textHoverColor){
         this.inputListenerList = new ArrayList<NavigationInputListener>();
+
+        /* get the config file for color scheme */
+        ConfigFile configFile = ConfigurationManager.getConfigFile();
 
         /* get the icon font from the configuration */
         this.iconFont = ConfigurationManager.getIconFont(19f);
@@ -148,7 +150,8 @@ public class NavigationBar extends JPanel {
 
         /* create the address input */
         this.addressInput = this.createAddressInput();
-        this.addressInput.setSelectionColor(Color.decode(this.selectionColor));
+        this.addressInput.setSelectionColor(Color.decode(configFile.getSetting
+            ("NAVIGATIONBAR_SELECTION_COLOR", "Appearance", this.selectionColor)));
         this.addressInput.setCaretColor(Color.decode(NavigationBar.textColorHex));
 
         /* create the download button and handle it */
