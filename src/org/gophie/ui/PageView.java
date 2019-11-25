@@ -14,7 +14,7 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
-import org.gophie.config.ConfigurationManager;
+import org.gophie.config.*;
 import org.gophie.net.GopherItem;
 import org.gophie.net.GopherPage;
 import org.gophie.net.GopherItem.GopherItemType;
@@ -35,6 +35,9 @@ public class PageView extends JScrollPane{
     private Font textFont;
     private String viewTextColor = "#ffffff";
     private String selectionColor = "#cf9a0c";
+
+    /* the config file with all settings */
+    private ConfigFile configFile;
 
     /* listeners for local events */
     private ArrayList<NavigationInputListener> inputListenerList;
@@ -176,11 +179,16 @@ public class PageView extends JScrollPane{
      * Configures the style of the view
      */
     private void configureStyle(){
+        /* get the color schemes from the config file */
+        String linkColor = this.configFile.getSetting("PAGE_LINK_COLOR", "Appearance", "#22c75c");
+        String lineNumberColor = this.configFile.getSetting("PAGE_LINENUMBER_COLOR", "Appearance", "#454545");
+
+        /* build up the stylesheet for the rendering */
         this.styleSheet = this.editorKit.getStyleSheet();
         this.styleSheet.addRule(".text { cursor:text; }");
-        this.styleSheet.addRule(".lineNumber { color: #454545; }");
+        this.styleSheet.addRule(".lineNumber { color: " + lineNumberColor + "; }");
         this.styleSheet.addRule(".itemIcon { font-family:Feather; font-size:10px; margin-left:5px; }"); 
-        this.styleSheet.addRule("a { text-decoration: none; color: #22c75c; }");  
+        this.styleSheet.addRule("a { text-decoration: none; color: " + linkColor + "; }");  
         this.styleSheet.addRule(".item { color: " + this.viewTextColor + "; }");  
     }
 
@@ -195,6 +203,9 @@ public class PageView extends JScrollPane{
      * 
      */
     public PageView(String textColor, String backgroundColor){
+        /* get the config file to fetch the settings */
+        this.configFile = ConfigurationManager.getConfigFile();
+
         /* instanciate input listener list */
         this.inputListenerList = new ArrayList<NavigationInputListener>();
 
@@ -209,7 +220,9 @@ public class PageView extends JScrollPane{
         this.viewPane.setBorder(new EmptyBorder(10,4,8,16));
         this.viewPane.setEditorKit(this.editorKit);
         this.viewPane.setCursor(new Cursor(Cursor.TEXT_CURSOR));
-        this.viewPane.setSelectionColor(Color.decode(this.selectionColor));
+        this.viewPane.setSelectionColor(Color.decode(this.configFile.getSetting
+                    ("PAGE_SELECTION_COLOR", "Appearance", this.selectionColor)));
+
         this.viewPane.setDragEnabled(false);
         this.getViewport().add(this.viewPane);
 
