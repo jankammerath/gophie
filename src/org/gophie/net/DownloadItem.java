@@ -203,12 +203,6 @@ public class DownloadItem implements GopherClientEventListener {
         /* set the finish time */
         this.finishTimeMillis = System.currentTimeMillis();
 
-        /* output the total duration */
-        System.out.println("Download completed (" 
-            + this.byteCountLoaded + " byte in " 
-            + ((this.finishTimeMillis-this.startTimeMillis)/1000) 
-            + " secs): " + this.item.getUrlString());
-
         /* check if file open was requested */
         if(this.openFile){ this.openFileOnDesktop(); }
 

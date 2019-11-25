@@ -55,8 +55,6 @@ public class GopherClient {
         this.thread = new Thread(new Runnable() { 
             public void run() { 
                 try{
-                    System.out.println("Downloading: " + url);
-
                     /* create the output file stream to write to */
                     OutputStream fileStream = new FileOutputStream(new File(targetFile));
 
@@ -184,8 +182,6 @@ public class GopherClient {
             /* string result with content */
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-            System.out.println("Fetching (" + contentType.toString() + "): " + url);
-
             /* parse the url and instanciate the client */
             GopherUrl gopherUrl = new GopherUrl(url);
             Socket gopherSocket = new Socket(gopherUrl.getHost(), gopherUrl.getPort());
@@ -230,7 +226,6 @@ public class GopherClient {
         }catch(Exception ex){
             /* handle the error properly and raise and event */
             System.out.println("GOPHER NETWORK EXCEPTION: " + ex.getMessage());
-            ex.printStackTrace();
             throw new GopherNetworkException(GopherError.EXCEPTION, ex.getMessage());
         }
 

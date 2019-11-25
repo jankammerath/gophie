@@ -190,8 +190,6 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                 if(option == 0){
                     /* store file to download directory and open */
                     String targetFileName = ConfigurationManager.getDownloadPath() + item.getFileName();
-                                    
-                    System.out.println("Download \"" + item.getUrlString() + "\" to \"" + targetFileName + "\"");
                     downloadList.add(new DownloadItem(item,targetFileName,true));
 
                     /* hide the message view */
@@ -205,7 +203,6 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                     if(targetFileName.equals(null) == false
                         && targetFileName.equals("nullnull") == false){
                         /* pass url and target file to download manager */
-                        System.out.println("Download \"" + item.getUrlString() + "\" to \"" + targetFileName + "\"");
                         downloadList.add(new DownloadItem(item,targetFileName,false));
                     }
 
