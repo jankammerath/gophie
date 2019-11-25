@@ -11,7 +11,7 @@ Gophie is very eas to install as it comes as a portable Java application in a JA
 
 - [Download Gophie for Windows, Mac and Linux (Java JAR-file)](https://github.com/jankammerath/gophie/raw/master/build/Gophie.jar)
 
-Double-click the file on Windows, Mac and Linux will automatically launch Gophie, if you have Java installed. If you do not have Java installed, you can get it from (java.com/download).
+Double-click the file on Windows, Mac and Linux will automatically launch Gophie, if you have Java installed. If you do not have Java installed, you can get it from [java.com/download](java.com/download).
 
 ## Building Gophie
 
