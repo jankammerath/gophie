@@ -19,6 +19,7 @@
 package org.gophie.ui;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -46,6 +47,7 @@ public class PageView extends JScrollPane{
     private static final long serialVersionUID = 1L;
 
     /* local variables and objects */
+    private PageMenu pageMenu;
     private JEditorPane viewPane;
     private JEditorPane headerPane;
     private HTMLEditorKit editorKit;
@@ -265,25 +267,55 @@ public class PageView extends JScrollPane{
         /* configure the style of the header and the view */
         this.configureStyle();
 
+        /* create the page menu and attach the popup trigger */
+        this.pageMenu = new PageMenu();
+        this.viewPane.add(this.pageMenu);
+        this.viewPane.addMouseListener(new MouseAdapter(){
+            /* handle the popup trigger for this document */
+            public void mouseReleased(MouseEvent evt){
+                /* get the trigger button for the menu from config
+                    (right mouse button id is usually #3) */
+                int menuTriggerButtonId = Integer.parseInt(configFile.getSetting
+                                ("MENU_MOUSE_TRIGGERBUTTON", "Navigation", "3"));
+                if(evt.getButton() == menuTriggerButtonId){
+                    /* trigger hit, show the page menu */
+                    pageMenu.show(viewPane, 
+                            (int)evt.getPoint().getX(), 
+                            (int)evt.getPoint().getY());
+                }
+            }
+        });
+
         /* report any links hits as address request to the listeners */
         this.viewPane.addHyperlinkListener(new HyperlinkListener() {
             public void hyperlinkUpdate(HyperlinkEvent e) {
-                if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                    /* get the url of that link */
-                    String urlValue = e.getDescription();
+                /* get the url of that link */
+                String urlValue = e.getDescription();
 
-                    /* determine the content type of the link target */
-                    GopherItem itemObject = null;
-                    if(currentPage != null){
-                        /* determine the content type of the gopher item
-                            by the definition of it in the gopher menu */
-                        for(GopherItem contentItem : currentPage.getItemList()){
-                            if(contentItem.getUrlString().equals(urlValue)){
-                                itemObject = contentItem;
-                            }
+                /* determine the content type of the link target */
+                GopherItem itemObject = null;
+                if(currentPage != null){
+                    /* determine the content type of the gopher item
+                        by the definition of it in the gopher menu */
+                    for(GopherItem contentItem : currentPage.getItemList()){
+                        if(contentItem.getUrlString().equals(urlValue)){
+                            itemObject = contentItem;
                         }
                     }
+                }
 
+                /* pass the active link item to the popup menu */
+                if(e.getEventType() == HyperlinkEvent.EventType.ENTERED){
+                    pageMenu.setLinkTarget(itemObject);
+                }
+
+                /* reset the link target for the popup menu */
+                if(e.getEventType() == HyperlinkEvent.EventType.EXITED){
+                    pageMenu.setLinkTarget(null);
+                }
+
+                /* handle link activation (aka left-click) */
+                if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                     /* execute the handler */
                     for (NavigationInputListener inputListener : inputListenerList){
                         inputListener.addressRequested(urlValue,itemObject);
