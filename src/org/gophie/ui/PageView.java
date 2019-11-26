@@ -300,7 +300,7 @@ public class PageView extends JScrollPane{
 
         if(code.equals("0")){ result = ""; }
         if(code.equals("1")){ result =  ""; } 
-        if(code.equals("2")){ result =  ""; } 
+        if(code.equals("2")){ result =  ""; } 
         if(code.equals("3")){ result =  ""; } 
         if(code.equals("4")){ result =  "";} 
         if(code.equals("5")){ result =  ""; } 

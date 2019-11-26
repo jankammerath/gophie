@@ -265,6 +265,10 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                     /* handle telnet session requests */
                     this.openTelnetSession(item.getHostName(), item.getPortNumber());
                     break;
+                case TELNET3270:
+                    /* handle telnet 3270 session requests */
+                    this.openTelnetSession(item.getHostName(), item.getPortNumber());
+                    break;
                 default:
                     /* check what type of link was requested and execute
                         the appropriate external application or use the
