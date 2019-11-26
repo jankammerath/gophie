@@ -31,11 +31,25 @@ If you're having trouble with Gophie, it is quite verbose when it comes to error
 
 ## Gopher Protocol Support
 
-Gophie aims to support the Gopher protocol from RFC 1436 entirely so that users have an unlimited graphical Gopher experience. The following provides an overview of which gopher items and part of the gopher protocol are supported.
+Gophie aims to support the Gopher protocol from RFC 1436 entirely so that users have an unlimited graphical Gopher experience. The following provides an overview of which gopher items and part of the gopher protocol are supported. HTML files are currently not being rendered, but redirects with *URL:* in the Gopher item selector are supported and the user is prompted to open his system's WWW browser.
 
-| Item Type        | Code | Support             | Description                              |
-| :--------------- |:-----| :-------------------|-----------------------------------------:|
-| Text file        | 0    | Fully supported     | Displayed inside Gophie                  |
-| Gopher menu      | 1    | Fully supported     | Rendered inside Gophie                   |
+| Item Type          | Code | Support             | Handling                                              |
+| :------------------|:-----| :-------------------|------------------------------------------------------:|
+| Text File          | 0    | Fully supported     | Displayed inside Gophie                               |
+| Gopher Menu        | 1    | Fully supported     | Rendered inside Gophie                                |
+| CCSO Nameserver    | 2    | Not yet supported   | **Awaiting implementation**                           |
+| Error Code         | 3    | Fully supported     | Rendered inside Gophie                                |
+| BinHex File        | 4    | Fully supported     | Allows user to download this file type                |
+| DOS File           | 5    | Fully supported     | Allows user to download this file type                |
+| UUEncoded File     | 6    | Fully supported     | Allows user to download this file type                |
+| Full Text-Search   | 7    | Fully supported     | Rendered inside Gophie                                |
+| Telnet             | 8    | Fully supported     | Executes "telnet://"-URI on the system                |
+| Binary File        | 9    | Fully supported     | Allows user to download this file type                |
+| GIF File           | g    | Fully supported     | Displayed inside Gophie                               |
+| Image File         | I    | Fully supported     | Displayed inside Gophie                               |
+| Telnet 3270        | T    | Depends on OS       | Treated the same as Telnet item                       |
+| HTML file          | h    | Partially supported | Opens WWW with browser, HTML displayed as text        |
+| Information        | i    | Fully supported     | Rendered inside Gophie                                |
+| Sound File         | s    | Fully supported     | Allows user to download this file type                |
 
 Protocol extensions are recommended extensions to RFC 1436 like Gopher+ or Gopher II are not supported by Gophie. The development of features focuses on implementing RFC 1436 and providing a seamsless experience for the user without sacrificing the proper implementation of the protocol specification.
