@@ -85,6 +85,9 @@ public class PageView extends JScrollPane{
         /* reset the header to just show nothing */
         this.headerPane.setText("");
 
+        /* set current page to the page menu */
+        this.pageMenu.setCurrentPage(content);
+
         /* check the type of content supplied */
         if(content.getContentType() == GopherItemType.IMAGE_FILE
             || content.getContentType() == GopherItemType.GIF_FILE){
@@ -154,6 +157,9 @@ public class PageView extends JScrollPane{
     public void showGopherPage(GopherPage page){
         /* set the current local gopher page */
         this.currentPage = page;
+
+        /* set current page to the page menu */
+        this.pageMenu.setCurrentPage(page);
 
         /* create the headers */
         String renderedHeader = "<table cellspacing=\"0\" cellpadding=\"2\">";
@@ -278,7 +284,11 @@ public class PageView extends JScrollPane{
                 int menuTriggerButtonId = Integer.parseInt(configFile.getSetting
                                 ("MENU_MOUSE_TRIGGERBUTTON", "Navigation", "3"));
                 if(evt.getButton() == menuTriggerButtonId){
-                    /* trigger hit, show the page menu */
+                    /* trigger hit, show the page menu and also
+                        make sure to pass the text selection before */
+                    pageMenu.setSelectedText(viewPane.getSelectedText());
+
+                    /* show the menu */
                     pageMenu.show(viewPane, 
                             (int)evt.getPoint().getX(), 
                             (int)evt.getPoint().getY());

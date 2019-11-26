@@ -19,7 +19,11 @@
 package org.gophie.ui;
 
 import java.awt.*;
+import java.awt.datatransfer.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import org.gophie.net.GopherPage;
 import org.gophie.net.GopherItem;
 
 public class PageMenu extends PopupMenu {
@@ -40,28 +44,92 @@ public class PageMenu extends PopupMenu {
 
     /* private variables */
     private String selectedText = "";
-    private GopherItem targetLink = null;
+    private GopherItem targetLink;
+    private GopherPage currentPage;
 
     /**
      * Constructs the page menu
      */
-    public PageMenu(){
+    public PageMenu() {
         super();
 
         /* instanciate the menu items */
         this.saveItem = new MenuItem("Save Page As...");
         this.saveTargetItem = new MenuItem("Save Link As...");
+
+        /* copies the url of the link target to the clipboard */
         this.copyTargetUrl = new MenuItem("Copy Link URL");
+        this.copyTargetUrl.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(targetLink != null){
+                    copyToClipboard(targetLink.getUrlString());
+                }
+            }       
+        });
+
+        /* copies the text of the active link to the clipboard */
         this.copyTargetText = new MenuItem("Copy Link Text");
+        this.copyTargetText.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(targetLink != null){
+                    copyToClipboard(targetLink.getUserDisplayString());
+                }
+            }       
+        });
+
+        /* copies the currently selected text to the clipboard */
         this.copySelectedItem = new MenuItem("Copy Selection");
+        this.copySelectedItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(selectedText.length() > 0){
+                    copyToClipboard(selectedText);
+                }
+            }       
+        });
+
         this.selectAllItem = new MenuItem("Select All");
         this.setHomeGopherItem = new MenuItem("Set As Home Gopher");
 
         /* create the copy menu with its sub-items */
         this.copyMenu = new PopupMenu("Copy");
+
+        /* copies the url of the current page to the clipboard */
         this.copyUrlItem = new MenuItem("URL");
+        this.copyUrlItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(currentPage != null){
+                    copyToClipboard(currentPage.getUrl().getUrlString());
+                }
+            }       
+        });
+
+        /* copies the text of the current page to the clipboard */
         this.copyTextItem = new MenuItem("Page Text");
+        this.copyTextItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(currentPage != null){
+                    copyToClipboard(currentPage.getTextContent());
+                }
+            }       
+        });
+
+        /* copies the source code of the page to the clipboard */
         this.copySourceItem = new MenuItem("Source Code");
+        this.copySourceItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(currentPage != null){
+                    copyToClipboard(currentPage.getSourceCode());
+                }
+            }       
+        });
+
+        /* add the items to the copy menu */
         this.copyMenu.add(this.copyUrlItem);
         this.copyMenu.add(this.copyTextItem);
         this.copyMenu.add(this.copySourceItem);
@@ -75,6 +143,27 @@ public class PageMenu extends PopupMenu {
         /* show menu item based on context */
         if(this.targetLink == null){
             /* we do not have a link target */
+            /* determine the text for the save item */
+            if(currentPage != null){
+                switch(currentPage.getContentType()){
+                    case GOPHERMENU:
+                        /* save gopher menu as */
+                        this.saveItem.setLabel("Save Page As ...");
+                        break;
+                    case IMAGE_FILE:
+                        /* save image file as */
+                        this.saveItem.setLabel("Save Image As ...");
+                        break;
+                    case GIF_FILE:
+                        /* save image file as */
+                        this.saveItem.setLabel("Save Image As ...");
+                        break;
+                    default:
+                        /* save file as is the generic label */
+                        this.saveItem.setLabel("Save File As ...");
+                        break;
+                }
+            }            
             this.add(this.saveItem);
             this.addSeparator();
 
@@ -84,7 +173,7 @@ public class PageMenu extends PopupMenu {
             }
             
             this.add(this.selectAllItem);
-            this.add(copyMenu);
+            this.add(copyMenu);                        
             this.addSeparator();
             this.add(this.setHomeGopherItem);            
         }else{
@@ -107,11 +196,28 @@ public class PageMenu extends PopupMenu {
         super.show(origin,x,y);
     }
 
+    private void copyToClipboard(String text){
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents((new StringSelection(text)), null);
+    }
+
+    public void setCurrentPage(GopherPage value){
+        /* reset the link target when a new page was loaded */
+        this.targetLink = null;
+
+        /* set the current page locally */
+        this.currentPage = value;
+    }
+
     public void setLinkTarget(GopherItem value){
         this.targetLink = value;
     }
 
     public void setSelectedText(String value){
-        this.selectedText = "";
+        if(value == null){
+            this.selectedText = "";
+        }else{
+            this.selectedText = value;
+        }
     }
 }
