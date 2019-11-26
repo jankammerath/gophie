@@ -279,6 +279,16 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                         }
                     });
                     break;
+                case CCSCO_NAMESERVER:
+                    /* CCSO is not part of the Gopher protocol, but its very own
+                        protocol and apart from floodgap.com's CCSO server there
+                        is hardly any server to test interaction with. The CCSO
+                        protocol can also be considered quite simple. A CCSO client
+                        would be a software of its own, but sources are even fewer
+                        than Gopher servers out there. Hence, Gophie allows the
+                        user to use CCSO servers throgh their Telnet client. */
+                    this.openTelnetSession(item.getHostName(), item.getPortNumber());
+                    break;
                 case TELNET:
                     /* handle telnet session requests */
                     this.openTelnetSession(item.getHostName(), item.getPortNumber());
