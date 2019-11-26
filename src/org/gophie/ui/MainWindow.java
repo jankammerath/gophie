@@ -261,6 +261,10 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                         }
                     });
                     break;
+                case TELNET:
+                    /* handle telnet session requests */
+                    this.openTelnetSession(item.getHostName(), item.getPortNumber());
+                    break;
                 default:
                     /* check what type of link was requested and execute
                         the appropriate external application or use the
@@ -280,6 +284,47 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                     break;
             }
         }
+    }
+
+    /**
+     * Prompts the user and opens the systems telnet client
+     * 
+     * @param hostName
+     * host name of the telnet server
+     * 
+     * @param portNumber
+     * port number of the telnet server
+     */
+    private void openTelnetSession(String hostName, int portNumber){
+        String confirmText = "Open a Telnet session with \"" + hostName + ":" + portNumber + "\"?";
+        String[] optionList = new String[]{"Open Telnet", "Dismiss"};
+        this.messageView.showConfirm(confirmText, optionList, new MessageViewListener(){
+            @Override
+            public void optionSelected(int option) {
+                if(option == 0){
+                    /* launch the system WWW browser */
+                    if (Desktop.isDesktopSupported() == true 
+                        && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                        try{
+                            /* launch the systems telnet client by creating
+                                a telnet URI and calling the systems protocol handler */
+                            String telnetUri = "telnet://" + hostName + ":" + portNumber;
+                            Desktop.getDesktop().browse(new URI(telnetUri));
+                        }catch(Exception ex){
+                            /* Error: cannot enjoy bloated javascript 
+                                    stuffed World Wide Web pages! */
+                            System.out.println("Unable to open system's "
+                                + "telnet client: " + ex.getMessage());
+                        }
+                    }
+                    /* hide the message view */
+                    messageView.setVisible(false);
+                }else{
+                    /* hide the message view */
+                    messageView.setVisible(false);
+                }
+            }
+        });
     }
 
     /**
