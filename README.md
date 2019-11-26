@@ -37,7 +37,7 @@ Gophie aims to support the Gopher protocol from RFC 1436 entirely so that users 
 | :------------------|:-----|:--------------------|:------------------------------------------------------|
 | Text File          | 0    | Fully supported     | Displayed inside Gophie                               |
 | Gopher Menu        | 1    | Fully supported     | Rendered inside Gophie                                |
-| CCSO Nameserver    | 2    | Not yet supported   | **Awaiting implementation**                           |
+| CCSO Nameserver    | 2    | Only with terminal  | Works like Telnet, user needs to operate CCSO         |
 | Error Code         | 3    | Fully supported     | Rendered inside Gophie                                |
 | BinHex File        | 4    | Fully supported     | Allows user to download this file type                |
 | DOS File           | 5    | Fully supported     | Allows user to download this file type                |
