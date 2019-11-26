@@ -28,3 +28,14 @@ java -jar Gophie.jar
 ```
 
 If you're having trouble with Gophie, it is quite verbose when it comes to errors and exceptions. It is recommended that you run Gophie through Java on the command line to get the exception and error message output it might report.
+
+## Gopher Protocol Support
+
+Gophie aims to support the Gopher protocol from RFC 1436 entirely so that users have an unlimited graphical Gopher experience. The following provides an overview of which gopher items and part of the gopher protocol are supported.
+
+| Item Type        | Code | Support             | Description                              |
+| :--------------- |:-----| :-------------------|-----------------------------------------:|
+| Text file        | 0    | Fully supported     | Displayed inside Gophie                  |
+| Gopher menu      | 1    | Fully supported     | Rendered inside Gophie                   |
+
+Protocol extensions are recommended extensions to RFC 1436 like Gopher+ or Gopher II are not supported by Gophie. The development of features focuses on implementing RFC 1436 and providing a seamsless experience for the user without sacrificing the proper implementation of the protocol specification.
