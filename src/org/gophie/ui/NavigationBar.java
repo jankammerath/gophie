@@ -120,17 +120,17 @@ public class NavigationBar extends JPanel {
         this.refreshButton.addMouseListener(new MouseAdapter() {
             /* initiate a refresh or cancel process */
             public void mouseReleased(MouseEvent evt){
-                /* request a stop or cancellation when currently loading */
-                if(isLoadingStatus == true){
-                    for (NavigationInputListener inputListener : inputListenerList){
-                        inputListener.stopRequested();
-                    }
-                }
-
                 /* request a refresh when currently in network idle */
                 if(isLoadingStatus == false){
                     for (NavigationInputListener inputListener : inputListenerList){
                         inputListener.refreshRequested();
+                    }
+                }
+
+                /* request a stop or cancellation when currently loading */
+                if(isLoadingStatus == true){
+                    for (NavigationInputListener inputListener : inputListenerList){
+                        inputListener.stopRequested();
                     }
                 }
             }
