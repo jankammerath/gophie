@@ -203,6 +203,7 @@ public class PageView extends JScrollPane{
 
         /* build up the stylesheet for the rendering */
         this.styleSheet = this.editorKit.getStyleSheet();
+        this.styleSheet.addRule("body { white-space:nowrap; }");
         this.styleSheet.addRule(".text { cursor:text; }");
         this.styleSheet.addRule(".lineNumber { color: " + lineNumberColor + "; }");
         this.styleSheet.addRule(".itemIcon { font-family:Feather; font-size:10px; margin-left:5px; }"); 
