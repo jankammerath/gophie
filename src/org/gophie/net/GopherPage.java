@@ -18,6 +18,7 @@
 
 package org.gophie.net;
 
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Base64;
 
@@ -178,6 +179,60 @@ public class GopherPage {
             /* just return the source code and remove the
                 line termination from the gopher server */
             return this.getSourceCode().replace("\r\n.\r\n", "");
+        }
+
+        return result;
+    }
+
+    /**
+     * Saves the contents of this 
+     * page to the defined file 
+     * 
+     * @param fileName
+     * The file to store content in
+     * 
+     * @return
+     * truen when successful, otherwise false
+     */
+    public Boolean saveAsFile(String fileName){
+        Boolean result = false;
+
+        try{
+            /* store this page content to file */
+            FileOutputStream fileOutput = new FileOutputStream(fileName);
+            fileOutput.write(this.getByteArray());
+            fileOutput.close();
+            result = true;
+        }catch(Exception ex){
+            /* output the exception info when file storage failed */
+            System.out.println("Failed to save page as file: " + ex.getMessage());
+            result = false;
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the filename for this page
+     * 
+     * @return
+     * The file name as string with extension
+     */
+    public String getFileName(){
+        String result = this.getUrl().getUrlString();
+
+        /* check if the file has a file name */
+        if(result.lastIndexOf("/") > 0){
+            /* use the file name provided in the url */
+            result = result.substring(result.lastIndexOf("/")+1);
+        }else{
+            /* just call the file index when none exists */
+            result = "index";
+        }
+
+        /* check if the file has an extension */
+        if(result.lastIndexOf(".") == -1){
+            result += "." + GopherItem.getDefaultFileExt(this.getContentType());
         }
 
         return result;

@@ -202,13 +202,33 @@ public class GopherItem{
      * Returns the file name of this items file
      * 
      * @return
-     * Filename as string with file title and extension
+     * Filename as string as defined in the url
      */
     public String getFileName(){
         String result = this.getUrlString();
 
         if(result.lastIndexOf("/") > 0){
             result = result.substring(result.lastIndexOf("/")+1);
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the file name and forces an extension
+     * on the filename. If the file does not have an
+     * extension attached, it will come with the 
+     * default extension for the file type
+     * 
+     * @return
+     * Filename as string with forced extension
+     */
+    public String getFileNameWithForcedExt(){
+        String result = this.getFileName();
+
+        /* check if the file has an extension */
+        if(result.lastIndexOf(".") == -1){
+            result += "." + GopherItem.getDefaultFileExt(this.getItemType());
         }
 
         return result;
@@ -250,6 +270,40 @@ public class GopherItem{
             /* this item is a binary file */
             result = true;
         }
+
+        return result;
+    }
+
+    /**
+     * Returns the default file extension for 
+     * the provided gopher item type
+     * 
+     * @param itemType
+     * the item type to 
+     * 
+     * @return
+     * File extension as string
+     */
+    public static String getDefaultFileExt(GopherItemType itemType){
+        String result = "dat";
+
+        if(itemType == GopherItemType.TEXTFILE){ result = "txt"; }
+        if(itemType == GopherItemType.GOPHERMENU){ result = "gophermap"; }
+        if(itemType == GopherItemType.CCSCO_NAMESERVER){ result = "ccso"; }
+        if(itemType == GopherItemType.ERRORCODE){ result = "error"; }
+        if(itemType == GopherItemType.BINHEX_FILE){ result = "hqx"; }
+        if(itemType == GopherItemType.DOS_FILE){ result = "dat"; }
+        if(itemType == GopherItemType.UUENCODED_FILE){ result = "uue"; }
+        if(itemType == GopherItemType.FULLTEXT_SEARCH){ result = "txt"; }
+        if(itemType == GopherItemType.TELNET){ result = "txt"; }
+        if(itemType == GopherItemType.BINARY_FILE){ result = "dat"; }
+        if(itemType == GopherItemType.MIRROR){ result = "txt"; }
+        if(itemType == GopherItemType.GIF_FILE){ result = "gif"; }
+        if(itemType == GopherItemType.IMAGE_FILE){ result = "jpg"; }
+        if(itemType == GopherItemType.TELNET3270){ result = "txt"; }
+        if(itemType == GopherItemType.HTML_FILE){ result = "htm"; }
+        if(itemType == GopherItemType.INFORMATION){ result = "txt"; }
+        if(itemType == GopherItemType.SOUND_FILE){ result = "wav"; }  
 
         return result;
     }

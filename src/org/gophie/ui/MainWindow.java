@@ -211,6 +211,18 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         }
     }
 
+    /**
+     * Prompts user to choose on how to handle the
+     * file and whether it should be saved only or
+     * immediately downloaded to user home and 
+     * executed or opened when finished
+     * 
+     * @param addressText
+     * the address (URL) to download
+     * 
+     * @param item
+     * the item to download
+     */
     public void confirmDownload(String addressText, GopherItem item){
         /* binary files are handled by the download manager */
         String confirmText = "Download \"" + item.getFileName() 
@@ -227,16 +239,8 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                     /* hide the message view */
                     messageView.setVisible(false);
                 }if(option == 1){
-                    /* let user select where to store the file */
-                    FileDialog fileDialog = new FileDialog(frame, "Download and save file", FileDialog.SAVE);
-                    fileDialog.setFile(item.getFileName());
-                    fileDialog.setVisible(true);
-                    String targetFileName = fileDialog.getDirectory() + fileDialog.getFile();
-                    if(targetFileName.equals(null) == false
-                        && targetFileName.equals("nullnull") == false){
-                        /* pass url and target file to download manager */
-                        downloadList.add(new DownloadItem(item,targetFileName,false));
-                    }
+                    /* initiate the download */
+                    initiateDownload(item);
 
                     /* hide the message view */
                     messageView.setVisible(false);
@@ -246,6 +250,27 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                 messageView.setVisible(false);
             }
         });
+    }
+
+    /**
+     * Prompts user to select the file destination
+     * and immediately executes the download of the
+     * file
+     * 
+     * @param fileItem
+     * the item to download
+     */
+    public void initiateDownload(GopherItem fileItem){
+        /* let user select where to store the file */
+        FileDialog fileDialog = new FileDialog(frame, "Download and save file", FileDialog.SAVE);
+        fileDialog.setFile(fileItem.getFileNameWithForcedExt());
+        fileDialog.setVisible(true);
+        String targetFileName = fileDialog.getDirectory() + fileDialog.getFile();
+        if(targetFileName.equals(null) == false
+            && targetFileName.equals("nullnull") == false){
+            /* pass url and target file to download manager */
+            downloadList.add(new DownloadItem(fileItem,targetFileName,false));
+        }        
     }
 
     /**
@@ -565,12 +590,21 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
     @Override
     public void itemDownloadRequested(GopherItem item) {
-        System.out.println("MainWindow.itemDownloadRequested(): " + item.getUrlString());
+        this.initiateDownload(item);
     }
 
     @Override
     public void pageSaveRequested(GopherPage page) {
-        System.out.println("MainWindow.pageSaveRequested(): " + page.getUrl().getUrlString());
+        /* let user select where to store the file */
+        FileDialog fileDialog = new FileDialog(frame, "Save current file", FileDialog.SAVE);
+        fileDialog.setFile(page.getFileName());
+        fileDialog.setVisible(true);
+        String targetFileName = fileDialog.getDirectory() + fileDialog.getFile();
+        if(targetFileName.equals(null) == false
+            && targetFileName.equals("nullnull") == false){
+            /* pass url and target file to download manager */
+            page.saveAsFile(targetFileName);
+        } 
     }
 
     @Override
