@@ -271,7 +271,13 @@ public class PageMenu extends PopupMenu {
                 this.add(this.selectAllItem);
                 this.add(copyMenu);
                 this.addSeparator();
-                this.add(this.setHomeGopherItem);  
+                
+                /* only allow setting as home gopher when
+                    this page is a gopher menu page */
+                if(currentPage.getContentType() == GopherItemType.GOPHERMENU){
+                    this.addSeparator();
+                    this.add(this.setHomeGopherItem);   
+                }   
             }else{
                 this.add(this.copyImageObject);
                 this.add(this.copyImageUrl);
@@ -288,8 +294,6 @@ public class PageMenu extends PopupMenu {
             }
 
             this.add(this.copyTargetText);
-            this.addSeparator();
-            this.add(this.setHomeGopherItem);      
         }
 
         /* call the base method */

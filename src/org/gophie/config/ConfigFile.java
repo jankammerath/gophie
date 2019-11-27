@@ -18,11 +18,16 @@
 
 package org.gophie.config;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * This class parses *.INI configuration files
@@ -101,6 +106,51 @@ public class ConfigFile {
             /* put name and value to the setting map */
             settingMap.put(name, value);
             this.config.put(section, settingMap);
+        }
+    }
+
+    /**
+     * Create the ini file text content
+     * to be written into the ini file
+     * 
+     * @return
+     * The text content of the ini file as string
+     */
+    private String getTextContent(){
+        String result = "";
+
+        /* iterate through the hash map and build the ini file content */
+        Iterator<Entry<String, HashMap<String, String>>> iterator = this.config.entrySet().iterator();
+        while (iterator.hasNext()) {
+            /* get the current entry */
+            Entry<String, HashMap<String, String>> pair = (Entry<String, HashMap<String, String>>)iterator.next();
+
+            /* set the section header first */
+            if(result.length() > 0) { result += "\n"; }
+            result += "[" + pair.getKey() + "]\n";
+
+            /* iterate through all the settings values */
+            Iterator<Entry<String, String>> settingIterator = pair.getValue().entrySet().iterator();
+            while (settingIterator.hasNext()) {
+                /* get the current setting for this section */
+                Entry<String, String> settingEntry = settingIterator.next();
+                result += settingEntry.getKey() + " = " + settingEntry.getValue() + "\n";
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Saves this config ini file to disk 
+     */
+    public void save(){
+        try{
+            BufferedWriter writer = new BufferedWriter(new FileWriter(this.fileName));
+            writer.write(this.getTextContent());
+            writer.close();
+        }catch(Exception ex){
+            System.out.println("Failed to write config file: " + ex.getMessage());
         }
     }
 

@@ -585,7 +585,10 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
     @Override
     public void setHomeGopherRequested(String url) {
-        System.out.println("MainWindow.setHomeGopherRequested(): " + url);
+        /* set the gopher home to the config file */
+        ConfigFile configFile = ConfigurationManager.getConfigFile();
+        configFile.setSetting("GOPHERHOME", url, "Navigation");
+        configFile.save();
     }
 
     @Override
