@@ -355,6 +355,7 @@ public class PageView extends JScrollPane{
     public void selectAllText(){
         /* just pass it onto the view */
         this.viewPane.selectAll();
+        this.viewPane.requestFocus();
     }
 
     /**
