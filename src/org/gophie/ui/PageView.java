@@ -38,6 +38,7 @@ import org.gophie.net.GopherItem;
 import org.gophie.net.GopherPage;
 import org.gophie.net.GopherItem.GopherItemType;
 import org.gophie.ui.event.NavigationInputListener;
+import org.gophie.ui.event.PageMenuEventListener;
 
 /**
  * The PageView component renders GopherPage objects
@@ -229,7 +230,7 @@ public class PageView extends JScrollPane{
      * The background color of the viewer
      * 
      */
-    public PageView(String textColor, String backgroundColor){
+    public PageView(MainWindow parent, String textColor, String backgroundColor){
         /* get the config file to fetch the settings */
         this.configFile = ConfigurationManager.getConfigFile();
 
@@ -275,6 +276,7 @@ public class PageView extends JScrollPane{
 
         /* create the page menu and attach the popup trigger */
         this.pageMenu = new PageMenu();
+        this.pageMenu.addPageMenuEventListener((PageMenuEventListener)parent);
         this.viewPane.add(this.pageMenu);
         this.viewPane.addMouseListener(new MouseAdapter(){
             /* handle the popup trigger for this document */
@@ -345,6 +347,14 @@ public class PageView extends JScrollPane{
         this.headerPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
         this.headerPane.setFont(this.textFont);
         this.headerPane.setHighlighter(null);
+    }
+
+    /**
+     * Selects all the items in the view
+     */
+    public void selectAllText(){
+        /* just pass it onto the view */
+        this.viewPane.selectAll();
     }
 
     /**

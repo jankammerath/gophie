@@ -37,7 +37,7 @@ import org.gophie.net.event.*;
 /* import ui event listeners */
 import org.gophie.ui.event.*;
 
-public class MainWindow implements NavigationInputListener, GopherClientEventListener {
+public class MainWindow implements NavigationInputListener, GopherClientEventListener, PageMenuEventListener {
     /* define the constants for the UI */
     public static final String APPLICATION_TITLE = "Gophie";
     public static final String NAVIGATIONBAR_BACKGROUND = "#248AC2";
@@ -83,7 +83,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         /* create the page view component object */
-        this.pageView = new PageView(VIEW_TEXTCOLOR, VIEW_BACKGROUND);
+        this.pageView = new PageView(this,VIEW_TEXTCOLOR, VIEW_BACKGROUND);
         this.pageView.addListener(this);
 
         /* create the navigation bar */
@@ -556,5 +556,26 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         }else{
             this.downloadWindow.show(this.frame);
         }
+    }
+
+    @Override
+    public void setHomeGopherRequested(String url) {
+        System.out.println("MainWindow.setHomeGopherRequested(): " + url);
+    }
+
+    @Override
+    public void itemDownloadRequested(GopherItem item) {
+        System.out.println("MainWindow.itemDownloadRequested(): " + item.getUrlString());
+    }
+
+    @Override
+    public void pageSaveRequested(GopherPage page) {
+        System.out.println("MainWindow.pageSaveRequested(): " + page.getUrl().getUrlString());
+    }
+
+    @Override
+    public void selectAllTextRequested() {
+        /* hand that one back to the page view */
+        this.pageView.selectAllText();
     }
 }

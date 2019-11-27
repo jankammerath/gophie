@@ -22,8 +22,17 @@ import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.*;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
+
+import org.gophie.ui.event.PageMenuEventListener;
+import org.gophie.ui.util.ImageTransferable;
 import org.gophie.net.GopherPage;
+import org.gophie.net.GopherItem.GopherItemType;
 import org.gophie.net.GopherItem;
 
 public class PageMenu extends PopupMenu {
@@ -34,6 +43,8 @@ public class PageMenu extends PopupMenu {
     private MenuItem saveTargetItem;
     private MenuItem copyTargetUrl;
     private MenuItem copyTargetText;
+    private MenuItem copyImageUrl;
+    private MenuItem copyImageObject;
     private MenuItem copySelectedItem;
     private MenuItem copyUrlItem;
     private MenuItem copyTextItem;
@@ -47,15 +58,40 @@ public class PageMenu extends PopupMenu {
     private GopherItem targetLink;
     private GopherPage currentPage;
 
+    /* list with event listeners to report to */
+    private ArrayList<PageMenuEventListener> eventListenerList = new ArrayList<PageMenuEventListener>();
+
     /**
      * Constructs the page menu
      */
     public PageMenu() {
         super();
 
-        /* instanciate the menu items */
+        /* request listeners to save the current page as file */
         this.saveItem = new MenuItem("Save Page As...");
+        this.saveItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(currentPage != null){
+                    for(PageMenuEventListener listener: eventListenerList){
+                        listener.pageSaveRequested(currentPage);
+                    }
+                }
+            }       
+        });
+
+        /* request listeners to download the file behind the link */
         this.saveTargetItem = new MenuItem("Save Link As...");
+        this.saveTargetItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(targetLink != null){
+                    for(PageMenuEventListener listener: eventListenerList){
+                        listener.itemDownloadRequested(targetLink);
+                    }
+                }
+            }       
+        });
 
         /* copies the url of the link target to the clipboard */
         this.copyTargetUrl = new MenuItem("Copy Link URL");
@@ -64,6 +100,28 @@ public class PageMenu extends PopupMenu {
             public void actionPerformed(ActionEvent e) {
                 if(targetLink != null){
                     copyToClipboard(targetLink.getUrlString());
+                }
+            }       
+        });
+
+        /* copies the url of an individually displayed image */
+        this.copyImageUrl = new MenuItem("Copy Image URL");
+        this.copyImageUrl.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(currentPage != null){
+                    copyToClipboard(currentPage.getUrl().getUrlString());
+                }
+            }       
+        });
+
+        /* copies the object of the image to clipboard */
+        this.copyImageObject = new MenuItem("Copy Image");
+        this.copyImageObject.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(currentPage != null){
+                    copyImageToClipboard();
                 }
             }       
         });
@@ -90,8 +148,29 @@ public class PageMenu extends PopupMenu {
             }       
         });
 
+        /* requests event listeners to select all text */
         this.selectAllItem = new MenuItem("Select All");
+        this.selectAllItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                for(PageMenuEventListener listener: eventListenerList){
+                    listener.selectAllTextRequested();
+                }
+            }       
+        });
+
+        /* requests listeners to set current page as home page */
         this.setHomeGopherItem = new MenuItem("Set As Home Gopher");
+        this.setHomeGopherItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(currentPage != null){
+                    for(PageMenuEventListener listener: eventListenerList){
+                        listener.setHomeGopherRequested(currentPage.getUrl().getUrlString());
+                    }
+                }
+            }       
+        });
 
         /* create the copy menu with its sub-items */
         this.copyMenu = new PopupMenu("Copy");
@@ -135,6 +214,16 @@ public class PageMenu extends PopupMenu {
         this.copyMenu.add(this.copySourceItem);
     }
 
+    /**
+     * Adds and event listener for page menu events
+     * 
+     * @param listener
+     * the listener to add to the list
+     */
+    public void addPageMenuEventListener(PageMenuEventListener listener){
+        this.eventListenerList.add(listener);
+    }
+
     @Override
     public void show(Component origin, int x, int y){
         /* remove all items */
@@ -143,6 +232,8 @@ public class PageMenu extends PopupMenu {
         /* show menu item based on context */
         if(this.targetLink == null){
             /* we do not have a link target */
+            Boolean isImage = false;
+
             /* determine the text for the save item */
             if(currentPage != null){
                 switch(currentPage.getContentType()){
@@ -152,11 +243,11 @@ public class PageMenu extends PopupMenu {
                         break;
                     case IMAGE_FILE:
                         /* save image file as */
-                        this.saveItem.setLabel("Save Image As ...");
+                        isImage = true;
                         break;
                     case GIF_FILE:
                         /* save image file as */
-                        this.saveItem.setLabel("Save Image As ...");
+                        isImage = true;
                         break;
                     default:
                         /* save file as is the generic label */
@@ -164,18 +255,27 @@ public class PageMenu extends PopupMenu {
                         break;
                 }
             }            
+
+            /* set the proper label for image files */
+            if(isImage == true){ this.saveItem.setLabel("Save Image As ..."); }
+
             this.add(this.saveItem);
             this.addSeparator();
 
             /* only show selection copy, when selection exists */
-            if(this.selectedText.length() > 0){
+            if(this.selectedText.length() > 0 && isImage == false){
                 this.add(this.copySelectedItem);
             }
-            
-            this.add(this.selectAllItem);
-            this.add(copyMenu);                        
-            this.addSeparator();
-            this.add(this.setHomeGopherItem);            
+
+            if(!isImage){ 
+                this.add(this.selectAllItem);
+                this.add(copyMenu);
+                this.addSeparator();
+                this.add(this.setHomeGopherItem);  
+            }else{
+                this.add(this.copyImageObject);
+                this.add(this.copyImageUrl);
+            }
         }else{
             /* we do have a link target */
             this.add(this.saveTargetItem);
@@ -196,6 +296,34 @@ public class PageMenu extends PopupMenu {
         super.show(origin,x,y);
     }
 
+    /**
+     * Copies the current image in the page to the clipboard
+     */
+    private void copyImageToClipboard(){
+        if(currentPage != null){
+            if(currentPage.getContentType() == GopherItemType.IMAGE_FILE
+                || currentPage.getContentType() == GopherItemType.GIF_FILE){
+                /* seems to be a valid image file, copy it to clipboard */
+                try{
+                    InputStream imageInputStream = new ByteArrayInputStream(currentPage.getByteArray());
+                    BufferedImage bufferedImage = ImageIO.read(imageInputStream);
+                    ImageTransferable transferImage = new ImageTransferable(bufferedImage);
+                    Clipboard clipBoard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                    clipBoard.setContents(transferImage, null);
+                }catch(Exception ex){
+                    /* output information about the clippy failure */
+                    System.out.println("Unable to copy image to clipboard: " + ex.getMessage());
+                }
+            }
+        }
+    }
+
+    /**
+     * Copies the text provided to the clipboard
+     * 
+     * @param text
+     * text to copy to the clipboard
+     */
     private void copyToClipboard(String text){
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         clipboard.setContents((new StringSelection(text)), null);
