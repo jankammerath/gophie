@@ -326,7 +326,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                     /* check what type of link was requested and execute
                         the appropriate external application or use the
                         default approach for gopher content */
-                        if(addressText.startsWith("https://") == true 
+                    if(addressText.startsWith("https://") == true 
                         || addressText.startsWith("http://") == true){
                         /* this is the World Wide Web using HTTP or HTTPS, 
                             so try to open the systems browser so that the
@@ -334,6 +334,9 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                             content with the fine-art of pop-up advertising
                             and animated display banners */
                         this.openWebContent(addressText,item.getItemType());
+                    }else if(addressText.startsWith("mailto:") == true){
+                        /* this is a mailto link */
+                        this.openEmailClient(addressText.replace("mailto:", ""));
                     }else{
                         /* just fetch as regular gopher content */
                         this.fetchGopherContent(addressText,item.getItemType());
@@ -341,6 +344,41 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                     break;
             }
         }
+    }
+
+    /**
+     * Opens the clients email address
+     * 
+     * @param emailAddress
+     * the email address to send an email to
+     */
+    private void openEmailClient(String emailAddress){
+        String confirmText = "Do you want to send an e-mail to \"" + emailAddress + "\"?";
+        String[] optionList = new String[]{"Create new e-mail", "Dismiss"};
+        this.messageView.showConfirm(confirmText, optionList, new MessageViewListener(){
+            @Override
+            public void optionSelected(int option) {
+                if(option == 0){
+                    /* launch the system email client */
+                    if (Desktop.isDesktopSupported() == true 
+                        && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                        try{
+                            /* launch the mailto handler of the system */
+                            Desktop.getDesktop().browse(new URI("mailto:"+emailAddress));
+                        }catch(Exception ex){
+                            /* Error: cannot open email client */
+                            System.out.println("Unable to open system's "
+                                + "email client: " + ex.getMessage());
+                        }
+                    }
+                    /* hide the message view */
+                    messageView.setVisible(false);
+                }else{
+                    /* hide the message view */
+                    messageView.setVisible(false);
+                }
+            }
+        });        
     }
 
     /**
@@ -368,8 +406,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                             String telnetUri = "telnet://" + hostName + ":" + portNumber;
                             Desktop.getDesktop().browse(new URI(telnetUri));
                         }catch(Exception ex){
-                            /* Error: cannot enjoy bloated javascript 
-                                    stuffed World Wide Web pages! */
+                            /* Error: cannot open telnet client */
                             System.out.println("Unable to open system's "
                                 + "telnet client: " + ex.getMessage());
                         }
