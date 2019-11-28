@@ -42,6 +42,7 @@ public class NavigationBar extends JPanel {
     private JLabel backButton;
     private JLabel forwardButton;
     private JLabel refreshButton;
+    private JLabel homeButton;
     private JTextField addressInput;
     private JLabel downloadButton;
     private JLabel statusIcon;
@@ -163,6 +164,30 @@ public class NavigationBar extends JPanel {
             public void mouseExited(MouseEvent evt) {
                 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 refreshButton.setForeground(Color.decode(NavigationBar.textColorHex));
+            }
+        });
+
+        /* create the refresh button and handle it */
+        this.homeButton = this.createButton("");
+        this.homeButton.addMouseListener(new MouseAdapter() {
+            /* request navigation to the home page */
+            public void mouseReleased(MouseEvent evt){
+                /* request to g to home gopher page */
+                for (NavigationInputListener inputListener : inputListenerList){
+                    inputListener.homeGopherRequested();
+                }                
+            }
+
+            /* set the color to the hover color and use the hand cursor */
+            public void mouseEntered(MouseEvent evt) {
+                setCursor(new Cursor(Cursor.HAND_CURSOR));
+                homeButton.setForeground(Color.decode(NavigationBar.textHoverColorHex));
+            }
+        
+            /* revert back to the default cursor and default color */
+            public void mouseExited(MouseEvent evt) {
+                setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                homeButton.setForeground(Color.decode(NavigationBar.textColorHex));
             }
         });
 

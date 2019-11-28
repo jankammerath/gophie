@@ -64,6 +64,9 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     private SearchInput searchInput;
     private DownloadWindow downloadWindow;
 
+    /**
+     * Constructs this main window
+     */
     public MainWindow() {
         /* get the config file */
         ConfigFile configFile = ConfigurationManager.getConfigFile();
@@ -127,6 +130,9 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.fetchGopherContent(gopherHome, GopherItemType.GOPHERMENU);
     }
 
+    /**
+     * Shows this main window
+     */
     public void show() {
         /* display the window */
         this.frame.pack();
@@ -486,6 +492,9 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         }        
     }
 
+    /**
+     * Navigates backwards in the history
+     */
     @Override
     public void backwardRequested() {
         /* set the new history position */
@@ -514,6 +523,9 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         }
     }
 
+    /**
+     * Refreshes the current page
+     */
     @Override
     public void refreshRequested() {
         /* get the current gopher page to reload it */
@@ -523,6 +535,9 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.fetchGopherContent(currentPage.getUrl().getUrlString(), currentPage.getContentType());
     }
 
+    /**
+     * Stops the current page load
+     */
     @Override
     public void stopRequested() {
         /* cancel any current operation */
@@ -568,6 +583,9 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.navigationBar.setIsLoading(false);
     }
 
+    /**
+     * Reports failed page load
+     */
     @Override
     public void pageLoadFailed(GopherError error, GopherUrl url) {
         /* show message for connection timeout */
@@ -603,6 +621,9 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.navigationBar.setIsLoading(false);
     }
 
+    /**
+     * Report progress on the page loading
+     */
     @Override
     public void progress(GopherUrl url, long byteCount) {
         /* report the download size in the title bar */
@@ -611,6 +632,9 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
             + " - " + APPLICATION_TITLE);
     }
 
+    /**
+     * Toggles the download window
+     */
     @Override
     public void showDownloadRequested() {
         if(this.downloadWindow.isVisible()){
@@ -620,6 +644,9 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         }
     }
 
+    /**
+     * Updates the gopher home with the provided url
+     */
     @Override
     public void setHomeGopherRequested(String url) {
         /* set the gopher home to the config file */
@@ -628,11 +655,17 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         configFile.save();
     }
 
+    /**
+     * initiates the download of the requested file
+     */
     @Override
     public void itemDownloadRequested(GopherItem item) {
         this.initiateDownload(item);
     }
 
+    /**
+     * Saves the current page to file
+     */
     @Override
     public void pageSaveRequested(GopherPage page) {
         /* let user select where to store the file */
@@ -647,9 +680,23 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         } 
     }
 
+    /**
+     * Selects all text on the current page
+     */
     @Override
     public void selectAllTextRequested() {
         /* hand that one back to the page view */
         this.pageView.selectAllText();
+    }
+
+    /**
+     * Sends the user to his gopher home
+     */
+    @Override
+    public void homeGopherRequested() {
+        ConfigFile configFile = ConfigurationManager.getConfigFile();
+        String homeGopherUrl = configFile.getSetting("GOPHERHOME", "Navigation", DEFAULT_GOPHERHOME);
+        this.fetchGopherContent(homeGopherUrl, GopherItemType.GOPHERMENU);
+        this.navigationBar.setAddressText(homeGopherUrl);
     }
 }
