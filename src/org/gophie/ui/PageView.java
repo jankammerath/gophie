@@ -210,12 +210,15 @@ public class PageView extends JScrollPane{
         String linkColor = this.configFile.getSetting("PAGE_LINK_COLOR", "Appearance", "#22c75c");
         String lineNumberColor = this.configFile.getSetting("PAGE_LINENUMBER_COLOR", "Appearance", "#454545");
 
+        /* get the configured icon font size */
+        String iconFontSize = ConfigurationManager.getConfigFile().getSetting("PAGE_ICON_FONT_SIZE", "Appearance", "10");
+
         /* build up the stylesheet for the rendering */
         this.styleSheet = this.editorKit.getStyleSheet();
         this.styleSheet.addRule("body { white-space:nowrap; }");
         this.styleSheet.addRule(".text { cursor:text; }");
         this.styleSheet.addRule(".lineNumber { color: " + lineNumberColor + "; }");
-        this.styleSheet.addRule(".itemIcon { font-family:Feather; font-size:10px; margin-left:5px; }"); 
+        this.styleSheet.addRule(".itemIcon { font-family:Feather; font-size:" + iconFontSize + "px; margin-left:5px; }"); 
         this.styleSheet.addRule("a { text-decoration: none; color: " + linkColor + "; }");  
         this.styleSheet.addRule(".item { color: " + this.viewTextColor + "; }");  
     }
@@ -337,7 +340,7 @@ public class PageView extends JScrollPane{
         });
 
         /* try to open the font for icon display */
-        this.textFont = ConfigurationManager.getConsoleFont(17f);
+        this.textFont = ConfigurationManager.getConsoleFont(ConfigurationManager.getConsoleFontSize(17f));
 
         /* apply the font settings to the view pane */
         this.viewPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);

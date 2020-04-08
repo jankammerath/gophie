@@ -134,7 +134,41 @@ public class ConfigurationManager{
      * The Font object
      */
     public static Font getConsoleFont(float size){
-        return ConfigurationManager.getFont("Inconsolata-Regular.ttf", size);
+        Font result;
+
+        /* get the font from the configuration file */
+        String fontName = ConfigurationManager.getConfigFile().getSetting("PAGE_FONT", "Appearance", "");
+        if(fontName.isEmpty()){
+            /* no font provided in config, use default */
+            result = ConfigurationManager.getFont("Inconsolata-Regular.ttf", size);
+        }else{
+            /* system font defined, use that one instead */
+            result = new Font(fontName, Font.PLAIN, (int)size);
+        }
+    
+        return result;
+    }
+
+    /**
+     * Returns the configured size for the console font
+     * 
+     * @param defaultSize
+     * the default size as a float
+     * 
+     * @return
+     * returns the configured size as float
+     */
+    public static float getConsoleFontSize(float defaultSize){
+        float result = defaultSize;
+
+        /* get the configured font size for the console font */
+        String fontSize = ConfigurationManager.getConfigFile().getSetting("PAGE_FONT_SIZE", "Appearance", "");
+        if(!fontSize.isEmpty()){
+            /* parse the font size and cast it to float */
+            result = (float)Integer.parseInt(fontSize);
+        }
+
+        return result;
     }
 
     /**
