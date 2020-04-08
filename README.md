@@ -29,6 +29,20 @@ java -jar Gophie.jar
 
 If you're having trouble with Gophie, it is quite verbose when it comes to errors and exceptions. It is recommended that you run Gophie through Java on the command line to get the exception and error message output it might report.
 
+## Configuration file
+
+A configuration file named "config.ini" resides in a directory named "Gophie" in the user's home directory. The configuration file [config.ini](https://github.com/jankammerath/gophie/blob/master/config/config.ini) allows to configure the GopherHome, default charset, various colors and the font for the page view or content area. The following table outlines the main configuration options. For a complete list, please have a look into the [config.ini](https://github.com/jankammerath/gophie/blob/master/config/config.ini) itself.
+
+| Section       | Setting             | Default value        | Description                              |
+| :-------------|:--------------------|:---------------------|:-----------------------------------------|
+| Navigation    | GOPHERHOME          | gopher.floodgap.com  | The GopherHome also known as "Homepage"  |
+| Network       | DEFAULT_CHARSET     | UTF-8                | Charset to use for text encoding         |
+| Appearance    | PAGE_FONT           | Inconsolata (Custom) | Font for the text in the page view       |
+| Appearance    | PAGE_FONT_SIZE      | 17                   | Font size for the text in the page view  |
+| Appearance    | PAGE_ICON_FONT_SIZE | 10                   | Size of the icon font in the page view   |
+
+All configuration settings are part of a corresponding configuration section. When changing the configuration file, please ensure to put the settings into the section the setting belongs to.
+
 ## Gopher Protocol Support
 
 Gophie aims to support the Gopher protocol from RFC 1436 entirely so that users have an unlimited graphical Gopher experience. The following provides an overview of which gopher items and part of the gopher protocol are supported. HTML files are currently not being rendered, but redirects with *URL:* in the Gopher item selector are supported and the user is prompted to open his system's WWW browser.
