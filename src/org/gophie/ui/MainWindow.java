@@ -86,7 +86,9 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         /* create the page view component object */
-        this.pageView = new PageView(this,VIEW_TEXTCOLOR, VIEW_BACKGROUND);
+        this.pageView = new PageView(this,
+            configFile.getSetting("VIEW_TEXTCOLOR", "Appearance", VIEW_TEXTCOLOR), 
+            configFile.getSetting("VIEW_BACKGROUND", "Appearance", VIEW_BACKGROUND));
         this.pageView.addListener(this);
 
         /* create the navigation bar */
