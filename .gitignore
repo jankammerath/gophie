@@ -1,2 +1,6 @@
 class/
 *.swp
+release/
+package/
+deploy/
+*.icns
