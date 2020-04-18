@@ -9,9 +9,24 @@ Gophe is a modern, graphical and cross-platform client, or browser if you like, 
 
 Gophie is very eas to install as it comes as a portable Java application in a JAR-file. Simply download the file and execute it on your computer. **All Gophie requires is a Java Runtime Environment**. It was built to work also with older JRE version and currently only requires JVM version 8.
 
-- [Download Gophie for Windows, Mac and Linux (Java JAR-file)](https://github.com/jankammerath/gophie/raw/master/build/Gophie.jar)
+- [Download the Windows, Mac or Linux release](https://github.com/jankammerath/gophie/releases/)
+- [Download the latest Java JAR-file](https://github.com/jankammerath/gophie/raw/master/build/Gophie.jar)
 
-Double-click the file on Windows, Mac and Linux will automatically launch Gophie, if you have Java installed. If you do not have Java installed, you can get it from [java.com/download](java.com/download).
+### Install on Windows
+
+The Windows package is a ZIP-file that includes the EXE-file for Windows with Gophie. You can extract the ZIP-file and put it somewhere in a folder, on a USB stick, network drive or wherever you would like to store the EXE-file. Note that you still need the Java JRE from [java.com/download](java.com/download) to run the Gophie.exe file.
+
+### Install on Mac
+
+The Mac package for Gophie is a DMG-file. You can download the DMG-file, open it and drag the Gophie icon into the application folder. Afterwards Gophie will be available in your applications and you can launch it from wherever you wish.
+
+### Install on Linux
+
+The Linux package is simply a tar.gz-archive with an executable. The executable is a bash-file with the JAR-file attached. You can either double-click the executable named "Gophie" or launch it from the terminal of your choice. If you wish to have Gophie present wherever you need it in your system, just copy the executable file into your "/usr/bin"-directory.
+
+### Using the JAR-file itself
+
+Double-click the Java JAR-file on Windows, Mac and Linux will automatically launch Gophie, if you have Java installed. If you do not have Java installed, you can get it from [java.com/download](java.com/download).
 
 ## Building Gophie
 
