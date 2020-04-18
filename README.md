@@ -82,3 +82,7 @@ Gophie aims to support the Gopher protocol from RFC 1436 entirely so that users 
 | Sound File         | s    | Fully supported     | Allows user to download this file type                |
 
 Protocol extensions are recommended extensions to RFC 1436 like Gopher+ or Gopher II are not supported by Gophie. The development of features focuses on implementing RFC 1436 and providing a seamsless experience for the user without sacrificing the proper implementation of the protocol specification.
+
+## Help and FAQs
+
+If you need help with Gophie you can of course open an issue here on GitHib in case you really found a bug. You can also find me on freenode as @derjanni. If you have trouble using Gophie, kindly check this README file first before asking any questions. I will track all the questions and update the README file accordingly.
