@@ -20,6 +20,8 @@ package org.gophie.config;
 
 import java.awt.*;
 import java.io.*;
+
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 public class ConfigurationManager{
@@ -98,6 +100,30 @@ public class ConfigurationManager{
      */
     public static Font getIconFont(float size){
         return ConfigurationManager.getFont("Feather.ttf", size);
+    }
+
+    /**
+     * Returns an image from the resources
+     * 
+     * @param name
+     * Name of the image file from the resources
+     * 
+     * @return
+     * The image object from the resources
+     */
+    public static Image getImage(String name){
+        Image result = null;
+
+        try{
+            /* try to open the font for icon display */
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            result = ImageIO.read(classLoader.getResource("res/"+name));            
+        }catch(Exception ex){
+            /* Ouchie, this will look bad... */
+            System.out.println("Unable to load the image icon (" + name + "): " + ex.getMessage());
+        }
+
+        return result;
     }
 
     /**

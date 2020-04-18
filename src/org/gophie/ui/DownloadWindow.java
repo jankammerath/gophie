@@ -51,6 +51,7 @@ public class DownloadWindow implements ActionButtonEventListener {
         this.frame.setTitle("Downloads");
         this.frame.setMinimumSize(new Dimension(400, 200));
         this.frame.setLayout(new BorderLayout());
+        this.frame.setIconImage(ConfigurationManager.getImage("icon.png"));
 
         this.fileListView = new JList<DownloadItem>();
         this.fileListView.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

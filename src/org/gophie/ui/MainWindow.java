@@ -84,6 +84,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.frame = new JFrame(APPLICATION_TITLE);
         this.frame.setMinimumSize(new Dimension(800, 600));
         this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.frame.setIconImage(ConfigurationManager.getImage("icon.png"));
 
         /* create the page view component object */
         this.pageView = new PageView(this,
