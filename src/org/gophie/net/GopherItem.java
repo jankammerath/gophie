@@ -201,6 +201,7 @@ public class GopherItem{
                 if(this.portNumber != 70){
                     result += ":" + this.portNumber;
                 }
+                result += "/" + this.itemTypeCode; /* append item type */
 
                 /* add the slash to the URL if not present */
                 if(!this.selector.startsWith("/")){
@@ -363,23 +364,28 @@ public class GopherItem{
      */
     private void setItemTypeByCode(String code){
         this.itemTypeCode = code;
-        if(code.equals("0")){ this.itemType = GopherItemType.TEXTFILE; }
-        if(code.equals("1")){ this.itemType = GopherItemType.GOPHERMENU; } 
-        if(code.equals("2")){ this.itemType = GopherItemType.CCSCO_NAMESERVER; } 
-        if(code.equals("3")){ this.itemType = GopherItemType.ERRORCODE; } 
-        if(code.equals("4")){ this.itemType = GopherItemType.BINHEX_FILE; } 
-        if(code.equals("5")){ this.itemType = GopherItemType.DOS_FILE; } 
-        if(code.equals("6")){ this.itemType = GopherItemType.UUENCODED_FILE; } 
-        if(code.equals("7")){ this.itemType = GopherItemType.FULLTEXT_SEARCH; } 
-        if(code.equals("8")){ this.itemType = GopherItemType.TELNET; } 
-        if(code.equals("9")){ this.itemType = GopherItemType.BINARY_FILE; } 
-        if(code.equals("+")){ this.itemType = GopherItemType.MIRROR; } 
-        if(code.equals("g")){ this.itemType = GopherItemType.GIF_FILE; } 
-        if(code.equals("I")){ this.itemType = GopherItemType.IMAGE_FILE; } 
-        if(code.equals("T")){ this.itemType = GopherItemType.TELNET3270; } 
-        if(code.equals("h")){ this.itemType = GopherItemType.HTML_FILE; }         
-        if(code.equals("i")){ this.itemType = GopherItemType.INFORMATION; } 
-        if(code.equals("s")){ this.itemType = GopherItemType.SOUND_FILE; } 
-        if(code.equals("?")){ this.itemType = GopherItemType.UNKNOWN; } 
+        this.itemType = getItemTypeByCode(code);
     }
+
+	public static GopherItemType getItemTypeByCode(String code) {
+		if(code.equals("0")){ return GopherItemType.TEXTFILE; }
+        if(code.equals("1")){ return GopherItemType.GOPHERMENU; } 
+        if(code.equals("2")){ return GopherItemType.CCSCO_NAMESERVER; } 
+        if(code.equals("3")){ return GopherItemType.ERRORCODE; } 
+        if(code.equals("4")){ return GopherItemType.BINHEX_FILE; } 
+        if(code.equals("5")){ return GopherItemType.DOS_FILE; } 
+        if(code.equals("6")){ return GopherItemType.UUENCODED_FILE; } 
+        if(code.equals("7")){ return GopherItemType.FULLTEXT_SEARCH; } 
+        if(code.equals("8")){ return GopherItemType.TELNET; } 
+        if(code.equals("9")){ return GopherItemType.BINARY_FILE; } 
+        if(code.equals("+")){ return GopherItemType.MIRROR; } 
+        if(code.equals("g")){ return GopherItemType.GIF_FILE; } 
+        if(code.equals("I")){ return GopherItemType.IMAGE_FILE; } 
+        if(code.equals("T")){ return GopherItemType.TELNET3270; } 
+        if(code.equals("h")){ return GopherItemType.HTML_FILE; }         
+        if(code.equals("i")){ return GopherItemType.INFORMATION; } 
+        if(code.equals("s")){ return GopherItemType.SOUND_FILE; } 
+        if(code.equals("?")){ return GopherItemType.UNKNOWN; }
+		return GopherItemType.UNKNOWN;
+	}
 }

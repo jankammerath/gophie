@@ -20,11 +20,16 @@ package org.gophie.net;
 
 public class GopherUrl {
     private int port = 70;
+    private String typeCode = "1";
     private String host;
     private String selector;
 
     public int getPort(){
         return this.port;
+    }
+    
+    public String getTypeCode(){
+        return this.typeCode;
     }
 
     public String getHost(){
@@ -41,6 +46,8 @@ public class GopherUrl {
         if(this.port != 70){
             result += ":" + this.port;
         }
+        
+        result += "/" + this.typeCode;
 
         if(this.selector.length() > 0){
             if(this.selector.startsWith("/")){
@@ -49,7 +56,7 @@ public class GopherUrl {
                 result += "/" + this.selector;
             }
         }
-
+        
         return result;
     }
     
@@ -69,6 +76,15 @@ public class GopherUrl {
         }else{
             /* no selector present, set the default to empty string */
             this.selector = "";
+        }
+        
+        /* check for an item type and move it from the selector */
+        String typesplit[]= this.selector.split("/");
+        if(typesplit.length > 1) {
+	        if(typesplit[1].length() == 1) {
+	        	this.typeCode = typesplit[1];
+	        	this.selector = this.selector.substring(2);
+	        }
         }
 
         /* check if a port number was provided */

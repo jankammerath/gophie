@@ -59,7 +59,9 @@ public class GopherPage {
         this.sourceCode = gopherPageSourceCode;
         this.url = gopherPageUrl;
         this.itemList = new ArrayList<GopherItem>();
-
+        
+        gopherContentType = GopherItem.getItemTypeByCode(this.url.getTypeCode());
+        
         if(gopherContentType == GopherItemType.GOPHERMENU 
             || gopherContentType == GopherItemType.UNKNOWN){
             /* try to parse it as a gopher menu */
