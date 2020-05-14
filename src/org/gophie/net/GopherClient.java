@@ -254,7 +254,8 @@ public class GopherClient {
                     as it seems to be getting very big and might be a 
                     binary or media file */
                 if((contentType == GopherItemType.GOPHERMENU 
-                    || contentType == GopherItemType.TEXTFILE)
+                    || contentType == GopherItemType.TEXTFILE
+                    || contentType == GopherItemType.UNKNOWN)
                     && totalByteCount > 200000){
                     /* check if the data is text content or not */
                     FileSignature largeSignature = new FileSignature(data);

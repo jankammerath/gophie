@@ -80,6 +80,9 @@ public class FileSignature {
         /* get the hex representation of this file */
         String fileHex = this.getContentHexString();
 
+        /* set the content type to text if it is text */
+        if(this.isTextContent()){ result = FileSignatureType.TEXT; }
+
         /* check if the content contains an image signature */
         for(int i=0; i<FileSignature.IMAGE_SIGNATURE_LIST.length; i++){
             /* get the current signature and check if the content begins with it */
@@ -102,9 +105,6 @@ public class FileSignature {
 
         /* check if the file is an mpeg4 container */
         if(fileHex.substring(8, 16).equals("66747970")){ result = FileSignatureType.MEDIA; }
-
-        /* set the content type to text if it is text */
-        if(this.isTextContent()){ result = FileSignatureType.TEXT; }
 
         return result;
     }
