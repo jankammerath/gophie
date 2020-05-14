@@ -23,18 +23,78 @@ public class GopherUrl {
     private String host;
     private String selector;
 
+    /**
+     * Returns the port number of this address
+     * 
+     * @return
+     * the port number as integer
+     */
     public int getPort(){
         return this.port;
     }
 
+    /**
+     * Returns the host name of this url
+     * 
+     * @return
+     * host name as string
+     */
     public String getHost(){
         return this.host;
     }
 
+    /**
+     * Returns the selector of this url
+     * 
+     * @return
+     * the selector as string
+     */
     public String getSelector(){
         return this.selector;
     }
 
+    /**
+     * Returns the type prefix from the url, if any
+     * 
+     * @return
+     * type prefix (gopher item type code) as string
+     */
+    public String getTypePrefix(){
+        String result = null;
+
+        if(this.selector.length() >= 3){
+            if(this.selector.charAt(0) == '/' && this.selector.charAt(2) == '/'){
+                String itemTypeCode = this.selector.substring(1,2);
+                if(itemTypeCode.matches("[0-9\\+gIThis\\?]")){
+                    result = itemTypeCode;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Determines whether the url's selector 
+     * has a type prefix for the gopher item
+     * @return
+     */
+    public boolean hasTypePrefix(){
+        boolean result = false;
+
+        if(this.getTypePrefix() != null){
+            result = true;
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the url string for this url
+     * 
+     * @return
+     * the url as string
+     */
     public String getUrlString(){
         String result = this.host;
 
@@ -42,18 +102,31 @@ public class GopherUrl {
             result += ":" + this.port;
         }
 
+        /* strip the item type prefix as it is just
+            for presentation and technically not part
+            of the url itself */
+        String selectorValue = this.selector;
+        if(this.hasTypePrefix()){
+            selectorValue = selectorValue.substring(3);
+        }
+
         if(this.selector.length() > 0){
             if(this.selector.startsWith("/")){
-                result += this.selector;
+                result += selectorValue;
             }else{
-                result += "/" + this.selector;
+                result += "/" + selectorValue;
             }
         }
 
         return result;
     }
     
-    /* constructs the object and parses the url */
+    /**
+     * constructs the object and parses the url
+     * 
+     * @param url
+     * the url to parse as string
+     */
     public GopherUrl(String url){
         this.host = url;
 

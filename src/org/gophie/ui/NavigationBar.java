@@ -26,6 +26,7 @@ import java.util.*;
 
 import org.gophie.config.*;
 import org.gophie.net.GopherItem;
+import org.gophie.net.GopherUrl;
 import org.gophie.ui.event.NavigationInputListener;
 
 public class NavigationBar extends JPanel {
@@ -301,7 +302,25 @@ public class NavigationBar extends JPanel {
                 String requestedAddress = inputField.getText().trim();
                 if(requestedAddress.length() > 0){
                     for (NavigationInputListener inputListener : inputListenerList){
-                        inputListener.addressRequested(requestedAddress, new GopherItem());
+                        /* define the request address */
+                        String address = requestedAddress;
+                        GopherItem item = new GopherItem();
+
+                        /* check if selector prefixes are enabled */
+                        ConfigFile configFile = ConfigurationManager.getConfigFile();
+                        String prefixEnabled = configFile.getSetting("SELECTOR_PREFIX_ENABLED", "Navigation", "yes");
+                        if(prefixEnabled.equals("yes")){
+                            /* create the gopher url object for the address */
+                            GopherUrl gopherUrl = new GopherUrl(address);
+                            if(gopherUrl.hasTypePrefix()){
+                                /* set the type of the item with the prefix */
+                                item = new GopherItem(gopherUrl.getTypePrefix(),gopherUrl);
+                                address = gopherUrl.getUrlString();
+                            }
+                        }
+
+                        /* call the listener for the request */
+                        inputListener.addressRequested(address, item);
                     }
                 }
             }

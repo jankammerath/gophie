@@ -110,7 +110,7 @@ public class GopherItem{
      * The gopher item type the url represents
      * 
      * @param url
-     * The url of the goper item
+     * The url of the gopher item
      */
     public GopherItem(GopherItemType type, GopherUrl url){
         this.itemType = type;
@@ -118,6 +118,23 @@ public class GopherItem{
         this.portNumber = url.getPort();
         this.selector = url.getSelector();
         this.userDisplayString = this.getFileName();
+    }
+
+    /**
+     * Constructs a gopher item from a url with a defined type code
+     * 
+     * @param itemTypeCode
+     * the type code of the gopher item as string
+     * 
+     * @param url
+     * the url of the gopher item
+     */
+    public GopherItem(String itemTypeCode, GopherUrl url){
+        this.setItemTypeByCode(itemTypeCode);
+        this.hostName = url.getHost();
+        this.portNumber = url.getPort();
+        this.selector = url.getSelector();
+        this.userDisplayString = this.getFileName();        
     }
 
     /**
@@ -356,6 +373,41 @@ public class GopherItem{
     }
 
     /**
+     * Gets the enum value for the item type
+     * provided as a parameter
+     * 
+     * @param code
+     * the gopher item type as string
+     * 
+     * @return
+     * the gopher item type enum
+     */
+    private GopherItemType getItemTypeByCode(String code){
+        GopherItemType result = GopherItemType.UNKNOWN;
+
+        if(code.equals("0")){ result = GopherItemType.TEXTFILE; }
+        if(code.equals("1")){ result = GopherItemType.GOPHERMENU; } 
+        if(code.equals("2")){ result = GopherItemType.CCSCO_NAMESERVER; } 
+        if(code.equals("3")){ result = GopherItemType.ERRORCODE; } 
+        if(code.equals("4")){ result = GopherItemType.BINHEX_FILE; } 
+        if(code.equals("5")){ result = GopherItemType.DOS_FILE; } 
+        if(code.equals("6")){ result = GopherItemType.UUENCODED_FILE; } 
+        if(code.equals("7")){ result = GopherItemType.FULLTEXT_SEARCH; } 
+        if(code.equals("8")){ result = GopherItemType.TELNET; } 
+        if(code.equals("9")){ result = GopherItemType.BINARY_FILE; } 
+        if(code.equals("+")){ result = GopherItemType.MIRROR; } 
+        if(code.equals("g")){ result = GopherItemType.GIF_FILE; } 
+        if(code.equals("I")){ result = GopherItemType.IMAGE_FILE; } 
+        if(code.equals("T")){ result = GopherItemType.TELNET3270; } 
+        if(code.equals("h")){ result = GopherItemType.HTML_FILE; }         
+        if(code.equals("i")){ result = GopherItemType.INFORMATION; } 
+        if(code.equals("s")){ result = GopherItemType.SOUND_FILE; } 
+        if(code.equals("?")){ result = GopherItemType.UNKNOWN; } 
+
+        return result;
+    }
+
+    /**
      * Sets the code locally and also the proper type enum value 
      * 
      * @param code
@@ -363,23 +415,6 @@ public class GopherItem{
      */
     private void setItemTypeByCode(String code){
         this.itemTypeCode = code;
-        if(code.equals("0")){ this.itemType = GopherItemType.TEXTFILE; }
-        if(code.equals("1")){ this.itemType = GopherItemType.GOPHERMENU; } 
-        if(code.equals("2")){ this.itemType = GopherItemType.CCSCO_NAMESERVER; } 
-        if(code.equals("3")){ this.itemType = GopherItemType.ERRORCODE; } 
-        if(code.equals("4")){ this.itemType = GopherItemType.BINHEX_FILE; } 
-        if(code.equals("5")){ this.itemType = GopherItemType.DOS_FILE; } 
-        if(code.equals("6")){ this.itemType = GopherItemType.UUENCODED_FILE; } 
-        if(code.equals("7")){ this.itemType = GopherItemType.FULLTEXT_SEARCH; } 
-        if(code.equals("8")){ this.itemType = GopherItemType.TELNET; } 
-        if(code.equals("9")){ this.itemType = GopherItemType.BINARY_FILE; } 
-        if(code.equals("+")){ this.itemType = GopherItemType.MIRROR; } 
-        if(code.equals("g")){ this.itemType = GopherItemType.GIF_FILE; } 
-        if(code.equals("I")){ this.itemType = GopherItemType.IMAGE_FILE; } 
-        if(code.equals("T")){ this.itemType = GopherItemType.TELNET3270; } 
-        if(code.equals("h")){ this.itemType = GopherItemType.HTML_FILE; }         
-        if(code.equals("i")){ this.itemType = GopherItemType.INFORMATION; } 
-        if(code.equals("s")){ this.itemType = GopherItemType.SOUND_FILE; } 
-        if(code.equals("?")){ this.itemType = GopherItemType.UNKNOWN; } 
+        this.itemType = this.getItemTypeByCode(code);
     }
 }
