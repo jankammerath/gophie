@@ -17,7 +17,6 @@
 */
 
 package org.gophie.io;
-import org.gophie.net.GopherItem.GopherItemType;
 
 /**
  * This class allows to identify a file type by the file signature head in the
@@ -26,22 +25,35 @@ import org.gophie.net.GopherItem.GopherItemType;
 public class FileSignature {
     /* enum with the available file types */
     public enum FileSignatureType {
-        /* image file signature types */
-        IMAGE_JPEG, IMAGE_PNG, IMAGE_GIF, IMAGE_BMP, IMAGE_ICO, IMAGE_TIFF,
-
-        /* audio and video file signature types */
-        MEDIA_AIFF, MEDIA_OGG, MEDIA_MP3, MEDIA_WAV, MEDIA_AVI, MEDIA_FLAC, 
-        MEDIA_MKV, MEDA_MPEG, MEDIA_MINI,
-
-        /* gopher map and text file signature types */
-        TEXT_GOPHERMAP, TEXT_PLAIN,
-
-        /* defines any other file type */
-        BINARY_UNKNOWN
+        BINARY, IMAGE, MEDIA, TEXT
     }
 
     /* hex values for converting byte array to hex representation */
     private static final char[] HEX_VALUE = "0123456789ABCDEF".toCharArray();
+
+    /* file signatures for popular image files */
+    private static final String[] IMAGE_SIGNATURE_LIST = new String[]{
+        /* GIF */               "47494638",
+        /* JPEG */              "FFD8FF", 
+        /* JPEG 2000 */         "0000000C6A502020",
+        /* PNG */               "89504E470D0A1A0A",
+        /* BMP */               "424D",
+        /* ICO */               "00000100",
+        /* TIFF */              "492049", "49492A00", "4D4D002A", "4D4D002B"
+    };
+
+    /* file signatures for popular media files */
+    private static final String[] MEDIA_SIGNATURE_LIST = new String[]{
+        /* AIFF */              "464F524D",
+        /* OGG */               "4F676753",
+        /* MP3 */               "494433", "FFFB", "FFF3", "FFF2",
+        /* WAV, AVI */          "52494646",
+        /* MIDI */              "4D546864",
+        /* FLAC */              "664C6143",
+        /* MKV */               "1A45DFA3",
+        /* MPEG */              "000001BA", "000001B3",
+        /* WMV, WMA, ASF */     "3026B2758E66CF11", "A6D900AA0062CE6C"
+    };
 
     /* content for this file signature */
     private byte[] content;
@@ -61,13 +73,73 @@ public class FileSignature {
      * @return
      * FileSignatureType-enum defining the type
      */
-    public GopherItemType getSignatureItemType(){
+    public FileSignatureType getSignatureItemType(){
         /* default binary file is the default return value */
-        GopherItemType result = GopherItemType.BINARY_FILE;
+        FileSignatureType result = FileSignatureType.BINARY;
 
         /* get the hex representation of this file */
         String fileHex = this.getContentHexString();
-        System.out.println(fileHex);
+
+        /* check if the content contains an image signature */
+        for(int i=0; i<FileSignature.IMAGE_SIGNATURE_LIST.length; i++){
+            /* get the current signature and check if the content begins with it */
+            String imageSignature = FileSignature.IMAGE_SIGNATURE_LIST[i];
+            if(fileHex.substring(0, imageSignature.length()).equals(imageSignature)){
+                /* this file is an image */
+                result = FileSignatureType.IMAGE;
+            }
+        }
+
+        /* check if the content contains a media file signature */
+        for(int m=0; m<FileSignature.MEDIA_SIGNATURE_LIST.length; m++){
+            /* get the current signature and check if the content begins with it */
+            String mediaSignature = FileSignature.MEDIA_SIGNATURE_LIST[m];
+            if(fileHex.substring(0, mediaSignature.length()).equals(mediaSignature)){
+                /* this file is an image */
+                result = FileSignatureType.MEDIA;
+            }
+        }
+
+        /* check if the file is an mpeg4 container */
+        if(fileHex.substring(8, 16).equals("66747970")){ result = FileSignatureType.MEDIA; }
+
+        /* set the content type to text if it is text */
+        if(this.isTextContent()){ result = FileSignatureType.TEXT; }
+
+        return result;
+    }
+
+    /**
+     * Determines whether the provided content is 
+     * human readable text such as a text file or 
+     * a gophermap and returns true when it is
+     * 
+     * @return
+     */
+    private boolean isTextContent(){
+        boolean result = false;
+
+        /* get the hex string for the byte content */
+        String fileHex = this.getContentHexString();
+        
+        /* cound the alphanumeric chars in the data */
+        double alphaNumCharCount = 0;
+        double totalCharCount = 0;
+        for(int c=0; c<fileHex.length(); c = c + 2){
+            int charCode = Integer.parseInt(fileHex.substring(c, c+2),16);
+            if(charCode != 0){
+                if((charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122)){
+                    alphaNumCharCount++;
+                }
+                totalCharCount++;
+            }
+        }
+
+        /* when the percentage is greater than 20, it is highly likely
+            that this is a text document. Images and binary files mainly 
+            have 15% or less text coverage. */
+        double percent = ((alphaNumCharCount / totalCharCount)*100);
+        if(percent >= 20){ result = true; }
 
         return result;
     }

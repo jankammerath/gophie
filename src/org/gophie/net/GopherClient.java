@@ -25,6 +25,8 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 
+import org.gophie.io.FileSignature;
+import org.gophie.io.FileSignature.FileSignatureType;
 import org.gophie.net.GopherItem.GopherItemType;
 import org.gophie.net.event.*;
 
@@ -214,6 +216,22 @@ public class GopherClient {
 
             /* read byte by byte to be able to report progress */
             while ((read = socketStream.read(data, 0, data.length)) != -1) {
+                /* check the file signature from the first bytes received */
+                if(totalByteCount == 0){
+                    FileSignature fileSignature = new FileSignature(data);
+                    FileSignatureType fileType = fileSignature.getSignatureItemType();
+                    if(fileType == FileSignatureType.IMAGE && 
+                        (contentType != GopherItemType.IMAGE_FILE 
+                        || contentType != GopherItemType.GIF_FILE)){
+                        /* when the detected file signature is an image, but
+                            the original gopher item type defined is neither
+                            a generic image nor a gif file, simply fix the
+                            item type by setting it to an image */
+                        contentType = GopherItemType.IMAGE_FILE;
+                    }
+                }
+
+                /* write the data to the buffer */
                 buffer.write(data, 0, read);
 
                 /* calculate total bytes read */
