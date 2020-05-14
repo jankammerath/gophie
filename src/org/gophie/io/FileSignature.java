@@ -25,7 +25,7 @@ package org.gophie.io;
 public class FileSignature {
     /* enum with the available file types */
     public enum FileSignatureType {
-        BINARY, IMAGE, MEDIA, TEXT
+        UNKNOWN, BINARY, IMAGE, MEDIA, TEXT
     }
 
     /* hex values for converting byte array to hex representation */
@@ -117,8 +117,8 @@ public class FileSignature {
      * FileSignatureType-enum defining the type
      */
     public FileSignatureType getSignatureItemType(){
-        /* default binary file is the default return value */
-        FileSignatureType result = FileSignatureType.BINARY;
+        /* unknown file type by default */
+        FileSignatureType result = FileSignatureType.UNKNOWN;
 
         /* get the hex representation of this file */
         String fileHex = this.getContentHexString();

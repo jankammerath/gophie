@@ -247,6 +247,9 @@ public class GopherClient {
                             through the download method. this method
                             is for fetching gopher pages, text and images */
                         throw new GopherItemTypeException(url, contentType, GopherItemType.SOUND_FILE);
+                    }if(fileType == FileSignatureType.BINARY){
+                        /* same goes for binary files */
+                        throw new GopherItemTypeException(url, contentType, GopherItemType.BINARY_FILE);
                     }
                 }
 
