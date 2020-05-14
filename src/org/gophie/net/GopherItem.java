@@ -104,6 +104,23 @@ public class GopherItem{
     }
 
     /**
+     * Constructs a gopher item from a url with a defined type
+     * 
+     * @param type
+     * The gopher item type the url represents
+     * 
+     * @param url
+     * The url of the goper item
+     */
+    public GopherItem(GopherItemType type, GopherUrl url){
+        this.itemType = type;
+        this.hostName = url.getHost();
+        this.portNumber = url.getPort();
+        this.selector = url.getSelector();
+        this.userDisplayString = this.getFileName();
+    }
+
+    /**
      * Constructs an empty gopher item
      * 
      */

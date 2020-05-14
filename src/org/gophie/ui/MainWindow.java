@@ -702,4 +702,18 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.fetchGopherContent(homeGopherUrl, GopherItemType.GOPHERMENU);
         this.navigationBar.setAddressText(homeGopherUrl);
     }
+
+    /**
+     * Handles item mismatch events when the content detection
+     * during the page loading process detects a different file
+     * type than the one requested.
+     */
+    @Override
+    public void pageLoadItemMismatch(GopherItemType requested, GopherItemType detected, GopherUrl url) {
+        /* reset the navigation bar status */
+        this.navigationBar.setIsLoading(false);
+
+        /* binary files are handled by the download manager */
+        this.confirmDownload(url.getUrlString(),(new GopherItem(detected,url)));
+    }
 }

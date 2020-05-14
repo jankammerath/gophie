@@ -169,6 +169,12 @@ public class GopherClient {
                             eventListener.pageLoadFailed(ex.getGopherErrorType(),new GopherUrl(url));
                         } 
                     }
+                }catch(GopherItemTypeException ex){
+                    if(!clientObject.isCancelled()){
+                        if (eventListener != null) { 
+                            eventListener.pageLoadItemMismatch(ex.getRequestedType(),ex.getDetectedType(),new GopherUrl(url));
+                        } 
+                    }
                 }
             } 
         });
@@ -178,7 +184,10 @@ public class GopherClient {
     }
 
     /**
-     * Fetches a gopher page
+     * Fetches a gopher page. Do not use this method for fetching
+     * anything other than gopher menus or pages, text files or images
+     * as this method will throw an exception if it encounters media 
+     * files or other binary data.
      * 
      * @param url
      * the url of the page to fetch
@@ -195,7 +204,7 @@ public class GopherClient {
      * @throws GopherNetworkException
      * Exception with network information
      */
-    public GopherPage fetch(String url, GopherItemType contentType, GopherClientEventListener eventListener) throws GopherNetworkException {
+    public GopherPage fetch(String url, GopherItemType contentType, GopherClientEventListener eventListener) throws GopherNetworkException, GopherItemTypeException {
         GopherPage result = null;
 
         try{
@@ -220,6 +229,8 @@ public class GopherClient {
                 if(totalByteCount == 0){
                     FileSignature fileSignature = new FileSignature(data);
                     FileSignatureType fileType = fileSignature.getSignatureItemType();
+
+                    /* check if the actual file type is an image */
                     if(fileType == FileSignatureType.IMAGE && 
                         (contentType != GopherItemType.IMAGE_FILE 
                         || contentType != GopherItemType.GIF_FILE)){
@@ -228,6 +239,31 @@ public class GopherClient {
                             a generic image nor a gif file, simply fix the
                             item type by setting it to an image */
                         contentType = GopherItemType.IMAGE_FILE;
+                    }
+
+                    /* check if the actual file is a media file */
+                    if(fileType == FileSignatureType.MEDIA){
+                        /* fetching media files needs to be done
+                            through the download method. this method
+                            is for fetching gopher pages, text and images */
+                        throw new GopherItemTypeException(url, contentType, GopherItemType.SOUND_FILE);
+                    }
+                }
+
+                /* verify that the provided file is actually a text file
+                    as it seems to be getting very big and might be a 
+                    binary or media file */
+                if((contentType == GopherItemType.GOPHERMENU 
+                    || contentType == GopherItemType.TEXTFILE)
+                    && totalByteCount > 200000){
+                    /* check if the data is text content or not */
+                    FileSignature largeSignature = new FileSignature(data);
+                    FileSignatureType largeType = largeSignature.getSignatureItemType();
+
+                    /* throw an exception when this file does not match */
+                    if(largeType != FileSignatureType.TEXT){
+                        /* throw the item type exception and define this as a generic binary */
+                        throw new GopherItemTypeException(url, contentType, GopherItemType.BINARY_FILE);
                     }
                 }
 
@@ -259,6 +295,9 @@ public class GopherClient {
         }catch(SocketTimeoutException ex){
             /* handle host not found exception */
             throw new GopherNetworkException(GopherError.CONNECTION_TIMEOUT, ex.getMessage());
+        }catch(GopherItemTypeException ex){
+            /* just pass through the item type exception */
+            throw ex;
         }catch(Exception ex){
             /* handle the error properly and raise and event */
             System.out.println("GOPHER NETWORK EXCEPTION: " + ex.getMessage());
