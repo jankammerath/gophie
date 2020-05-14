@@ -55,6 +55,20 @@ public class FileSignature {
         /* WMV, WMA, ASF */     "3026B2758E66CF11", "A6D900AA0062CE6C"
     };
 
+    /* file signatures for popular binary files like zip, rar, tar, hqx */
+    private static final String[] BINARY_SIGNATURE_LIST = new String[]{
+        /* RAR */               "526172211A07",
+        /* ZIP family */        "504B0304", "504B0506", "504B0708", "504B4C495445",
+                                "504B537058", "504B0506", "504B0708", "57696E5A6970", 
+                                "504B030414000100", "377ABCAF271C", "FD377A585A00",
+                                "04224D18", "4D534346", "535A444488F02733",
+        /* HQX */               "28546869",
+        /* TAR */               "7573746172003030", "7573746172202000",
+        /* GZIP */              "1F8B",
+        /* DMG */               "7801730D626260",
+        /* SIT */               "5349542100", "5374756666497420"
+    };
+
     /* content for this file signature */
     private byte[] content;
 
@@ -65,6 +79,35 @@ public class FileSignature {
      */
     public FileSignature(byte[] fileContent){
         this.content = fileContent;
+    }
+
+    /**
+     * Verifies if the provided hex string matches
+     * any of the signatures from the list provided
+     * 
+     * @param list
+     * String array with file signature list
+     * 
+     * @param hex
+     * the hex string of the byte content
+     * 
+     * @return
+     * true when any signature matches, otherwise false
+     */
+    private boolean hasSignature(String[] list, String hex){
+        boolean result = false;
+
+        /* check if the content contains an image signature */
+        for(int i=0; i<list.length; i++){
+            /* get the current signature and check if the content begins with it */
+            String signature = list[i];
+            if(hex.substring(0, signature.length()).equals(signature)){
+                /* this file is an image */
+                result = true;
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -84,23 +127,18 @@ public class FileSignature {
         if(this.isTextContent()){ result = FileSignatureType.TEXT; }
 
         /* check if the content contains an image signature */
-        for(int i=0; i<FileSignature.IMAGE_SIGNATURE_LIST.length; i++){
-            /* get the current signature and check if the content begins with it */
-            String imageSignature = FileSignature.IMAGE_SIGNATURE_LIST[i];
-            if(fileHex.substring(0, imageSignature.length()).equals(imageSignature)){
-                /* this file is an image */
-                result = FileSignatureType.IMAGE;
-            }
+        if(this.hasSignature(FileSignature.IMAGE_SIGNATURE_LIST, fileHex)){
+            result = FileSignatureType.IMAGE;
         }
 
         /* check if the content contains a media file signature */
-        for(int m=0; m<FileSignature.MEDIA_SIGNATURE_LIST.length; m++){
-            /* get the current signature and check if the content begins with it */
-            String mediaSignature = FileSignature.MEDIA_SIGNATURE_LIST[m];
-            if(fileHex.substring(0, mediaSignature.length()).equals(mediaSignature)){
-                /* this file is an image */
-                result = FileSignatureType.MEDIA;
-            }
+        if(this.hasSignature(FileSignature.MEDIA_SIGNATURE_LIST, fileHex)){
+            result = FileSignatureType.MEDIA;
+        }
+
+        /* check if the content contains a binary file signature */
+        if(this.hasSignature(FileSignature.BINARY_SIGNATURE_LIST, fileHex)){
+            result = FileSignatureType.BINARY;
         }
 
         /* check if the file is an mpeg4 container */
