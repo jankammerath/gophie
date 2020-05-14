@@ -373,6 +373,39 @@ public class GopherItem{
     }
 
     /**
+     * Returns the type code for an item type
+     * 
+     * @param itemType
+     * the item type enum value
+     * 
+     * @return
+     * the singe-character type code as string 
+     */
+    public static String getTypeCode(GopherItemType itemType){
+        String result = "?";
+
+        if(itemType == GopherItemType.TEXTFILE){ result = "0"; }
+        if(itemType == GopherItemType.GOPHERMENU){ result = "1"; }
+        if(itemType == GopherItemType.CCSCO_NAMESERVER){ result = "2"; }
+        if(itemType == GopherItemType.ERRORCODE){ result = "3"; }
+        if(itemType == GopherItemType.BINHEX_FILE){ result = "4"; }
+        if(itemType == GopherItemType.DOS_FILE){ result = "5"; }
+        if(itemType == GopherItemType.UUENCODED_FILE){ result = "6"; }
+        if(itemType == GopherItemType.FULLTEXT_SEARCH){ result = "7"; }
+        if(itemType == GopherItemType.TELNET){ result = "8"; }
+        if(itemType == GopherItemType.BINARY_FILE){ result = "9"; }
+        if(itemType == GopherItemType.MIRROR){ result = "+"; }
+        if(itemType == GopherItemType.GIF_FILE){ result = "g"; }
+        if(itemType == GopherItemType.IMAGE_FILE){ result = "I"; }
+        if(itemType == GopherItemType.TELNET3270){ result = "T"; }
+        if(itemType == GopherItemType.HTML_FILE){ result = "h"; }
+        if(itemType == GopherItemType.INFORMATION){ result = "i"; }
+        if(itemType == GopherItemType.SOUND_FILE){ result = "s"; }   
+
+        return result;
+    }
+
+    /**
      * Gets the enum value for the item type
      * provided as a parameter
      * 

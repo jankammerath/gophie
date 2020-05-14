@@ -564,7 +564,23 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
             + " - " + APPLICATION_TITLE);
 
         /* update the address text with the loaded page */
-        this.navigationBar.setAddressText(result.getUrl().getUrlString());
+        String address = result.getUrl().getUrlString();
+
+        /* check if selector prefixes are enabled */
+        ConfigFile configFile = ConfigurationManager.getConfigFile();
+        String prefixEnabled = configFile.getSetting("SELECTOR_PREFIX_ENABLED", "Navigation", "yes");
+        if(prefixEnabled.equals("yes")){
+            /* create the gopher url object for the address */
+            GopherUrl prefixUrl = result.getUrl();
+            prefixUrl.setTypePrefix(GopherItem.getTypeCode(result.getContentType()));
+
+            /* set the address to the url with the prefix */
+            address = prefixUrl.getUrlString(true);
+        }
+
+        /* set the navigation bar to the new address */
+        this.navigationBar.setAddressText(address);
+
 
         /* detect the content type and determine how the handle it */
         if(result.getContentType() == GopherItemType.GOPHERMENU){

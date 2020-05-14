@@ -90,12 +90,63 @@ public class GopherUrl {
     }
 
     /**
+     * Returns the url string for this url 
+     * without type prefix, if present
+     * 
+     * @return
+     * the url string of the url
+     */
+    public String getUrlString(){
+        return this.getUrlString(false);
+    }
+
+    /**
+     * Sets or overwrites the type prefix for this url
+     * 
+     * @param prefix
+     * single-character type prefix as string
+     */
+    public void setTypePrefix(String prefix){
+        /* check if a type prefix is present already */
+        if(this.hasTypePrefix()){
+            /* replace the existing type prefix with the new one */
+            if(this.selector.length() > 3){
+                if(this.selector.substring(3,4).equals("/")){
+                    this.selector = "/" + prefix + this.selector.substring(3);
+                }else{
+                    this.selector = "/" + prefix + "/" + this.selector.substring(3);
+                }
+            }else{
+                /* only the prefix is in the selector, replace it */
+                this.selector = "/" + prefix + "/";
+            }
+        }else{
+            if(this.selector.length() > 0){
+                /* just add the type prefix to the selector */
+                if(this.selector.substring(0,1).equals("/")){
+                    this.selector = "/" + prefix + this.selector;
+                }else{
+                    this.selector = "/" + prefix + "/" + this.selector;
+                }
+            }else{
+                /* just set the prefix as the selector */
+                this.selector = "/" + prefix + "/";
+            }
+        }
+    }
+
+    /**
      * Returns the url string for this url
+     * 
+     * @param includeTypePrefix
+     * when true will include the type prefix in the 
+     * url, if any is available. If none is available, 
+     * this parameter has no effect.
      * 
      * @return
      * the url as string
      */
-    public String getUrlString(){
+    public String getUrlString(boolean includeTypePrefix){
         String result = this.host;
 
         if(this.port != 70){
@@ -107,7 +158,10 @@ public class GopherUrl {
             of the url itself */
         String selectorValue = this.selector;
         if(this.hasTypePrefix()){
-            selectorValue = selectorValue.substring(3);
+            if(!includeTypePrefix){
+                /* remove the type prefix if requested */
+                selectorValue = selectorValue.substring(3);
+            }
         }
 
         if(this.selector.length() > 0){
