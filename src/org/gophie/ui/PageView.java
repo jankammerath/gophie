@@ -160,7 +160,7 @@ public class PageView extends JScrollPane{
      */
     private String formatItemTitle(String text){
         return text.replace("&","&amp;").replace(" ", "&nbsp;")
-                .replace("<", "&lt;").replace(">", "&gt");
+                .replace("<", "&lt;").replace(">", "&gt;");
     }
 
     /**
@@ -197,8 +197,7 @@ public class PageView extends JScrollPane{
             /* build links for anything other than infromation items */
             if(!item.getItemTypeCode().equals("i")){ 
                 /* create the link for this item */
-                itemCode = "<a href=\"" + item.getUrlString() + "\">" 
-                         + this.formatItemTitle(itemTitle) + "</a>";
+                itemCode = "<a href=\"" + item.getUrlString() + "\">" + itemTitle + "</a>";
             }
 
             /* create the item table row */
