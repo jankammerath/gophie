@@ -46,7 +46,7 @@ public class FileSignature {
     private static final String[] MEDIA_SIGNATURE_LIST = new String[]{
         /* AIFF */              "464F524D",
         /* OGG */               "4F676753",
-        /* MP3 */               "494433", "FFFB", "FFF3", "FFF2",
+        /* MP3 */               "494433", "FFFA", "FFFB", "FFF3", "FFF2",
         /* WAV, AVI */          "52494646",
         /* MIDI */              "4D546864",
         /* FLAC */              "664C6143",
