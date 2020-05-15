@@ -123,11 +123,9 @@ public class PageView extends JScrollPane{
                     int width = bufferedImage.getWidth();
                     int height = bufferedImage.getHeight();
                     if(width > 800){
-                        height = (height / (width / 800));
-                        imageHtmlCode = "<img src=\"" + tempImageFile.toURI()
-                                        .toURL().toExternalForm() + "\" "
-                                        + "width=\"800\" height=" + height + "\""
-                                        + "/>";
+                        double calcHeight = (((double)height) / (((double)width) / 800));
+                        imageHtmlCode = "<img src=\"" + tempImageFile.toURI().toURL().toExternalForm() + "\" "
+                                        + "width=800 height=" + (int)calcHeight + " />";
                     }
                 }catch(Exception ex){
                     /* failed to determine image size */
