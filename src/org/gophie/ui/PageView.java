@@ -150,6 +150,20 @@ public class PageView extends JScrollPane{
     }
 
     /**
+     * Formats the item's title for display in the view
+     * 
+     * @param text
+     * the text with unencoded elements
+     * 
+     * @return
+     * the text with html-encoded entities
+     */
+    private String formatItemTitle(String text){
+        return text.replace("&","&amp;").replace(" ", "&nbsp;")
+                .replace("<", "&lt;").replace(">", "&gt");
+    }
+
+    /**
      * Initialises rendering of a GopherPage on this view
      * 
      * @param page
@@ -175,13 +189,16 @@ public class PageView extends JScrollPane{
                            + "</div></td></tr>";
 
             /* set the content for the text view */
-            String itemTitle = item.getUserDisplayString().replace(" ", "&nbsp;");
+            String itemTitle = this.formatItemTitle(item.getUserDisplayString());
+
+            if(itemTitle.isEmpty()){ itemTitle = "&nbsp;"; }
             String itemCode = "<span class=\"text\">" + itemTitle + "</span>";
 
             /* build links for anything other than infromation items */
             if(!item.getItemTypeCode().equals("i")){ 
                 /* create the link for this item */
-                itemCode = "<a href=\"" + item.getUrlString() + "\">" + itemTitle + "</a>";
+                itemCode = "<a href=\"" + item.getUrlString() + "\">" 
+                         + this.formatItemTitle(itemTitle) + "</a>";
             }
 
             /* create the item table row */
@@ -215,7 +232,7 @@ public class PageView extends JScrollPane{
 
         /* build up the stylesheet for the rendering */
         this.styleSheet = this.editorKit.getStyleSheet();
-        this.styleSheet.addRule("body { white-space:nowrap; }");
+        this.styleSheet.addRule("body { white-space:nowrap; margin:0; padding:0; vertical-align: top;}");
         this.styleSheet.addRule(".text { cursor:text; }");
         this.styleSheet.addRule(".lineNumber { color: " + lineNumberColor + "; }");
         this.styleSheet.addRule(".itemIcon { font-family:Feather; font-size:" + iconFontSize + "px; margin-left:5px; }"); 
@@ -247,6 +264,10 @@ public class PageView extends JScrollPane{
         this.viewPane = new JEditorPane(){
             private static final long serialVersionUID = 1L;
 
+            /**
+             * Override the scroll tracks so that the content
+             * will adjust to the window size horizontally
+             */
             @Override
             public boolean getScrollableTracksViewportWidth(){
                 return true;
