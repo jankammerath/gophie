@@ -32,7 +32,10 @@ import javax.imageio.ImageIO;
 import org.gophie.ui.event.PageMenuEventListener;
 import org.gophie.ui.util.ImageTransferable;
 import org.gophie.net.GopherPage;
+import org.gophie.net.GopherUrl;
 import org.gophie.net.GopherItem.GopherItemType;
+import org.gophie.config.ConfigFile;
+import org.gophie.config.ConfigurationManager;
 import org.gophie.net.GopherItem;
 
 public class PageMenu extends PopupMenu {
@@ -67,6 +70,13 @@ public class PageMenu extends PopupMenu {
     public PageMenu() {
         super();
 
+        /**
+         * Check if gopher item prefixes are enabled for urls
+         * and add the prefixes to the url copy methods when enabled
+         */
+        ConfigFile configFile = ConfigurationManager.getConfigFile();
+        String prefixEnabled = configFile.getSetting("SELECTOR_PREFIX_ENABLED", "Navigation", "yes");
+
         /* request listeners to save the current page as file */
         this.saveItem = new MenuItem("Save Page As...");
         this.saveItem.addActionListener(new ActionListener() {
@@ -99,7 +109,20 @@ public class PageMenu extends PopupMenu {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(targetLink != null){
-                    copyToClipboard(targetLink.getUrlString());
+                    /* use the plain url without prefix by default */
+                    String targetLinkUrl = targetLink.getUrlString();
+
+                    if(prefixEnabled.equals("yes")){
+                        /* create the gopher url object for the address */
+                        GopherUrl prefixUrl = new GopherUrl(targetLink.getUrlString());
+                        prefixUrl.setTypePrefix(targetLink.getItemTypeCode());
+            
+                        /* set the address to the url with the prefix */
+                        targetLinkUrl = prefixUrl.getUrlString(true);
+                    }
+
+                    /* copy the address to the clipboard */
+                    copyToClipboard(targetLinkUrl);
                 }
             }       
         });
@@ -110,7 +133,20 @@ public class PageMenu extends PopupMenu {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(currentPage != null){
-                    copyToClipboard(currentPage.getUrl().getUrlString());
+                    /* use the plain url without prefix by default */
+                    String currentPageUrl = currentPage.getUrl().getUrlString();
+
+                    if(prefixEnabled.equals("yes")){
+                        /* create the gopher url object for the address */
+                        GopherUrl prefixUrl = new GopherUrl(currentPage.getUrl().getUrlString());
+                        prefixUrl.setTypePrefix(GopherItem.getTypeCode(currentPage.getContentType()));
+            
+                        /* set the address to the url with the prefix */
+                        currentPageUrl = prefixUrl.getUrlString(true);
+                    }
+
+                    /* copy the current page url to the clipboard */
+                    copyToClipboard(currentPageUrl);
                 }
             }       
         });
