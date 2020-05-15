@@ -208,6 +208,9 @@ public class GopherClient {
         GopherPage result = null;
 
         try{
+            /* reset the cancellation indicator */
+            this.cancelled = false;
+
             /* string result with content */
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
