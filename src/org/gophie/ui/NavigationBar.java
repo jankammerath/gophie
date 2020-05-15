@@ -145,10 +145,8 @@ public class NavigationBar extends JPanel {
                     for (NavigationInputListener inputListener : inputListenerList){
                         inputListener.refreshRequested();
                     }
-                }
-
-                /* request a stop or cancellation when currently loading */
-                if(isLoadingStatus == true){
+                }else{
+                    /* request a stop or cancellation when currently loading */
                     for (NavigationInputListener inputListener : inputListenerList){
                         inputListener.stopRequested();
                     }

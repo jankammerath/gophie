@@ -164,8 +164,8 @@ public class GopherUrl {
             }
         }
 
-        if(this.selector.length() > 0){
-            if(this.selector.startsWith("/")){
+        if(selectorValue.length() > 0){
+            if(selectorValue.startsWith("/")){
                 result += selectorValue;
             }else{
                 result += "/" + selectorValue;
