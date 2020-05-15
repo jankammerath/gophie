@@ -244,7 +244,15 @@ public class PageView extends JScrollPane{
         this.editorKit = new HTMLEditorKit();
 
         /* create the editor pane */
-        this.viewPane = new JEditorPane();
+        this.viewPane = new JEditorPane(){
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean getScrollableTracksViewportWidth(){
+                return true;
+            }
+        };
+
         this.viewPane.setEditable(false);
         this.viewPane.setBackground(Color.decode(backgroundColor));
         this.viewPane.setForeground(Color.decode(textColor));
