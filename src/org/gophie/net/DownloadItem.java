@@ -87,7 +87,8 @@ public class DownloadItem implements GopherClientEventListener {
      */
     public void start() {
         /* start the download process */
-        this.client.downloadAsync(this.item.getUrlString(), this.fileName, this);
+        String url = new GopherUrl(this.item.getUrlString()).getUrlString();
+        this.client.downloadAsync(url, this.fileName, this);
         this.status = DownloadStatus.ACTIVE;
     }
 
