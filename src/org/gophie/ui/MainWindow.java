@@ -348,7 +348,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                         this.openEmailClient(addressText.replace("mailto:", ""));
                     }else{
                         /* just fetch as regular gopher content */
-                        this.fetchGopherContent(addressText,item.getItemType());
+                        this.fetchGopherContent((new GopherUrl(addressText)).getUrlString(),item.getItemType());
                     }
                     break;
             }
