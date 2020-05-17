@@ -6,5 +6,5 @@ $JAVA_HOME/bin/javapackager -deploy -native dmg \
         -srcfiles build/Gophie.jar -appclass org.gophie.Gophie -name Gophie \
         -outdir deploy -outfile Gophie -v
 rm -r package/
-cp deploy/bundles/Gophie-1.0.dmg release/Gophie-1.0.dmg
+cp deploy/bundles/Gophie-1.0.dmg release/Gophie-1.1.dmg
 rm -r deploy/
