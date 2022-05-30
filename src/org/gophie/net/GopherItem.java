@@ -18,6 +18,8 @@
 
 package org.gophie.net;
 
+import java.net.URLConnection;
+
 public class GopherItem{
     /* defines the official types of gopher items */
     public enum GopherItemType {
@@ -63,6 +65,9 @@ public class GopherItem{
 
     /* defines the port number of this gopher item */
     private int portNumber = 70;
+
+    /* The protocol can be gopher or http */
+    private String proto = "gopher";
 
     /* constructs the gopher item taking the single line
         and parsing its content into the structure of this
@@ -113,6 +118,7 @@ public class GopherItem{
      * The url of the gopher item
      */
     public GopherItem(GopherItemType type, GopherUrl url){
+	this.proto = url.getProto();
         this.itemType = type;
         this.hostName = url.getHost();
         this.portNumber = url.getPort();
@@ -131,6 +137,7 @@ public class GopherItem{
      */
     public GopherItem(String itemTypeCode, GopherUrl url){
         this.setItemTypeByCode(itemTypeCode);
+	this.proto = url.getProto();
         this.hostName = url.getHost();
         this.portNumber = url.getPort();
         this.selector = url.getSelector();
@@ -191,6 +198,13 @@ public class GopherItem{
     }
 
     /**
+     * Returns the item's protocol.
+     */
+    public String getProtocol() {
+        return this.proto;
+    }
+
+    /**
      * Creates a URL string for this item
      * 
      * @return
@@ -201,8 +215,11 @@ public class GopherItem{
 
         /* unknown or information links do not have
             any link associated with it */
-        if(this.itemType != GopherItemType.UNKNOWN 
-            && this.itemType != GopherItemType.INFORMATION){
+        // if(this.itemType != GopherItemType.UNKNOWN 
+        //    && this.itemType != GopherItemType.INFORMATION){
+
+	/* Unknown types can (and are required to) have a URL. */
+        if (this.itemType != GopherItemType.INFORMATION){
             /* check if the selector contains a URL */
             if(this.selector.startsWith("URL:") == true
                 || this.selector.startsWith("/URL:") == true){
@@ -212,6 +229,8 @@ public class GopherItem{
                 }else{
                     result = this.selector.substring(4);
                 }
+	    } else if (this.selector.startsWith("http://")) {
+	        result = this.selector;
             }else{
                 /* protocol is definitely gopher */
                 result = "gopher://" + this.hostName;
@@ -230,6 +249,69 @@ public class GopherItem{
         }
 
         return result;
+    }
+
+    /**
+     * Returns a guessed content-type.
+     */
+    public String guessContentType() {
+        String fn = getFileName();
+	String type = URLConnection.guessContentTypeFromName(fn);
+	return type;
+    }
+
+    /**
+     * Guesses and sets an item's Gopher type.
+     */
+    public void guessItemType() {
+        String content = guessContentType();
+
+        if (this.getFileName().endsWith(".ca"))
+            this.itemType = GopherItemType.GOPHERMENU;
+	else if (content == null)
+            this.itemType = GopherItemType.UNKNOWN;
+        else if (content.startsWith("text/"))
+            this.itemType = GopherItemType.TEXTFILE;
+        else if (content.startsWith("image/"))
+            this.itemType = GopherItemType.IMAGE_FILE;
+	else
+	    this.itemType = GopherItemType.BINARY_FILE;
+    }
+
+    /**
+     * Return the title item indicator.
+     */
+    public String getItemIndicator() {
+        /* Only text files may have an indicator. */
+        if (itemType != GopherItemType.TEXTFILE)
+	    return ("");
+
+        /* Get the item's filename. */
+	String fn = getSelector();
+	int k = fn.lastIndexOf("/");
+	if (k >= 0)
+	    fn = fn.substring(k + 1);
+
+        /* No filename no indicator. */
+	if (fn.equals(""))
+	    return ("");
+
+	/* Strip further chars. */
+	if ((k = fn.lastIndexOf("-")) >= 0)
+	    fn = fn.substring(k + 1);
+
+	if ((k = fn.indexOf(".")) >= 0)
+	    fn = fn.substring(0, k);
+
+	/* A filename like [...-]xxx.ext should now be reduced
+	 * to xxx. */
+	fn = fn.toLowerCase();
+	if (fn.equals("index")  ||  fn.equals("home")  ||  fn.equals("contents")  ||
+	    fn.equals("help")) {
+	    return (fn);
+	    }
+
+	return ("");
     }
 
     /**

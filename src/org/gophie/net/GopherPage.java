@@ -70,9 +70,13 @@ public class GopherPage {
                 /* parsing succeeded, define as gopher menu */
                 this.contentType = GopherItemType.GOPHERMENU;
             }catch(Exception ex){
-                /* output the parser exception */
-                System.out.println("Failed to parse gophermenu: " + ex.getMessage());
-                ex.printStackTrace();
+
+                /* Print an exception only if we expected a directory. */
+	        if (gopherContentType != GopherItemType.UNKNOWN) {
+                    /* output the parser exception */
+                    System.out.println("Failed to parse gophermenu: " + ex.getMessage());
+                    ex.printStackTrace();
+                    }
 
                 /* parsing failed for whatever, define as text */
                 this.contentType = GopherItemType.TEXTFILE;
@@ -241,10 +245,69 @@ public class GopherPage {
     /**
      * parses the local source code into components
      */
-    private void parse(){
+    private void parse() throws GopherItemTypeException {
         String[] itemSourceList = this.getSourceCode().split("\n");
+
+	/* See, if the directory is a Gopher+ $ listing - only to
+	 * discard that stuff during parsing. */
+	boolean isGopherPlus = itemSourceList.length > 0  &&  itemSourceList[0].startsWith("+");
+
         for(int i=0; i<itemSourceList.length; i++){
             String itemSource = itemSourceList[i];
+
+            /* If it's Gopher+ then we take only the +INFO lines. */
+            if (isGopherPlus) {
+	        if (! itemSource.startsWith("+INFO: "))
+	            continue;
+
+                itemSource = itemSource.substring(7);
+	    }
+
+            /* Do we have a non-empty line? */
+            if (itemSource.length() == 0  ||  itemSource.equals("."))
+	        continue;
+
+            /* To prevent texts being recognized as directories
+	     * some type characters are forbidden. */
+	    char typeChar = itemSource.charAt(0);
+            if (typeChar == ' '  ||  typeChar == '\t')
+	        throw new GopherItemTypeException(url.getUrlString(), GopherItemType.UNKNOWN, GopherItemType.UNKNOWN);
+
+            /* What is happening here is this: Incomplete Gopher selectors
+	     * (i.e. empty server field or server == `.`) get their data
+	     * from the directory's own address.  Furthermore, file
+	     * selectors without a leading slash are interpreted as
+	     * relative to the current directory.  That should mimic
+	     * http URL semantics and allow relative addressing. */
+
+	    String[] x = itemSource.split("\t");
+	    if (itemSource.startsWith("i")  ||  x.length < 2) {
+	        /* make sure that we have 4 fields */
+		itemSource = x[0] + "\t\t.\t0";
+		}
+	    else if (x.length < 3  ||  x[2].equals("")  ||  x[2].equals(".")) {
+
+                if (x[1].startsWith("http://")) {
+		    /* The entry is a complete URL.  Just make sure that
+		     * it has all four fields. */
+		    itemSource = x[0] + "\t" + x[1] + "\t.\t0";
+		} else if (url.getProto().equals("http")) {
+		    /* Create a full URL as selector. */
+
+		    String u2 = url.makeUrlString(x[1]);
+		    itemSource = x[0] + "\t" + u2 + "\t.\t0";
+
+		} else {
+	            /* Incomplete directory entry: server misssing. */
+		    x[2] = url.getHost();
+
+		    if (x.length < 4  ||  x[3].equals("")  ||  x[3].equals(".")  ||  x[3].equals("0"))
+		        x[3] = "70";
+
+		    /* Construct the entry. */
+		    itemSource = x[0] + "\t" + x[1] + "\t" + x[2] + "\t" + x[3];
+		    }
+	        }
 
             if(itemSource.length() > 0 && itemSource.equals(".") == false){
                 this.itemList.add(new GopherItem(itemSource));

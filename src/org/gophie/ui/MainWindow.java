@@ -64,10 +64,43 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     private SearchInput searchInput;
     private DownloadWindow downloadWindow;
 
+    private String address = "";
+    private boolean openTextInNewWindow = true;
+    private boolean openDirInNewWindow = false;
+
+
     /**
-     * Constructs this main window
+     * Locate the window near to the mouse pointer.
      */
-    public MainWindow() {
+    public static Point locateWindow(int width, int height) {
+        long    rx, ry;
+        Point    p;
+
+        try { p = MouseInfo.getPointerInfo().getLocation(); }
+	catch (Exception e) { p = new Point(10, 20); }
+
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        rx = Math.round( Math.random() * dim.width / 5 - dim.width / 10);
+        ry = Math.round( Math.random() * dim.height / 5 - dim.height / 10);
+
+        if (p.x > dim.width / 2) { p.x -= width + 20 - rx; }
+        else p.x -= 20 + rx;
+
+        if (p.x < 0) p.x = 0;
+
+        if (p.y > dim.height / 2) { p.y -= height + 20 - ry; }
+        else { p.y -= 20 + ry; }
+
+        if (p.y < 0) p.y = 0;
+
+        return (p);
+    }
+
+
+    /**
+     * Constructs the main window and make it ready for display.
+     */
+    private void init() {
         /* get the config file */
         ConfigFile configFile = ConfigurationManager.getConfigFile();
 
@@ -83,7 +116,8 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         /* create the main window */
         this.frame = new JFrame(APPLICATION_TITLE);
         this.frame.setMinimumSize(new Dimension(800, 600));
-        this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.frame.setIconImage(ConfigurationManager.getImage("icon.png"));
 
         /* create the page view component object */
@@ -102,8 +136,15 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         
         /* set the gopher home as defined in the config
             or use the default one if none is defined */
-        String gopherHome = configFile.getSetting("GOPHERHOME", "Navigation", DEFAULT_GOPHERHOME);
-        this.navigationBar.setAddressText(gopherHome);
+        String address = configFile.getSetting("GOPHERHOME", "Navigation", DEFAULT_GOPHERHOME);
+        this.navigationBar.setAddressText(address);
+
+        /* Get the flags who items are openend. */
+        String f = configFile.getSetting("item-in-new-window", "Navigation", "true");
+	openTextInNewWindow = (f.equals("yes")  ||  f.equals("true")  ||  f.equals("1"))? true: false;
+
+        f = configFile.getSetting("menu-in-new-window", "Navigation", "false");
+	openDirInNewWindow = (f.equals("yes")  ||  f.equals("true")  ||  f.equals("1"))? true: false;
 
         /* attach listener to navigation bar */
         this.navigationBar.addListener(this);
@@ -125,12 +166,38 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
         /* start the window in the center of the screen */
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        this.frame.setLocation(dim.width/2-this.frame.getSize().width/2, 
-                            dim.height/2-this.frame.getSize().height/2);
+	this.frame.setLocation(locateWindow(800, 600));
+        // this.frame.setLocation(dim.width/2-this.frame.getSize().width/2, 
+        //                     dim.height/2-this.frame.getSize().height/2);
+    }
+
+    /**
+     * Standard constructor.  Not used anymore.
+     */
+    public MainWindow() {
+    	this.init();
+
+	/* display the window */
         this.frame.setVisible(true);
 
         /* fetch the default gopher home */
-        this.fetchGopherContent(gopherHome, GopherItemType.GOPHERMENU);
+        this.fetchGopherContent(address, GopherItemType.GOPHERMENU);
+    }
+
+    /**
+     * Create window and open a specific location if set.
+     */
+    public MainWindow(String addr, GopherItemType type) {
+    	this.init();
+
+	/* If a URL is given, set it. Notice that it must be a
+	 * Gopher directory. */
+	if (addr != null  &&  ! addr.equals(""))
+		address = addr;
+
+        this.navigationBar.setAddressText(address);
+	this.frame.setVisible(true);
+        this.fetchGopherContent(address, type);
     }
 
     /**
@@ -292,7 +359,51 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
      * The expected content type of the content behind the address
      */
     @Override
-    public void addressRequested(String addressText, GopherItem item) {
+    public void addressRequested(String addressText, GopherItem item, boolean shifted) {
+
+	GopherItemType type = item.getItemType();
+	boolean openInNewWindow = false;
+
+        if (type == GopherItemType.TEXTFILE  ||  type == GopherItemType.FULLTEXT_SEARCH
+	    ||  type == GopherItemType.IMAGE_FILE  ||  type == GopherItemType.GIF_FILE) {
+	    if ((openTextInNewWindow  ||  shifted)  &&  ! (openTextInNewWindow  &&  shifted)) {
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+		    public void run() {
+	    	        MainWindow win = new MainWindow(addressText, item.getItemType());
+		        win.show();
+		    }
+		});
+
+                return;
+	    }
+	} else if (item.getItemType() == GopherItemType.GOPHERMENU) {
+	    if ((openDirInNewWindow  ||  shifted)  &&  ! (openDirInNewWindow  &&  shifted)) {
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+		    public void run() {
+	    	        MainWindow win = new MainWindow(addressText, item.getItemType());
+		        win.show();
+		    }
+		});
+
+                return;
+	    }
+	} else if (item.getItemType() == GopherItemType.UNKNOWN) {
+	    openInNewWindow = shifted;
+	}
+
+
+	if (openInNewWindow) {
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+		    public void run() {
+	    	        MainWindow win = new MainWindow(addressText, item.getItemType());
+		        win.show();
+		    }
+		});
+
+                return;
+	    }
+
+
         /* check if this file is binary or not as
             binaries such as media or other files
             will be handled differently (e.g. downloaded) */
@@ -332,10 +443,13 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                     this.openTelnetSession(item.getHostName(), item.getPortNumber());
                     break;
                 default:
+                    if (addressText.startsWith("http://") == true) {
+                        this.fetchGopherContent(addressText, item.getItemType());
+		    }
                     /* check what type of link was requested and execute
                         the appropriate external application or use the
                         default approach for gopher content */
-                    if(addressText.startsWith("https://") == true 
+                    else if(addressText.startsWith("https://") == true 
                         || addressText.startsWith("http://") == true){
                         /* this is the World Wide Web using HTTP or HTTPS, 
                             so try to open the systems browser so that the
@@ -712,6 +826,35 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
             /* pass url and target file to download manager */
             page.saveAsFile(targetFileName);
         } 
+    }
+
+    /**
+     * Loads the item from the selected text.
+     */
+    @Override
+    public void getAndGoRequested(GopherPage page, String selected, boolean shifted) {
+        GopherUrl url = page.getUrl();
+	String address = url.makeUrlString(selected);
+	GopherUrl u2 = new GopherUrl(address);
+
+	GopherItem item = new GopherItem(GopherItemType.UNKNOWN, u2);
+	item.guessItemType();
+
+        addressRequested(address, item, shifted);
+    }
+
+    /**
+     * Close the window.
+     */
+    public void closeRequested() {
+        this.frame.dispose();
+    }
+
+    /**
+     * Exits the program.
+     */
+    public void exitRequested() {
+        System.exit (0);
     }
 
     /**

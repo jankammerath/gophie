@@ -22,6 +22,7 @@ import javax.swing.BorderFactory;
 import javax.swing.UIManager;
 
 import org.gophie.ui.MainWindow;
+import org.gophie.net.GopherItem.GopherItemType;
 
 public class Gophie {
     /**
@@ -29,8 +30,9 @@ public class Gophie {
      * this method should be invoked from the
      * event-dispatching thread.
      */
-    private static void createAndShowGUI() {
-        MainWindow window = new MainWindow();
+    private static void createAndShowGUI(String[] args) {
+        MainWindow window = new MainWindow( args.length == 0? null: args[0],
+				GopherItemType.GOPHERMENU );
         window.show();
     }
 
@@ -57,7 +59,7 @@ public class Gophie {
             creating and showing this application's GUI. */
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                createAndShowGUI();
+                createAndShowGUI(args);
             }
         });
     }
