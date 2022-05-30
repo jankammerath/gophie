@@ -75,14 +75,26 @@ public class GopherClient {
         this.thread = new Thread(new Runnable() { 
             public void run() { 
                 try{
+		    boolean haveHttpHeader = false;
+
                     /* create the output file stream to write to */
                     OutputStream fileStream = new FileOutputStream(new File(targetFile));
 
                     /* parse the url and instanciate the client */
                     GopherUrl gopherUrl = new GopherUrl(url);
                     Socket gopherSocket = new Socket(gopherUrl.getHost(), gopherUrl.getPort());
-                    byte[] gopherRequest = (gopherUrl.getSelector() + "\r\n").getBytes(StandardCharsets.US_ASCII);
-                    (new DataOutputStream(gopherSocket.getOutputStream())).write(gopherRequest);
+
+		    if (gopherUrl.getProto().equals("http")) {
+			byte[] httpRequest = ("GET " + gopherUrl.getSelector() + " HTTP/1.0\r\n" +
+					"Host: " + gopherUrl.getHost() +"\r\n" +
+					"\r\n").getBytes(StandardCharsets.US_ASCII);
+			(new DataOutputStream(gopherSocket.getOutputStream())).write(httpRequest);
+			haveHttpHeader = true;
+			}
+		    else {
+			byte[] gopherRequest = (gopherUrl.getSelector() + "\r\n").getBytes(StandardCharsets.US_ASCII);
+			(new DataOutputStream(gopherSocket.getOutputStream())).write(gopherRequest);
+			}
 
                     /* read byte in chunks and report progress */
                     int read;
@@ -92,6 +104,25 @@ public class GopherClient {
 
                     /* read byte by byte to be able to report progress */
                     while ((read = socketStream.read(data, 0, data.length)) != -1) {
+			if (haveHttpHeader) {
+
+			    /* Look for the end of the HTTP header `\n\r?\n`
+			     * and delete the header from the data.  This is
+			     * just a dirty hack. */ 
+			    for (int i = 1; i < read; i++) {
+				if (data[i] == '\n') {
+				    if (data[i-1] == '\n'  ||
+					    (i >= 2  &&  data[i-2] == '\n'  &&  data[i-1] == '\r')) {
+					i++;
+					System.arraycopy(data, i, data, 0, read - i);
+					read -= i;
+					haveHttpHeader = false;
+					break;
+				    }				
+				}
+			    }
+			}
+
                         fileStream.write(data, 0, read);
 
                         /* calculate total bytes read */
@@ -208,6 +239,9 @@ public class GopherClient {
         GopherPage result = null;
 
         try{
+	    /* for HTTP requests */
+	    boolean haveHttpHeader = false;
+
             /* reset the cancellation indicator */
             this.cancelled = false;
 
@@ -217,8 +251,18 @@ public class GopherClient {
             /* parse the url and instanciate the client */
             GopherUrl gopherUrl = new GopherUrl(url);
             Socket gopherSocket = new Socket(gopherUrl.getHost(), gopherUrl.getPort());
-            byte[] gopherRequest = (gopherUrl.getSelector() + "\r\n").getBytes(StandardCharsets.US_ASCII);
-            (new DataOutputStream(gopherSocket.getOutputStream())).write(gopherRequest);
+
+	    if (gopherUrl.getProto().equals("http")) {
+                byte[] httpRequest = ("GET " + gopherUrl.getSelector() + " HTTP/1.0\r\n" +
+				"Host: " + gopherUrl.getHost() +"\r\n" +
+				"\r\n").getBytes(StandardCharsets.US_ASCII);
+                (new DataOutputStream(gopherSocket.getOutputStream())).write(httpRequest);
+		haveHttpHeader = true;
+	    	}
+	    else {
+                byte[] gopherRequest = (gopherUrl.getSelector() + "\r\n").getBytes(StandardCharsets.US_ASCII);
+                (new DataOutputStream(gopherSocket.getOutputStream())).write(gopherRequest);
+		}
 
             /* read byte in chunks and report progress */
             int read;
@@ -228,6 +272,25 @@ public class GopherClient {
 
             /* read byte by byte to be able to report progress */
             while ((read = socketStream.read(data, 0, data.length)) != -1) {
+	        if (haveHttpHeader) {
+
+                    /* Look for the end of the HTTP header `\n\r?\n`
+		     * and delete the header from the data.  This is
+		     * just a dirty hack. */ 
+		    for (int i = 1; i < read; i++) {
+		    	if (data[i] == '\n') {
+			    if (data[i-1] == '\n'  ||
+			            (i >= 2  &&  data[i-2] == '\n'  &&  data[i-1] == '\r')) {
+				i++;
+		                System.arraycopy(data, i, data, 0, read - i);
+				read -= i;
+				haveHttpHeader = false;
+				break;
+                            }				
+		        }
+		    }
+                }
+
                 /* check the file signature from the first bytes received */
                 if(totalByteCount == 0){
                     FileSignature fileSignature = new FileSignature(data);

@@ -26,4 +26,7 @@ public interface PageMenuEventListener {
     void itemDownloadRequested(GopherItem item);
     void pageSaveRequested(GopherPage page);
     void selectAllTextRequested();
+    void getAndGoRequested(GopherPage page, String selected, boolean shifted);
+    void closeRequested();
+    void exitRequested();
 }

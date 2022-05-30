@@ -19,9 +19,25 @@
 package org.gophie.net;
 
 public class GopherUrl {
-    private int port = 70;
+    private String proto = "gopher";
+    private int port = 0;
     private String host;
     private String selector;
+
+
+    /**
+     * Return the URL's protocol.
+     */
+    public String getProto() {
+        return proto;
+    }
+
+    /**
+     * Returns the default port for the protocol.
+     */
+    public int getDefaultPort() {
+        return proto.equals("http")? 80: 70;
+    }
 
     /**
      * Returns the port number of this address
@@ -30,7 +46,7 @@ public class GopherUrl {
      * the port number as integer
      */
     public int getPort(){
-        return this.port;
+        return this.port == 0? getDefaultPort(): this.port;
     }
 
     /**
@@ -101,6 +117,37 @@ public class GopherUrl {
     }
 
     /**
+     * Combines the possible relative URL url and
+     * returns the result; http logic is applied.
+     */
+    public String makeUrlString(String url) {
+
+        /* check if url is already complete */
+        if (url.indexOf("://") >= 0)
+	    return url;
+
+        String u2 = this.getProto() + "://" + this.getHost();
+        if (this.getPort() != this.getDefaultPort())
+            u2 = u2 + ":" + this.getPort();
+    
+        if (url.startsWith("/"))
+            u2 = u2 + url;                     /* absolute path. */
+        else {
+            String p = this.getSelector();     /* relative path. */
+            if (this.hasTypePrefix())
+                p = p.substring(2);
+
+            int k = p.lastIndexOf("/");
+            if (k >= 0)
+                p = p.substring(0, k + 1);
+    
+            u2 = u2 + p + url;
+	    }
+
+	return u2;
+    }
+
+    /**
      * Sets or overwrites the type prefix for this url
      * 
      * @param prefix
@@ -149,7 +196,7 @@ public class GopherUrl {
     public String getUrlString(boolean includeTypePrefix){
         String result = this.host;
 
-        if(this.port != 70){
+        if(this.port != getDefaultPort()){
             result += ":" + this.port;
         }
 
@@ -172,6 +219,9 @@ public class GopherUrl {
             }
         }
 
+	if (proto.equals("http"))
+		result = "http://" + result;
+
         return result;
     }
     
@@ -187,7 +237,11 @@ public class GopherUrl {
         /* check if the url contains the protocol specifier */
         if(this.host.startsWith("gopher://") == true){
             this.host = this.host.substring(9);
-        }
+	    this.proto = "gopher";
+        } else if (this.host.startsWith("http://")) {
+	    this.host = this.host.substring(7);
+	    this.proto = "http";
+	}
 
         /* check if a selector was provided */
         if(this.host.indexOf("/") > 0){

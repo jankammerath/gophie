@@ -42,6 +42,9 @@ public class PageMenu extends PopupMenu {
     private static final long serialVersionUID = 1L;
 
     /* the menu items */
+    private MenuItem getAndGo;
+    private MenuItem closeWindow;
+    private MenuItem exitProgram;
     private MenuItem saveItem;
     private MenuItem saveTargetItem;
     private MenuItem copyTargetUrl;
@@ -76,6 +79,47 @@ public class PageMenu extends PopupMenu {
          */
         ConfigFile configFile = ConfigurationManager.getConfigFile();
         String prefixEnabled = configFile.getSetting("SELECTOR_PREFIX_ENABLED", "Navigation", "yes");
+
+        /* Request listeners to open an item from the selected text */
+        this.getAndGo = new MenuItem("Get and go");
+        this.getAndGo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (currentPage != null) {
+		    boolean shifted = (e.getModifiers() & (ActionEvent.SHIFT_MASK | ActionEvent.CTRL_MASK)) != 0;
+
+                    for (PageMenuEventListener listener: eventListenerList) {
+                        listener.getAndGoRequested(currentPage, selectedText, shifted);
+                    }
+                }
+            }       
+        });
+
+        /* Request listeners to exit. */
+        this.exitProgram = new MenuItem("Exit Gophie");
+        this.exitProgram.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (currentPage != null) {
+                    for (PageMenuEventListener listener: eventListenerList) {
+                        listener.exitRequested();
+                    }
+                }
+            }       
+        });
+
+        /* Request listeners to close their Window . */
+        this.closeWindow = new MenuItem("Close Window");
+        this.closeWindow.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (currentPage != null) {
+                    for (PageMenuEventListener listener: eventListenerList) {
+                        listener.closeRequested();
+                    }
+                }
+            }       
+        });
 
         /* request listeners to save the current page as file */
         this.saveItem = new MenuItem("Save Page As...");
@@ -295,6 +339,11 @@ public class PageMenu extends PopupMenu {
             /* set the proper label for image files */
             if(isImage == true){ this.saveItem.setLabel("Save Image As ..."); }
 
+            if (currentPage != null  &&  currentPage.getContentType() == GopherItemType.TEXTFILE) {
+                if (selectedText.length() > 0)
+	            this.add(this.getAndGo);
+            }
+
             this.add(this.saveItem);
             this.addSeparator();
 
@@ -330,7 +379,11 @@ public class PageMenu extends PopupMenu {
             }
 
             this.add(this.copyTargetText);
+
         }
+
+	this.add(this.closeWindow);
+	this.add(this.exitProgram);
 
         /* call the base method */
         super.show(origin,x,y);

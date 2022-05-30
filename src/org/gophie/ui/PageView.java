@@ -188,6 +188,9 @@ public class PageView extends JScrollPane{
 
             /* set the content for the text view */
             String itemTitle = this.formatItemTitle(item.getUserDisplayString());
+	    String indicator = item.getItemIndicator();
+	    if (! indicator.equals(""))
+	        itemTitle = itemTitle + " [" + indicator + "]";
 
             if(itemTitle.isEmpty()){ itemTitle = "&nbsp;"; }
             String itemCode = "<span class=\"text\">" + itemTitle + "</span>";
@@ -357,9 +360,10 @@ public class PageView extends JScrollPane{
 
                 /* handle link activation (aka left-click) */
                 if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+		    boolean shifted = (e.getInputEvent().getModifiers() & (ActionEvent.SHIFT_MASK | ActionEvent.CTRL_MASK)) != 0;
                     /* execute the handler */
                     for (NavigationInputListener inputListener : inputListenerList){
-                        inputListener.addressRequested(urlValue,itemObject);
+                        inputListener.addressRequested(urlValue, itemObject, shifted);
                     }
                 }
             }

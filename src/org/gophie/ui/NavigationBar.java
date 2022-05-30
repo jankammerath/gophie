@@ -299,6 +299,7 @@ public class NavigationBar extends JPanel {
             public void actionPerformed(ActionEvent e){
                 String requestedAddress = inputField.getText().trim();
                 if(requestedAddress.length() > 0){
+		    boolean shifted = (e.getModifiers() & (ActionEvent.SHIFT_MASK | ActionEvent.CTRL_MASK)) != 0;
                     for (NavigationInputListener inputListener : inputListenerList){
                         /* define the request address */
                         String address = requestedAddress;
@@ -318,7 +319,7 @@ public class NavigationBar extends JPanel {
                         }
 
                         /* call the listener for the request */
-                        inputListener.addressRequested(address, item);
+                        inputListener.addressRequested(address, item, shifted);
                     }
                 }
             }

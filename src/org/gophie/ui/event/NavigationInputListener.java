@@ -25,7 +25,7 @@ import org.gophie.net.GopherItem;
     navigation bar ui element.
 */
 public interface NavigationInputListener {
-    void addressRequested(String addressText, GopherItem item);
+    void addressRequested(String addressText, GopherItem item, boolean shifted);
     void homeGopherRequested();
     void backwardRequested();
     void forwardRequested();
