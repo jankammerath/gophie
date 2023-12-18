@@ -20,6 +20,7 @@ package org.gophie.config;
 
 import java.awt.*;
 import java.io.*;
+import java.util.Objects;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -78,7 +79,7 @@ public class ConfigurationManager{
 
         try{
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            result = Font.createFont(Font.TRUETYPE_FONT, classLoader.getResourceAsStream("res/" + fileName)).deriveFont(size);
+            result = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(classLoader.getResourceAsStream(fileName))).deriveFont(size);
             GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
             graphicsEnvironment.registerFont(result);
         }catch(Exception ex){
@@ -117,7 +118,7 @@ public class ConfigurationManager{
         try{
             /* try to open the font for icon display */
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            result = ImageIO.read(classLoader.getResource("res/"+name));            
+            result = ImageIO.read(Objects.requireNonNull(classLoader.getResource(name)));
         }catch(Exception ex){
             /* Ouchie, this will look bad... */
             System.out.println("Unable to load the image icon (" + name + "): " + ex.getMessage());
@@ -141,7 +142,7 @@ public class ConfigurationManager{
         try{
             /* try to open the font for icon display */
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            result = new ImageIcon(classLoader.getResource("res/"+name));            
+            result = new ImageIcon(Objects.requireNonNull(classLoader.getResource(name)));
         }catch(Exception ex){
             /* Ouchie, this will look bad... */
             System.out.println("Unable to load the image icon (" + name + "): " + ex.getMessage());
