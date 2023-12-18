@@ -18,24 +18,24 @@
 
 package org.gophie.net;
 
-import org.gophie.net.event.*;
+import org.gophie.net.event.GopherError;
 
 public class GopherNetworkException extends Exception {
     private static final long serialVersionUID = 1L;
 
-    private GopherError errorCode;
-    private String errorMessage;
+    private final GopherError errorCode;
+    private final String errorMessage;
 
-    public GopherNetworkException(GopherError errorTypeCode, String errorTypeMessage){
+    public GopherNetworkException(GopherError errorTypeCode, String errorTypeMessage) {
         this.errorCode = errorTypeCode;
         this.errorMessage = errorTypeMessage;
     }
 
-    public String getGopherErrorMessage(){
+    public String getGopherErrorMessage() {
         return this.errorMessage;
     }
 
-    public GopherError getGopherErrorType(){
+    public GopherError getGopherErrorType() {
         return this.errorCode;
     }
 }

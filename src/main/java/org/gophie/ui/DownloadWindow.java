@@ -1,16 +1,18 @@
 package org.gophie.ui;
 
-import java.awt.*;
+import org.gophie.config.ConfigFile;
+import org.gophie.config.ConfigurationManager;
+import org.gophie.net.DownloadItem;
+import org.gophie.net.DownloadItem.DownloadStatus;
+import org.gophie.net.DownloadList;
+import org.gophie.net.event.DownloadListEventListener;
+import org.gophie.ui.event.ActionButtonEventListener;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
-import org.gophie.config.*;
-import org.gophie.net.*;
-import org.gophie.net.DownloadItem.DownloadStatus;
-import org.gophie.net.event.*;
-import org.gophie.ui.event.ActionButtonEventListener;
+import java.awt.*;
 
 public class DownloadWindow implements ActionButtonEventListener {
     private static final String ACTIONBAR_BACKGROUND = "#248AC2";
@@ -19,15 +21,15 @@ public class DownloadWindow implements ActionButtonEventListener {
     private static final String FILELIST_BACKGROUND = "#1b1b1b";
 
     /* local objects */
-    private DownloadList list;
+    private final DownloadList list;
     private DownloadItem[] data;
 
     /* local components */
-    private JDialog frame;
-    private JList<DownloadItem> fileListView;
-    private JPanel actionBar = new JPanel();
-    private ActionButton clearButton;
-    private ActionButton actionButton;
+    private final JDialog frame;
+    private final JList<DownloadItem> fileListView;
+    private final JPanel actionBar = new JPanel();
+    private final ActionButton clearButton;
+    private final ActionButton actionButton;
 
     public DownloadWindow(DownloadList downloadList) {
         /* get the config file */
@@ -67,16 +69,16 @@ public class DownloadWindow implements ActionButtonEventListener {
         this.frame.add(listScrollPane, BorderLayout.CENTER);
 
         this.clearButton = new ActionButton("", "Clear List",
-            configFile.getSetting("ACTIONBAR_TEXTCOLOR", "Appearance", ACTIONBAR_TEXTCOLOR),
-            configFile.getSetting("ACTIONBAR_INACTIVE_TEXTCOLOR", "Appearance", ACTIONBAR_INACTIVE_TEXTCOLOR)
+                configFile.getSetting("ACTIONBAR_TEXTCOLOR", "Appearance", ACTIONBAR_TEXTCOLOR),
+                configFile.getSetting("ACTIONBAR_INACTIVE_TEXTCOLOR", "Appearance", ACTIONBAR_INACTIVE_TEXTCOLOR)
         );
         this.clearButton.setButtonEnabled(false);
         this.clearButton.setButtonId(1);
         this.clearButton.addEventListener(this);
 
         this.actionButton = new ActionButton("", "Abort",
-            configFile.getSetting("ACTIONBAR_TEXTCOLOR", "Appearance", ACTIONBAR_TEXTCOLOR),
-            configFile.getSetting("ACTIONBAR_INACTIVE_TEXTCOLOR", "Appearance", ACTIONBAR_INACTIVE_TEXTCOLOR)
+                configFile.getSetting("ACTIONBAR_TEXTCOLOR", "Appearance", ACTIONBAR_TEXTCOLOR),
+                configFile.getSetting("ACTIONBAR_INACTIVE_TEXTCOLOR", "Appearance", ACTIONBAR_INACTIVE_TEXTCOLOR)
         );
         this.actionButton.setButtonId(0);
         this.actionButton.addEventListener(this);
@@ -84,7 +86,7 @@ public class DownloadWindow implements ActionButtonEventListener {
         this.actionBar.setLayout(new BorderLayout());
         this.actionBar.setBorder(new EmptyBorder(8, 16, 10, 16));
         this.actionBar.setBackground(Color.decode(configFile.getSetting
-            ("ACTIONBAR_BACKGROUND", "Appearance", ACTIONBAR_BACKGROUND)));
+                ("ACTIONBAR_BACKGROUND", "Appearance", ACTIONBAR_BACKGROUND)));
         this.actionBar.add(this.clearButton, BorderLayout.EAST);
         this.actionBar.add(this.actionButton, BorderLayout.WEST);
         this.frame.add(this.actionBar, BorderLayout.SOUTH);
@@ -96,66 +98,65 @@ public class DownloadWindow implements ActionButtonEventListener {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 handleSelectionChange();
-            }        
+            }
         });
 
         /* update the list for the first time */
         this.updateList();
     }
 
-    private void handleSelectionChange(){
+    private void handleSelectionChange() {
         DownloadItem selected = this.fileListView.getSelectedValue();
-        if(selected == null){
+        if (selected == null) {
             this.actionButton.setVisible(false);
-        }else{
-            if(selected.getStatus() == DownloadStatus.ACTIVE){
-                this.actionButton.setContent("","Abort");
-            }if(selected.getStatus() == DownloadStatus.FAILED){
-                this.actionButton.setContent("","Retry");
-            }if(selected.getStatus() == DownloadStatus.COMPLETED){
-                this.actionButton.setContent("","Open");
-            }if(selected.getStatus() == DownloadStatus.IDLE){
-                this.actionButton.setContent("","Start");
+        } else {
+            if (selected.getStatus() == DownloadStatus.ACTIVE) {
+                this.actionButton.setContent("", "Abort");
+            }
+            if (selected.getStatus() == DownloadStatus.FAILED) {
+                this.actionButton.setContent("", "Retry");
+            }
+            if (selected.getStatus() == DownloadStatus.COMPLETED) {
+                this.actionButton.setContent("", "Open");
+            }
+            if (selected.getStatus() == DownloadStatus.IDLE) {
+                this.actionButton.setContent("", "Start");
             }
 
             this.actionButton.setVisible(true);
             this.actionButton.setButtonEnabled(true);
         }
-    
+
         /* disable the clear list button for empty lists */
-        if(this.list.hasNonActiveItems()){
-            this.clearButton.setButtonEnabled(true);
-        }else{
-            this.clearButton.setButtonEnabled(false);
-        }
+        this.clearButton.setButtonEnabled(this.list.hasNonActiveItems());
     }
 
-    public void updateList(){
+    public void updateList() {
         this.data = this.list.getDownloadItemArray();
 
         int selectedIndex = this.fileListView.getSelectedIndex();
         this.fileListView.setListData(this.data);
 
-        if(selectedIndex < this.data.length){
+        if (selectedIndex < this.data.length) {
             this.fileListView.setSelectedIndex(selectedIndex);
-        }else{
-            if(this.data.length > 0){
-                this.fileListView.setSelectedIndex(this.data.length-1);
+        } else {
+            if (this.data.length > 0) {
+                this.fileListView.setSelectedIndex(this.data.length - 1);
             }
         }
 
         this.handleSelectionChange();
     }
 
-    public boolean isVisible(){
+    public boolean isVisible() {
         return this.frame.isVisible();
     }
 
-    public void hide(){
+    public void hide() {
         this.frame.setVisible(false);
     }
 
-    public void show(JFrame parent){
+    public void show(JFrame parent) {
         this.updateList();
         this.frame.setLocationRelativeTo(parent);
         this.frame.setVisible(true);
@@ -163,10 +164,10 @@ public class DownloadWindow implements ActionButtonEventListener {
 
     @Override
     public void buttonPressed(int buttonId) {
-        if(buttonId == 0){
+        if (buttonId == 0) {
             /* the action button */
             DownloadItem item = this.fileListView.getSelectedValue();
-            if(item.getStatus() == DownloadStatus.ACTIVE){
+            if (item.getStatus() == DownloadStatus.ACTIVE) {
                 /* cancel the currently active item */
                 item.cancel();
 
@@ -175,17 +176,21 @@ public class DownloadWindow implements ActionButtonEventListener {
 
                 /* delete the file form disk */
                 item.deleteFile();
-            }if(item.getStatus() == DownloadStatus.FAILED){
+            }
+            if (item.getStatus() == DownloadStatus.FAILED) {
                 /* retry failed item */
                 item.start();
-            }if(item.getStatus() == DownloadStatus.COMPLETED){
+            }
+            if (item.getStatus() == DownloadStatus.COMPLETED) {
                 /* open completed item file */
                 item.openFileOnDesktop();
-            }if(item.getStatus() == DownloadStatus.IDLE){
+            }
+            if (item.getStatus() == DownloadStatus.IDLE) {
                 /* start item in idle item */
                 item.start();
             }
-        }if(buttonId == 1){
+        }
+        if (buttonId == 1) {
             /* the clear list button */
             this.list.clearNonActiveItems();
         }

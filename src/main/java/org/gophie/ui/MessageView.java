@@ -18,13 +18,15 @@
 
 package org.gophie.ui;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.border.*;
-
-import org.gophie.config.*;
+import org.gophie.config.ConfigFile;
+import org.gophie.config.ConfigurationManager;
 import org.gophie.ui.event.MessageViewListener;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class MessageView extends JPanel {
     /* constants */
@@ -33,10 +35,10 @@ public class MessageView extends JPanel {
     private static final String MESSAGEVIEW_FOREGROUND_COLOR = "#000000";
 
     /* local components */
-    private JLabel messageIcon;
-    private JLabel messageText;
-    private JPanel buttonPanel;
-    private Font iconFont;
+    private final JLabel messageIcon;
+    private final JLabel messageText;
+    private final JPanel buttonPanel;
+    private final Font iconFont;
 
     /**
      * Constructs the message view and does not show it by default as one of the
@@ -53,28 +55,28 @@ public class MessageView extends JPanel {
         this.setLayout(new BorderLayout());
         this.setBorder(new EmptyBorder(10, 10, 10, 16));
         this.setBackground(Color.decode(configFile.getSetting
-                ("MESSAGEVIEW_BACKGROUND_COLOR", "Appearance", 
-                MESSAGEVIEW_BACKGROUND_COLOR)));
+                ("MESSAGEVIEW_BACKGROUND_COLOR", "Appearance",
+                        MESSAGEVIEW_BACKGROUND_COLOR)));
 
         /* create the label instance */
         this.messageIcon = new JLabel();
         this.messageIcon.setFont(this.iconFont);
         this.messageIcon.setBorder(new EmptyBorder(0, 5, 0, 10));
         this.messageIcon.setForeground(Color.decode(configFile.getSetting
-                ("MESSAGEVIEW_FOREGROUND_COLOR", "Appearance", 
-                MESSAGEVIEW_FOREGROUND_COLOR)));
+                ("MESSAGEVIEW_FOREGROUND_COLOR", "Appearance",
+                        MESSAGEVIEW_FOREGROUND_COLOR)));
 
         this.messageText = new JLabel();
         this.messageText.setFont(ConfigurationManager.getDefaultFont(11f));
         this.messageText.setForeground(Color.decode(configFile.getSetting
-                ("MESSAGEVIEW_FOREGROUND_COLOR", "Appearance", 
-                MESSAGEVIEW_FOREGROUND_COLOR)));
+                ("MESSAGEVIEW_FOREGROUND_COLOR", "Appearance",
+                        MESSAGEVIEW_FOREGROUND_COLOR)));
 
         this.buttonPanel = new JPanel();
         this.buttonPanel.setBorder(new EmptyBorder(0, 30, 0, 0));
         this.buttonPanel.setLayout(new BoxLayout(this.buttonPanel, BoxLayout.X_AXIS));
         this.buttonPanel.setBackground(Color.decode(configFile.getSetting
-                        ("MESSAGEVIEW_BACKGROUND_COLOR", "Appearance", 
+                ("MESSAGEVIEW_BACKGROUND_COLOR", "Appearance",
                         MESSAGEVIEW_BACKGROUND_COLOR)));
 
         this.add(this.messageIcon, BorderLayout.WEST);
@@ -87,18 +89,15 @@ public class MessageView extends JPanel {
 
     /**
      * Creates a new button for this view
-     * 
-     * @param text
-     * The text on the button as string
-     * 
-     * @return
-     * The button in the form of a JLabel
+     *
+     * @param text The text on the button as string
+     * @return The button in the form of a JLabel
      */
     private JLabel createButton(String text) {
         /* get the config file */
         ConfigFile configFile = ConfigurationManager.getConfigFile();
-        String buttonColor = configFile.getSetting("MESSAGEVIEW_FOREGROUND_COLOR", 
-                                        "Appearance", MESSAGEVIEW_FOREGROUND_COLOR);
+        String buttonColor = configFile.getSetting("MESSAGEVIEW_FOREGROUND_COLOR",
+                "Appearance", MESSAGEVIEW_FOREGROUND_COLOR);
 
         JLabel customButton = new JLabel("<html><div style=\"border:1px solid " + buttonColor + ";"
                 + "padding:2px 6px 2px 6px;border-radius:6px;\">" + text + "</div></html>");
@@ -111,9 +110,8 @@ public class MessageView extends JPanel {
 
     /**
      * Shows an information message
-     * 
-     * @param text
-     * Text of the information message as string
+     *
+     * @param text Text of the information message as string
      */
     public void showInfo(String text) {
         /* build up icon and text */
@@ -124,7 +122,7 @@ public class MessageView extends JPanel {
         /* add the handle to close this message */
         JLabel closeButton = this.createButton("Close");
         closeButton.addMouseListener(new MouseAdapter() {
-            public void mouseReleased(MouseEvent evt){
+            public void mouseReleased(MouseEvent evt) {
                 setVisible(false);
             }
         });
@@ -136,25 +134,22 @@ public class MessageView extends JPanel {
 
     /**
      * Shows a confirm message with options
-     * 
-     * @param text
-     * The text to show in the message view
-     * 
-     * @param optionList
-     * A string array with the options
+     *
+     * @param text       The text to show in the message view
+     * @param optionList A string array with the options
      */
-    public void showConfirm(String text, String[] optionList, MessageViewListener eventListener){
+    public void showConfirm(String text, String[] optionList, MessageViewListener eventListener) {
         /* remove all components */
         this.messageIcon.setText("");
         this.messageText.setText(text);
 
         /* build the option buttons */
         this.buttonPanel.removeAll();
-        for(int i=0; i<optionList.length; i++){
+        for (int i = 0; i < optionList.length; i++) {
             JLabel optionButton = this.createButton(optionList[i]);
             final int optionId = i;
             optionButton.addMouseListener(new MouseAdapter() {
-                public void mouseReleased(MouseEvent evt){
+                public void mouseReleased(MouseEvent evt) {
                     eventListener.optionSelected(optionId);
                 }
             });

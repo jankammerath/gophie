@@ -18,6 +18,13 @@
 
 package org.gophie.net;
 
+import lombok.extern.slf4j.Slf4j;
+import org.gophie.io.FileSignature;
+import org.gophie.io.FileSignature.FileSignatureType;
+import org.gophie.net.GopherItem.GopherItemType;
+import org.gophie.net.event.GopherClientEventListener;
+import org.gophie.net.event.GopherError;
+
 import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
@@ -25,11 +32,7 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 
-import org.gophie.io.FileSignature;
-import org.gophie.io.FileSignature.FileSignatureType;
-import org.gophie.net.GopherItem.GopherItemType;
-import org.gophie.net.event.*;
-
+@Slf4j
 public class GopherClient {
     /* thread with the active fetch process */
     private Thread thread;
@@ -38,43 +41,37 @@ public class GopherClient {
     /**
      * Cancels a current fetch operation
      */
-    public void cancelFetch(){
-        if(this.thread != null){
+    public void cancelFetch() {
+        if (this.thread != null) {
             this.thread.interrupt();
             this.cancelled = true;
         }
     }
 
     /**
-     * Returns whether the current 
+     * Returns whether the current
      * operation was cancelled or not
-     * 
-     * @return
-     * true when cancelled, false otherwise
+     *
+     * @return true when cancelled, false otherwise
      */
-    public Boolean isCancelled(){
+    public Boolean isCancelled() {
         return this.cancelled;
     }
 
     /**
-     * Downloads content through gopher and 
+     * Downloads content through gopher and
      * stores it in the define target file
-     * 
-     * @param url
-     * Url to download the content from
-     * 
-     * @param targetFile
-     * The file to write the content to
-     * 
-     * @param eventListener
-     * Listener to report the status to
+     *
+     * @param url           Url to download the content from
+     * @param targetFile    The file to write the content to
+     * @param eventListener Listener to report the status to
      */
-    public void downloadAsync(String url, String targetFile, GopherClientEventListener eventListener){
+    public void downloadAsync(String url, String targetFile, GopherClientEventListener eventListener) {
         /* instanciate the new thread */
         GopherClient clientObject = this;
-        this.thread = new Thread(new Runnable() { 
-            public void run() { 
-                try{
+        this.thread = new Thread(new Runnable() {
+            public void run() {
+                try {
                     /* create the output file stream to write to */
                     OutputStream fileStream = new FileOutputStream(new File(targetFile));
 
@@ -98,8 +95,8 @@ public class GopherClient {
                         totalByteCount = totalByteCount + data.length;
 
                         /* report byte count to listener */
-                        if(!clientObject.isCancelled()){
-                            if(eventListener != null){
+                        if (!clientObject.isCancelled()) {
+                            if (eventListener != null) {
                                 eventListener.progress(gopherUrl, totalByteCount);
                             }
                         }
@@ -111,72 +108,69 @@ public class GopherClient {
                     /* close the file stream */
                     fileStream.close();
 
-                    if(!clientObject.isCancelled()){
-                        if (eventListener != null) { 
-                            eventListener.pageLoaded(null); 
-                        } 
+                    if (!clientObject.isCancelled()) {
+                        if (eventListener != null) {
+                            eventListener.pageLoaded(null);
+                        }
                     }
-                }catch(Exception ex){
+                } catch (Exception ex) {
                     /* log the exception message */
-                    System.out.println("Download failed (" + url + "):" + ex.getMessage());
+                    log.error("Download failed ({}): {}", url, ex.getMessage());
 
                     /* remove the file if already created */
                     File createdFile = new File(targetFile);
-                    if(createdFile.exists()){ createdFile.delete(); }
+                    if (createdFile.exists()) {
+                        createdFile.delete();
+                    }
 
                     /* notify the handlers */
-                    if(!clientObject.isCancelled()){
-                        if (eventListener != null) { 
-                            eventListener.pageLoadFailed(GopherError.EXCEPTION,new GopherUrl(url));
-                        } 
+                    if (!clientObject.isCancelled()) {
+                        if (eventListener != null) {
+                            eventListener.pageLoadFailed(GopherError.EXCEPTION, new GopherUrl(url));
+                        }
                     }
                 }
-            } 
+            }
         });
 
         /* start the new thread */
-        this.thread.start();        
+        this.thread.start();
     }
 
     /**
      * Fetches a gopher page asynchronously
-     * 
-     * @param url
-     * the url of the gopher page to fetch
-     * 
-     * @param contentType
-     * the expected content type of the url
-     * 
-     * @param eventListener
-     * the listener to report the result to
+     *
+     * @param url           the url of the gopher page to fetch
+     * @param contentType   the expected content type of the url
+     * @param eventListener the listener to report the result to
      */
-    public void fetchAsync(String url, GopherItemType contentType, GopherClientEventListener eventListener){
+    public void fetchAsync(String url, GopherItemType contentType, GopherClientEventListener eventListener) {
         /* instanciate the new thread */
         GopherClient clientObject = this;
-        this.thread = new Thread(new Runnable() { 
-            public void run() { 
-                try{
+        this.thread = new Thread(new Runnable() {
+            public void run() {
+                try {
                     GopherPage resultPage = fetch(url, contentType, eventListener);
 
-                    if(!clientObject.isCancelled()){
-                        if (eventListener != null) { 
-                            eventListener.pageLoaded(resultPage); 
-                        } 
+                    if (!clientObject.isCancelled()) {
+                        if (eventListener != null) {
+                            eventListener.pageLoaded(resultPage);
+                        }
                     }
-                }catch(GopherNetworkException ex){
-                    if(!clientObject.isCancelled()){
-                        if (eventListener != null) { 
-                            eventListener.pageLoadFailed(ex.getGopherErrorType(),new GopherUrl(url));
-                        } 
+                } catch (GopherNetworkException ex) {
+                    if (!clientObject.isCancelled()) {
+                        if (eventListener != null) {
+                            eventListener.pageLoadFailed(ex.getGopherErrorType(), new GopherUrl(url));
+                        }
                     }
-                }catch(GopherItemTypeException ex){
-                    if(!clientObject.isCancelled()){
-                        if (eventListener != null) { 
-                            eventListener.pageLoadItemMismatch(ex.getRequestedType(),ex.getDetectedType(),new GopherUrl(url));
-                        } 
+                } catch (GopherItemTypeException ex) {
+                    if (!clientObject.isCancelled()) {
+                        if (eventListener != null) {
+                            eventListener.pageLoadItemMismatch(ex.getRequestedType(), ex.getDetectedType(), new GopherUrl(url));
+                        }
                     }
                 }
-            } 
+            }
         });
 
         /* start the new thread */
@@ -186,28 +180,19 @@ public class GopherClient {
     /**
      * Fetches a gopher page. Do not use this method for fetching
      * anything other than gopher menus or pages, text files or images
-     * as this method will throw an exception if it encounters media 
+     * as this method will throw an exception if it encounters media
      * files or other binary data.
-     * 
-     * @param url
-     * the url of the page to fetch
-     * 
-     * @param contentType
-     * the expected content type
-     * 
-     * @param eventListener
-     * event listener to report progress to
-     * 
-     * @return
-     * the fetched gopher page object
-     * 
-     * @throws GopherNetworkException
-     * Exception with network information
+     *
+     * @param url           the url of the page to fetch
+     * @param contentType   the expected content type
+     * @param eventListener event listener to report progress to
+     * @return the fetched gopher page object
+     * @throws GopherNetworkException Exception with network information
      */
     public GopherPage fetch(String url, GopherItemType contentType, GopherClientEventListener eventListener) throws GopherNetworkException, GopherItemTypeException {
         GopherPage result = null;
 
-        try{
+        try {
             /* reset the cancellation indicator */
             this.cancelled = false;
 
@@ -229,14 +214,14 @@ public class GopherClient {
             /* read byte by byte to be able to report progress */
             while ((read = socketStream.read(data, 0, data.length)) != -1) {
                 /* check the file signature from the first bytes received */
-                if(totalByteCount == 0){
+                if (totalByteCount == 0) {
                     FileSignature fileSignature = new FileSignature(data);
                     FileSignatureType fileType = fileSignature.getSignatureItemType();
 
                     /* check if the actual file type is an image */
-                    if(fileType == FileSignatureType.IMAGE && 
-                        (contentType != GopherItemType.IMAGE_FILE 
-                        || contentType != GopherItemType.GIF_FILE)){
+                    if (fileType == FileSignatureType.IMAGE &&
+                            (contentType != GopherItemType.IMAGE_FILE
+                                    || contentType != GopherItemType.GIF_FILE)) {
                         /* when the detected file signature is an image, but
                             the original gopher item type defined is neither
                             a generic image nor a gif file, simply fix the
@@ -245,12 +230,13 @@ public class GopherClient {
                     }
 
                     /* check if the actual file is a media file */
-                    if(fileType == FileSignatureType.MEDIA){
+                    if (fileType == FileSignatureType.MEDIA) {
                         /* fetching media files needs to be done
                             through the download method. this method
                             is for fetching gopher pages, text and images */
                         throw new GopherItemTypeException(url, contentType, GopherItemType.SOUND_FILE);
-                    }if(fileType == FileSignatureType.BINARY){
+                    }
+                    if (fileType == FileSignatureType.BINARY) {
                         /* same goes for binary files */
                         throw new GopherItemTypeException(url, contentType, GopherItemType.BINARY_FILE);
                     }
@@ -259,16 +245,16 @@ public class GopherClient {
                 /* verify that the provided file is actually a text file
                     as it seems to be getting very big and might be a 
                     binary or media file */
-                if((contentType == GopherItemType.GOPHERMENU 
-                    || contentType == GopherItemType.TEXTFILE
-                    || contentType == GopherItemType.UNKNOWN)
-                    && totalByteCount > 200000){
+                if ((contentType == GopherItemType.GOPHERMENU
+                        || contentType == GopherItemType.TEXTFILE
+                        || contentType == GopherItemType.UNKNOWN)
+                        && totalByteCount > 200000) {
                     /* check if the data is text content or not */
                     FileSignature largeSignature = new FileSignature(data);
                     FileSignatureType largeType = largeSignature.getSignatureItemType();
 
                     /* throw an exception when this file does not match */
-                    if(largeType != FileSignatureType.TEXT){
+                    if (largeType != FileSignatureType.TEXT) {
                         /* throw the item type exception and define this as a generic binary */
                         throw new GopherItemTypeException(url, contentType, GopherItemType.BINARY_FILE);
                     }
@@ -281,8 +267,8 @@ public class GopherClient {
                 totalByteCount = totalByteCount + data.length;
 
                 /* report byte count to listener */
-                if(!this.isCancelled()){
-                    if(eventListener != null){
+                if (!this.isCancelled()) {
+                    if (eventListener != null) {
                         eventListener.progress(gopherUrl, totalByteCount);
                     }
                 }
@@ -293,21 +279,21 @@ public class GopherClient {
 
             /* set the result page */
             result = new GopherPage(buffer.toByteArray(), contentType, gopherUrl);
-        }catch(ConnectException ex){
+        } catch (ConnectException ex) {
             /* handle host connection errors */
             throw new GopherNetworkException(GopherError.CONNECT_FAILED, ex.getMessage());
-        }catch(UnknownHostException ex){
+        } catch (UnknownHostException ex) {
             /* handle host not found exception */
             throw new GopherNetworkException(GopherError.HOST_UNKNOWN, ex.getMessage());
-        }catch(SocketTimeoutException ex){
+        } catch (SocketTimeoutException ex) {
             /* handle host not found exception */
             throw new GopherNetworkException(GopherError.CONNECTION_TIMEOUT, ex.getMessage());
-        }catch(GopherItemTypeException ex){
+        } catch (GopherItemTypeException ex) {
             /* just pass through the item type exception */
             throw ex;
-        }catch(Exception ex){
+        } catch (Exception ex) {
             /* handle the error properly and raise and event */
-            System.out.println("GOPHER NETWORK EXCEPTION: " + ex.getMessage());
+            log.error("GOPHER NETWORK EXCEPTION: {}", ex.getMessage());
             throw new GopherNetworkException(GopherError.EXCEPTION, ex.getMessage());
         }
 

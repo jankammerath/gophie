@@ -18,6 +18,6 @@
 
 package org.gophie.net.event;
 
-public interface DownloadItemEventListener{
+public interface DownloadItemEventListener {
     void downloadProgressReported();
 }

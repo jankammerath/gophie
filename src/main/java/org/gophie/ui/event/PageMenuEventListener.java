@@ -23,7 +23,10 @@ import org.gophie.net.GopherPage;
 
 public interface PageMenuEventListener {
     void setHomeGopherRequested(String url);
+
     void itemDownloadRequested(GopherItem item);
+
     void pageSaveRequested(GopherPage page);
+
     void selectAllTextRequested();
 }

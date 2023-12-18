@@ -24,48 +24,77 @@ public class GopherUrl {
     private String selector;
 
     /**
-     * Returns the port number of this address
-     * 
-     * @return
-     * the port number as integer
+     * constructs the object and parses the url
+     *
+     * @param url the url to parse as string
      */
-    public int getPort(){
+    public GopherUrl(String url) {
+        this.host = url;
+
+        /* check if the url contains the protocol specifier */
+        if (this.host.startsWith("gopher://")) {
+            this.host = this.host.substring(9);
+        }
+
+        /* check if a selector was provided */
+        if (this.host.indexOf("/") > 0) {
+            this.selector = this.host.substring(this.host.indexOf("/"));
+            this.host = this.host.substring(0, this.host.indexOf("/"));
+        } else {
+            /* no selector present, set the default to empty string */
+            this.selector = "";
+        }
+
+        /* check if a port number was provided */
+        if (this.host.indexOf(":") > 0) {
+            /* remove port number from host name */
+            String[] valueList = this.host.split(":");
+            this.host = valueList[0];
+
+            /* set the port number separately */
+            this.port = Integer.parseInt(valueList[1]);
+        }
+    }
+
+    /**
+     * Returns the port number of this address
+     *
+     * @return the port number as integer
+     */
+    public int getPort() {
         return this.port;
     }
 
     /**
      * Returns the host name of this url
-     * 
-     * @return
-     * host name as string
+     *
+     * @return host name as string
      */
-    public String getHost(){
+    public String getHost() {
         return this.host;
     }
 
     /**
      * Returns the selector of this url
-     * 
-     * @return
-     * the selector as string
+     *
+     * @return the selector as string
      */
-    public String getSelector(){
+    public String getSelector() {
         return this.selector;
     }
 
     /**
      * Returns the type prefix from the url, if any
-     * 
-     * @return
-     * type prefix (gopher item type code) as string
+     *
+     * @return type prefix (gopher item type code) as string
      */
-    public String getTypePrefix(){
+    public String getTypePrefix() {
         String result = null;
 
-        if(this.selector.length() >= 3){
-            if(this.selector.charAt(0) == '/' && this.selector.charAt(2) == '/'){
-                String itemTypeCode = this.selector.substring(1,2);
-                if(itemTypeCode.matches("[0-9\\+gIThis\\?]")){
+        if (this.selector.length() >= 3) {
+            if (this.selector.charAt(0) == '/' && this.selector.charAt(2) == '/') {
+                String itemTypeCode = this.selector.substring(1, 2);
+                if (itemTypeCode.matches("[0-9\\+gIThis\\?]")) {
                     result = itemTypeCode;
                 }
             }
@@ -75,60 +104,33 @@ public class GopherUrl {
     }
 
     /**
-     * Determines whether the url's selector 
-     * has a type prefix for the gopher item
-     * @return
-     */
-    public boolean hasTypePrefix(){
-        boolean result = false;
-
-        if(this.getTypePrefix() != null){
-            result = true;
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns the url string for this url 
-     * without type prefix, if present
-     * 
-     * @return
-     * the url string of the url
-     */
-    public String getUrlString(){
-        return this.getUrlString(false);
-    }
-
-    /**
      * Sets or overwrites the type prefix for this url
-     * 
-     * @param prefix
-     * single-character type prefix as string
+     *
+     * @param prefix single-character type prefix as string
      */
-    public void setTypePrefix(String prefix){
+    public void setTypePrefix(String prefix) {
         /* check if a type prefix is present already */
-        if(this.hasTypePrefix()){
+        if (this.hasTypePrefix()) {
             /* replace the existing type prefix with the new one */
-            if(this.selector.length() > 3){
-                if(this.selector.substring(3,4).equals("/")){
+            if (this.selector.length() > 3) {
+                if (this.selector.charAt(3) == '/') {
                     this.selector = "/" + prefix + this.selector.substring(3);
-                }else{
+                } else {
                     this.selector = "/" + prefix + "/" + this.selector.substring(3);
                 }
-            }else{
+            } else {
                 /* only the prefix is in the selector, replace it */
                 this.selector = "/" + prefix + "/";
             }
-        }else{
-            if(this.selector.length() > 0){
+        } else {
+            if (this.selector.length() > 0) {
                 /* just add the type prefix to the selector */
-                if(this.selector.substring(0,1).equals("/")){
+                if (this.selector.charAt(0) == '/') {
                     this.selector = "/" + prefix + this.selector;
-                }else{
+                } else {
                     this.selector = "/" + prefix + "/" + this.selector;
                 }
-            }else{
+            } else {
                 /* just set the prefix as the selector */
                 this.selector = "/" + prefix + "/";
             }
@@ -136,20 +138,39 @@ public class GopherUrl {
     }
 
     /**
-     * Returns the url string for this url
-     * 
-     * @param includeTypePrefix
-     * when true will include the type prefix in the 
-     * url, if any is available. If none is available, 
-     * this parameter has no effect.
-     * 
+     * Determines whether the url's selector
+     * has a type prefix for the gopher item
+     *
      * @return
-     * the url as string
      */
-    public String getUrlString(boolean includeTypePrefix){
+    public boolean hasTypePrefix() {
+        boolean result = this.getTypePrefix() != null;
+
+        return result;
+    }
+
+    /**
+     * Returns the url string for this url
+     * without type prefix, if present
+     *
+     * @return the url string of the url
+     */
+    public String getUrlString() {
+        return this.getUrlString(false);
+    }
+
+    /**
+     * Returns the url string for this url
+     *
+     * @param includeTypePrefix when true will include the type prefix in the
+     *                          url, if any is available. If none is available,
+     *                          this parameter has no effect.
+     * @return the url as string
+     */
+    public String getUrlString(boolean includeTypePrefix) {
         String result = this.host;
 
-        if(this.port != 70){
+        if (this.port != 70) {
             result += ":" + this.port;
         }
 
@@ -157,55 +178,21 @@ public class GopherUrl {
             for presentation and technically not part
             of the url itself */
         String selectorValue = this.selector;
-        if(this.hasTypePrefix()){
-            if(!includeTypePrefix){
+        if (this.hasTypePrefix()) {
+            if (!includeTypePrefix) {
                 /* remove the type prefix if requested */
                 selectorValue = selectorValue.substring(3);
             }
         }
 
-        if(selectorValue.length() > 0){
-            if(selectorValue.startsWith("/")){
+        if (selectorValue.length() > 0) {
+            if (selectorValue.startsWith("/")) {
                 result += selectorValue;
-            }else{
+            } else {
                 result += "/" + selectorValue;
             }
         }
 
         return result;
-    }
-    
-    /**
-     * constructs the object and parses the url
-     * 
-     * @param url
-     * the url to parse as string
-     */
-    public GopherUrl(String url){
-        this.host = url;
-
-        /* check if the url contains the protocol specifier */
-        if(this.host.startsWith("gopher://") == true){
-            this.host = this.host.substring(9);
-        }
-
-        /* check if a selector was provided */
-        if(this.host.indexOf("/") > 0){
-            this.selector = this.host.substring(this.host.indexOf("/"));
-            this.host = this.host.substring(0, this.host.indexOf("/"));
-        }else{
-            /* no selector present, set the default to empty string */
-            this.selector = "";
-        }
-
-        /* check if a port number was provided */
-        if(this.host.indexOf(":") > 0){
-            /* remove port number from host name */
-            String[] valueList = this.host.split(":");
-            this.host = valueList[0];
-
-            /* set the port number separately */
-            this.port = Integer.parseInt(valueList[1]);
-        }
     }
 }

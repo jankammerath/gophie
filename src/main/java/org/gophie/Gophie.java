@@ -18,10 +18,10 @@
 
 package org.gophie;
 
-import javax.swing.BorderFactory;
-import javax.swing.UIManager;
-
+import com.formdev.flatlaf.intellijthemes.FlatArcDarkOrangeIJTheme;
 import org.gophie.ui.MainWindow;
+
+import javax.swing.*;
 
 public class Gophie {
     /**
@@ -45,20 +45,11 @@ public class Gophie {
         /* set the proper application title on mac */
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Gophie");
 
-        try {
-            /* try setting to system look and feel */
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            /* exception when trying to set, but ignore it */
-            System.out.println("Error setting system look and feel");
-        }
+        //FlatNightOwlContrastIJTheme.setup();
+        FlatArcDarkOrangeIJTheme.setup();
 
         /* Schedule a job for the event-dispatching thread:
             creating and showing this application's GUI. */
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                createAndShowGUI();
-            }
-        });
+        javax.swing.SwingUtilities.invokeLater(Gophie::createAndShowGUI);
     }
 }

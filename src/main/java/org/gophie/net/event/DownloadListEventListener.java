@@ -18,7 +18,8 @@
 
 package org.gophie.net.event;
 
-public interface DownloadListEventListener{
+public interface DownloadListEventListener {
     void downloadListUpdated();
+
     void downloadProgressReported();
 }

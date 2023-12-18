@@ -18,26 +18,27 @@
 
 package org.gophie.config;
 
-import java.awt.*;
-import java.io.*;
-import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.util.Objects;
 
-public class ConfigurationManager{
-    private static ConfigFile configFile;
+@Slf4j
+public class ConfigurationManager {
     private static final String MAIN_CONFIG_FILENAME = "config.ini";
     private static final String CONFIG_FOLDERNAME = "Gophie";
+    private static ConfigFile configFile;
 
     /**
      * Returns the main configuration file
-     * 
-     * @return
-     * The main configuration file as ConfigFile
+     *
+     * @return The main configuration file as ConfigFile
      */
-    public static ConfigFile getConfigFile(){
-        if(ConfigurationManager.configFile == null){
+    public static ConfigFile getConfigFile() {
+        if (ConfigurationManager.configFile == null) {
             String configFileName = ConfigurationManager.getConfigPath() + MAIN_CONFIG_FILENAME;
             ConfigurationManager.configFile = new ConfigFile(configFileName);
         }
@@ -47,11 +48,10 @@ public class ConfigurationManager{
 
     /**
      * Returns the configuration directory's path
-     * 
-     * @return
-     * The full path to the configuration directory
+     *
+     * @return The full path to the configuration directory
      */
-    public static String getConfigPath(){
+    public static String getConfigPath() {
         /* define the full path of the configuration directory */
         String result = System.getProperty("user.home") + "/" + CONFIG_FOLDERNAME + "/";
 
@@ -64,27 +64,22 @@ public class ConfigurationManager{
 
     /**
      * Returns a Font from the resources
-     * 
-     * @param fileName
-     * Filename of the font in the resources path
-     * 
-     * @param size
-     * Size of the Font
-     * 
-     * @return
-     * The Font object with the font
+     *
+     * @param fileName Filename of the font in the resources path
+     * @param size     Size of the Font
+     * @return The Font object with the font
      */
-    public static Font getFont(String fileName, float size){
+    public static Font getFont(String fileName, float size) {
         Font result = null;
 
-        try{
+        try {
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             result = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(classLoader.getResourceAsStream(fileName))).deriveFont(size);
             GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
             graphicsEnvironment.registerFont(result);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             /* Ouchie, this will look bad... */
-            System.out.println("Unable to load font: " + ex.getMessage());
+            log.error("Unable to load font: {}", ex.getMessage());
         }
 
         return result;
@@ -92,36 +87,30 @@ public class ConfigurationManager{
 
     /**
      * Returns the font for icon display
-     * 
-     * @param size
-     * The size of the font as float
-     * 
-     * @return
-     * A Font object containing the icon font
+     *
+     * @param size The size of the font as float
+     * @return A Font object containing the icon font
      */
-    public static Font getIconFont(float size){
+    public static Font getIconFont(float size) {
         return ConfigurationManager.getFont("Feather.ttf", size);
     }
 
     /**
      * Returns an image from the resources
-     * 
-     * @param name
-     * Name of the image file from the resources
-     * 
-     * @return
-     * The image object from the resources
+     *
+     * @param name Name of the image file from the resources
+     * @return The image object from the resources
      */
-    public static Image getImage(String name){
+    public static Image getImage(String name) {
         Image result = null;
 
-        try{
+        try {
             /* try to open the font for icon display */
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             result = ImageIO.read(Objects.requireNonNull(classLoader.getResource(name)));
-        }catch(Exception ex){
+        } catch (Exception ex) {
             /* Ouchie, this will look bad... */
-            System.out.println("Unable to load the image icon (" + name + "): " + ex.getMessage());
+            log.error("Unable to load the image icon ({}): {}", name, ex.getMessage());
         }
 
         return result;
@@ -129,23 +118,20 @@ public class ConfigurationManager{
 
     /**
      * Returns an image icon from the resources
-     * 
-     * @param name
-     * Name of the image icon file from the resources
-     * 
-     * @return
-     * The ImageIcon object from the resources
+     *
+     * @param name Name of the image icon file from the resources
+     * @return The ImageIcon object from the resources
      */
-    public static ImageIcon getImageIcon(String name){
+    public static ImageIcon getImageIcon(String name) {
         ImageIcon result = null;
 
-        try{
+        try {
             /* try to open the font for icon display */
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             result = new ImageIcon(Objects.requireNonNull(classLoader.getResource(name)));
-        }catch(Exception ex){
+        } catch (Exception ex) {
             /* Ouchie, this will look bad... */
-            System.out.println("Unable to load the image icon (" + name + "): " + ex.getMessage());
+            log.error("Unable to load the image icon ({}): {}", name, ex.getMessage());
         }
 
         return result;
@@ -153,46 +139,40 @@ public class ConfigurationManager{
 
     /**
      * Returns the default console font
-     * 
-     * @param size
-     * Size of the requested font
-     * 
-     * @return
-     * The Font object
+     *
+     * @param size Size of the requested font
+     * @return The Font object
      */
-    public static Font getConsoleFont(float size){
+    public static Font getConsoleFont(float size) {
         Font result;
 
         /* get the font from the configuration file */
         String fontName = ConfigurationManager.getConfigFile().getSetting("PAGE_FONT", "Appearance", "");
-        if(fontName.isEmpty()){
+        if (fontName.isEmpty()) {
             /* no font provided in config, use default */
             result = ConfigurationManager.getFont("Inconsolata-Regular.ttf", size);
-        }else{
+        } else {
             /* system font defined, use that one instead */
-            result = new Font(fontName, Font.PLAIN, (int)size);
+            result = new Font(fontName, Font.PLAIN, (int) size);
         }
-    
+
         return result;
     }
 
     /**
      * Returns the configured size for the console font
-     * 
-     * @param defaultSize
-     * the default size as a float
-     * 
-     * @return
-     * returns the configured size as float
+     *
+     * @param defaultSize the default size as a float
+     * @return returns the configured size as float
      */
-    public static float getConsoleFontSize(float defaultSize){
+    public static float getConsoleFontSize(float defaultSize) {
         float result = defaultSize;
 
         /* get the configured font size for the console font */
         String fontSize = ConfigurationManager.getConfigFile().getSetting("PAGE_FONT_SIZE", "Appearance", "");
-        if(!fontSize.isEmpty()){
+        if (!fontSize.isEmpty()) {
             /* parse the font size and cast it to float */
-            result = (float)Integer.parseInt(fontSize);
+            result = (float) Integer.parseInt(fontSize);
         }
 
         return result;
@@ -200,27 +180,23 @@ public class ConfigurationManager{
 
     /**
      * Returns the default text font
-     * 
-     * @param size
-     * Size of the requested font
-     * 
-     * @return
-     * The Font object
+     *
+     * @param size Size of the requested font
+     * @return The Font object
      */
-    public static Font getDefaultFont(float size){
+    public static Font getDefaultFont(float size) {
         return ConfigurationManager.getFont("OpenSans-Regular.ttf", size);
     }
 
     /**
      * Returns the directory where all
      * the downloads should be stored in
-     * which usually resides in the user 
+     * which usually resides in the user
      * home
-     * 
-     * @return
-     * Path to the download directory
+     *
+     * @return Path to the download directory
      */
-    public static String getDownloadPath(){
+    public static String getDownloadPath() {
         return System.getProperty("user.home") + "/Downloads/";
     }
 }

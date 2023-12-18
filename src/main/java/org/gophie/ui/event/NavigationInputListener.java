@@ -26,10 +26,16 @@ import org.gophie.net.GopherItem;
 */
 public interface NavigationInputListener {
     void addressRequested(String addressText, GopherItem item);
+
     void homeGopherRequested();
+
     void backwardRequested();
+
     void forwardRequested();
+
     void refreshRequested();
+
     void stopRequested();
+
     void showDownloadRequested();
 }

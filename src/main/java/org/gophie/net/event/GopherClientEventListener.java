@@ -18,13 +18,16 @@
 
 package org.gophie.net.event;
 
+import org.gophie.net.GopherItem.GopherItemType;
 import org.gophie.net.GopherPage;
 import org.gophie.net.GopherUrl;
-import org.gophie.net.GopherItem.GopherItemType;
 
 public interface GopherClientEventListener {
     void progress(GopherUrl url, long byteCount);
+
     void pageLoaded(GopherPage result);
+
     void pageLoadFailed(GopherError error, GopherUrl url);
+
     void pageLoadItemMismatch(GopherItemType requested, GopherItemType detected, GopherUrl url);
 }

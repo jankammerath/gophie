@@ -28,23 +28,18 @@ import org.gophie.net.GopherItem.GopherItemType;
 public class GopherItemTypeException extends Exception {
     private static final long serialVersionUID = 1L;
 
-    private String url;
-    private GopherItemType requested;
-    private GopherItemType detected;
+    private final String url;
+    private final GopherItemType requested;
+    private final GopherItemType detected;
 
     /**
      * Constructs this exception
-     * 
-     * @param requestedUrl
-     * the requested gopher url for this item
-     * 
-     * @param requestedType
-     * the requested gopher type for this item
-     * 
-     * @param detectedType
-     * the detected gopher type for this item
+     *
+     * @param requestedUrl  the requested gopher url for this item
+     * @param requestedType the requested gopher type for this item
+     * @param detectedType  the detected gopher type for this item
      */
-    public GopherItemTypeException(String requestedUrl, GopherItemType requestedType, GopherItemType detectedType){
+    public GopherItemTypeException(String requestedUrl, GopherItemType requestedType, GopherItemType detectedType) {
         this.url = requestedUrl;
         this.requested = requestedType;
         this.detected = detectedType;
@@ -52,31 +47,28 @@ public class GopherItemTypeException extends Exception {
 
     /**
      * Returns the requested url
-     * 
-     * @return
-     * url as string
+     *
+     * @return url as string
      */
-    public String getRequestedUrl(){
+    public String getRequestedUrl() {
         return this.url;
     }
 
     /**
      * Returns the requested gopher item type
-     * 
-     * @return
-     * the goper item type requested
+     *
+     * @return the goper item type requested
      */
-    public GopherItemType getRequestedType(){
+    public GopherItemType getRequestedType() {
         return this.requested;
     }
 
     /**
      * Returns the detected gopher item type
-     * 
-     * @return
-     * the gopher item type detected
+     *
+     * @return the gopher item type detected
      */
-    public GopherItemType getDetectedType(){
+    public GopherItemType getDetectedType() {
         return this.detected;
     }
 }

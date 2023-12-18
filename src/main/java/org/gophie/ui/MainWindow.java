@@ -18,25 +18,25 @@
 
 package org.gophie.ui;
 
+import lombok.extern.slf4j.Slf4j;
+import org.gophie.config.ConfigFile;
+import org.gophie.config.ConfigurationManager;
+import org.gophie.config.SystemUtility;
+import org.gophie.net.*;
+import org.gophie.net.GopherItem.GopherItemType;
+import org.gophie.net.event.GopherClientEventListener;
+import org.gophie.net.event.GopherError;
+import org.gophie.ui.event.MessageViewListener;
+import org.gophie.ui.event.NavigationInputListener;
+import org.gophie.ui.event.PageMenuEventListener;
+import org.gophie.ui.event.SearchInputListener;
+
+import javax.swing.*;
 import java.awt.*;
 import java.net.URI;
 import java.util.ArrayList;
 
-import javax.swing.*;
-
-/* import application config classes */
-import org.gophie.config.ConfigFile;
-import org.gophie.config.ConfigurationManager;
-import org.gophie.config.SystemUtility;
-
-/* import gopher network client */
-import org.gophie.net.*;
-import org.gophie.net.GopherItem.GopherItemType;
-import org.gophie.net.event.*;
-
-/* import ui event listeners */
-import org.gophie.ui.event.*;
-
+@Slf4j
 public class MainWindow implements NavigationInputListener, GopherClientEventListener, PageMenuEventListener {
     /* define the constants for the UI */
     public static final String APPLICATION_TITLE = "Gophie";
@@ -48,21 +48,18 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     public static final String DEFAULT_GOPHERHOME = "gopher.floodgap.com";
 
     /* local network objects */
-    private GopherClient gopherClient;
-    private DownloadList downloadList;
-
-    /* storage with history for browsing */
-    private ArrayList<GopherPage> history = new ArrayList<GopherPage>();
-    private int historyPosition = -1;
-
+    private final GopherClient gopherClient;
+    private final DownloadList downloadList;
     /* local ui elements */
-    private JFrame frame;
-    private PageView pageView;
-    private NavigationBar navigationBar;
-    private JPanel headerBar;
-    private MessageView messageView;
-    private SearchInput searchInput;
-    private DownloadWindow downloadWindow;
+    private final JFrame frame;
+    private final PageView pageView;
+    private final NavigationBar navigationBar;
+    private final MessageView messageView;
+    private final SearchInput searchInput;
+    private final DownloadWindow downloadWindow;
+    /* storage with history for browsing */
+    private ArrayList<GopherPage> history = new ArrayList<>();
+    private int historyPosition = -1;
 
     /**
      * Constructs this main window
@@ -87,17 +84,19 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.frame.setIconImage(ConfigurationManager.getImage("icon.png"));
 
         /* create the page view component object */
+        // TODO refactor to let theme handle color
         this.pageView = new PageView(this,
-            configFile.getSetting("VIEW_TEXTCOLOR", "Appearance", VIEW_TEXTCOLOR), 
-            configFile.getSetting("VIEW_BACKGROUND", "Appearance", VIEW_BACKGROUND));
+                configFile.getSetting("VIEW_TEXTCOLOR", "Appearance", VIEW_TEXTCOLOR),
+                configFile.getSetting("VIEW_BACKGROUND", "Appearance", VIEW_BACKGROUND));
         this.pageView.addListener(this);
 
         /* create the navigation bar */
+        // TODO refactor to let theme handle color
         this.navigationBar = new NavigationBar(
-            /* get the appearance configuration from the config file */
-            configFile.getSetting("NAVIGATIONBAR_BACKGROUND", "Appearance", NAVIGATIONBAR_BACKGROUND), 
-            configFile.getSetting("NAVIGATIONBAR_TEXTCOLOR", "Appearance", NAVIGATIONBAR_TEXTCOLOR),
-            configFile.getSetting("NAVIGATIONBAR_TEXTHOVERCOLOR", "Appearance", NAVIGATIONBAR_TEXTHOVERCOLOR)
+                /* get the appearance configuration from the config file */
+                configFile.getSetting("NAVIGATIONBAR_BACKGROUND", "Appearance", NAVIGATIONBAR_BACKGROUND),
+                configFile.getSetting("NAVIGATIONBAR_TEXTCOLOR", "Appearance", NAVIGATIONBAR_TEXTCOLOR),
+                configFile.getSetting("NAVIGATIONBAR_TEXTHOVERCOLOR", "Appearance", NAVIGATIONBAR_TEXTHOVERCOLOR)
         );
         
         /* set the gopher home as defined in the config
@@ -110,23 +109,23 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
         /* create the header bar, message view
             and search input component */
-        this.headerBar = new JPanel();
-        this.headerBar.setLayout(new BoxLayout(this.headerBar,BoxLayout.Y_AXIS));
+        JPanel headerBar = new JPanel();
+        headerBar.setLayout(new BoxLayout(headerBar, BoxLayout.Y_AXIS));
         this.messageView = new MessageView();
-        this.headerBar.add(this.messageView);
+        headerBar.add(this.messageView);
         this.searchInput = new SearchInput();
-        this.headerBar.add(this.searchInput);
+        headerBar.add(this.searchInput);
 
         /* set the content pane */
         Container contentPane = frame.getContentPane();
-        contentPane.add(this.headerBar, BorderLayout.NORTH);
+        contentPane.add(headerBar, BorderLayout.NORTH);
         contentPane.add(this.pageView, BorderLayout.CENTER);
         contentPane.add(this.navigationBar, BorderLayout.SOUTH);
 
         /* start the window in the center of the screen */
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        this.frame.setLocation(dim.width/2-this.frame.getSize().width/2, 
-                            dim.height/2-this.frame.getSize().height/2);
+        this.frame.setLocation(dim.width / 2 - this.frame.getSize().width / 2,
+                dim.height / 2 - this.frame.getSize().height / 2);
         this.frame.setVisible(true);
 
         /* fetch the default gopher home */
@@ -144,40 +143,39 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
     /**
      * Updates the history with a new page
-     * 
-     * @param page
-     * The page that was received
+     *
+     * @param page The page that was received
      */
-    private void updateHistory(GopherPage page){
+    private void updateHistory(GopherPage page) {
         Boolean addToHistory = false;
 
         /* check if current position is at last page */
-        if(this.historyPosition == this.history.size()-1){
+        if (this.historyPosition == this.history.size() - 1) {
             /* add this page to the history */
-            if(this.history.size() > 0){
+            if (!this.history.isEmpty()) {
                 /* make sure this was not just a reload and the last
                     page in the history is not already ours */
-                if(!this.history.get(this.history.size()-1).getUrl().getUrlString()
-                                        .equals(page.getUrl().getUrlString())){
+                if (!this.history.get(this.history.size() - 1).getUrl().getUrlString()
+                        .equals(page.getUrl().getUrlString())) {
                     /* just drop it in */
                     addToHistory = true;
                 }
-            }else{
+            } else {
                 /* empty history, just drop in the page */
                 addToHistory = true;
-            }    
-        }else{
+            }
+        } else {
             /* user navigation inside history, check if the current
                 page is at the position in history or if it is a 
                 new page the user went to */
-            if(!this.history.get(this.historyPosition).getUrl()
-                .getUrlString().equals(page.getUrl().getUrlString())){
+            if (!this.history.get(this.historyPosition).getUrl()
+                    .getUrlString().equals(page.getUrl().getUrlString())) {
                 /* it is a new page outside the history, keep the history
                     up until the current page and add this page as a new
                     branch to the history, eliminating the 
                     previous branch forward */
-                ArrayList<GopherPage> updatedHistory = new ArrayList<GopherPage>();
-                for(int h=0; h<=this.historyPosition; h++){
+                ArrayList<GopherPage> updatedHistory = new ArrayList<>();
+                for (int h = 0; h <= this.historyPosition; h++) {
                     updatedHistory.add(this.history.get(h));
                 }
 
@@ -187,32 +185,33 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                 /* allow adding to history */
                 addToHistory = true;
             }
-        }    
+        }
 
         /* reset navigation allowance */
         this.navigationBar.setNavigateBack(false);
         this.navigationBar.setNavigateForward(false);
 
         /* add to history, if allowed */
-        if(addToHistory == true){
+        if (addToHistory) {
             /* add to the stack of pages */
             this.history.add(page);
 
             /* update position to the top */
-            this.historyPosition = this.history.size()-1;
+            this.historyPosition = this.history.size() - 1;
 
             /* disable forward */
             this.navigationBar.setNavigateForward(false);
-            if(this.history.size() > 1){
+            if (this.history.size() > 1) {
                 /* allow back if more than just this page exist */
                 this.navigationBar.setNavigateBack(true);
             }
-        }else{
+        } else {
             /* if position is 0, there is nowhere to go back to */
-            if(this.historyPosition > 0){
+            if (this.historyPosition > 0) {
                 /* allow navigation back in history */
                 this.navigationBar.setNavigateBack(true);
-            }if(this.historyPosition < (this.history.size()-1)){
+            }
+            if (this.historyPosition < (this.history.size() - 1)) {
                 /* if position is at the end, there is nowhere
                     to move forward to */
                 this.navigationBar.setNavigateForward(true);
@@ -223,31 +222,29 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     /**
      * Prompts user to choose on how to handle the
      * file and whether it should be saved only or
-     * immediately downloaded to user home and 
+     * immediately downloaded to user home and
      * executed or opened when finished
-     * 
-     * @param addressText
-     * the address (URL) to download
-     * 
-     * @param item
-     * the item to download
+     *
+     * @param addressText the address (URL) to download
+     * @param item        the item to download
      */
-    public void confirmDownload(String addressText, GopherItem item){
+    public void confirmDownload(String addressText, GopherItem item) {
         /* binary files are handled by the download manager */
-        String confirmText = "Download \"" + item.getFileName() 
-                    + "\" from \"" + item.getHostName() + "\"?";
+        String confirmText = "Download \"" + item.getFileName()
+                + "\" from \"" + item.getHostName() + "\"?";
         String[] optionList = new String[]{"Open", "Save", "Dismiss"};
-        this.messageView.showConfirm(confirmText, optionList, new MessageViewListener(){
+        this.messageView.showConfirm(confirmText, optionList, new MessageViewListener() {
             @Override
             public void optionSelected(int option) {
-                if(option == 0){
+                if (option == 0) {
                     /* store file to download directory and open */
                     String targetFileName = ConfigurationManager.getDownloadPath() + item.getFileName();
-                    downloadList.add(new DownloadItem(item,targetFileName,true));
+                    downloadList.add(new DownloadItem(item, targetFileName, true));
 
                     /* hide the message view */
                     messageView.setVisible(false);
-                }if(option == 1){
+                }
+                if (option == 1) {
                     /* initiate the download */
                     initiateDownload(item);
 
@@ -265,51 +262,47 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
      * Prompts user to select the file destination
      * and immediately executes the download of the
      * file
-     * 
-     * @param fileItem
-     * the item to download
+     *
+     * @param fileItem the item to download
      */
-    public void initiateDownload(GopherItem fileItem){
+    public void initiateDownload(GopherItem fileItem) {
         /* let user select where to store the file */
         FileDialog fileDialog = new FileDialog(frame, "Download and save file", FileDialog.SAVE);
         fileDialog.setFile(fileItem.getFileNameWithForcedExt());
         fileDialog.setVisible(true);
         String targetFileName = fileDialog.getDirectory() + fileDialog.getFile();
-        if(targetFileName.equals(null) == false
-            && targetFileName.equals("nullnull") == false){
+        if (!targetFileName.equals("nullnull")) {
             /* pass url and target file to download manager */
-            downloadList.add(new DownloadItem(fileItem,targetFileName,false));
-        }        
+            downloadList.add(new DownloadItem(fileItem, targetFileName, false));
+        }
     }
 
     /**
      * Process a request to go to an address or URL
-     * 
-     * @param addressText
-     * The text or URL of the address, the client will guess the correct URL
-     * 
-     * @param contentType
-     * The expected content type of the content behind the address
+     *
+     * @param addressText The text or URL of the address, the client will guess the correct URL
+     *                    <p>
+     *                    The expected content type of the content behind the address
      */
     @Override
     public void addressRequested(String addressText, GopherItem item) {
         /* check if this file is binary or not as
             binaries such as media or other files
             will be handled differently (e.g. downloaded) */
-        if(item.isBinaryFile()){
+        if (item.isBinaryFile()) {
             /* binary files are handled by the download manager */
-            this.confirmDownload(addressText,item);
-        }else{
+            this.confirmDownload(addressText, item);
+        } else {
             /* this is not a binary file, try to handle and render */
-            switch(item.getItemType()){
+            switch (item.getItemType()) {
                 case FULLTEXT_SEARCH:
                     /* show the search interface */
-                    this.searchInput.performSearch(item.getUserDisplayString(), new SearchInputListener(){
+                    this.searchInput.performSearch(item.getUserDisplayString(), new SearchInputListener() {
                         @Override
                         public void searchRequested(String text) {
                             /* execute search through gopher */
                             String searchQueryText = addressText + "\t" + text;
-                            fetchGopherContent(searchQueryText,GopherItemType.GOPHERMENU);               
+                            fetchGopherContent(searchQueryText, GopherItemType.GOPHERMENU);
                         }
                     });
                     break;
@@ -335,20 +328,20 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
                     /* check what type of link was requested and execute
                         the appropriate external application or use the
                         default approach for gopher content */
-                    if(addressText.startsWith("https://") == true 
-                        || addressText.startsWith("http://") == true){
+                    if (addressText.startsWith("https://")
+                            || addressText.startsWith("http://")) {
                         /* this is the World Wide Web using HTTP or HTTPS, 
                             so try to open the systems browser so that the
                             user can enjoy bloated javascript based html
                             content with the fine-art of pop-up advertising
                             and animated display banners */
-                        this.openWebContent(addressText,item.getItemType());
-                    }else if(addressText.startsWith("mailto:") == true){
+                        this.openWebContent(addressText, item.getItemType());
+                    } else if (addressText.startsWith("mailto:")) {
                         /* this is a mailto link */
                         this.openEmailClient(addressText.replace("mailto:", ""));
-                    }else{
+                    } else {
                         /* just fetch as regular gopher content */
-                        this.fetchGopherContent((new GopherUrl(addressText)).getUrlString(),item.getItemType());
+                        this.fetchGopherContent((new GopherUrl(addressText)).getUrlString(), item.getItemType());
                     }
                     break;
             }
@@ -357,72 +350,66 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
     /**
      * Opens the clients email address
-     * 
-     * @param emailAddress
-     * the email address to send an email to
+     *
+     * @param emailAddress the email address to send to
      */
-    private void openEmailClient(String emailAddress){
+    private void openEmailClient(String emailAddress) {
         String confirmText = "Do you want to send an e-mail to \"" + emailAddress + "\"?";
         String[] optionList = new String[]{"Create new e-mail", "Dismiss"};
-        this.messageView.showConfirm(confirmText, optionList, new MessageViewListener(){
+        this.messageView.showConfirm(confirmText, optionList, new MessageViewListener() {
             @Override
             public void optionSelected(int option) {
-                if(option == 0){
+                if (option == 0) {
                     /* launch the system email client */
-                    if (Desktop.isDesktopSupported() == true 
-                        && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                        try{
+                    if (Desktop.isDesktopSupported()
+                            && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                        try {
                             /* launch the mailto handler of the system */
-                            Desktop.getDesktop().browse(new URI("mailto:"+emailAddress));
-                        }catch(Exception ex){
+                            Desktop.getDesktop().browse(new URI("mailto:" + emailAddress));
+                        } catch (Exception ex) {
                             /* Error: cannot open email client */
-                            System.out.println("Unable to open system's "
-                                + "email client: " + ex.getMessage());
+                            log.error("Unable to open system's email client: {}", ex.getMessage());
                         }
                     }
                     /* hide the message view */
                     messageView.setVisible(false);
-                }else{
+                } else {
                     /* hide the message view */
                     messageView.setVisible(false);
                 }
             }
-        });        
+        });
     }
 
     /**
      * Prompts the user and opens the systems telnet client
-     * 
-     * @param hostName
-     * host name of the telnet server
-     * 
-     * @param portNumber
-     * port number of the telnet server
+     *
+     * @param hostName   host name of the telnet server
+     * @param portNumber port number of the telnet server
      */
-    private void openTelnetSession(String hostName, int portNumber){
+    private void openTelnetSession(String hostName, int portNumber) {
         String confirmText = "Open a Telnet session with \"" + hostName + ":" + portNumber + "\"?";
         String[] optionList = new String[]{"Open Telnet", "Dismiss"};
-        this.messageView.showConfirm(confirmText, optionList, new MessageViewListener(){
+        this.messageView.showConfirm(confirmText, optionList, new MessageViewListener() {
             @Override
             public void optionSelected(int option) {
-                if(option == 0){
+                if (option == 0) {
                     /* launch the system WWW browser */
-                    if (Desktop.isDesktopSupported() == true 
-                        && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                        try{
+                    if (Desktop.isDesktopSupported()
+                            && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                        try {
                             /* launch the systems telnet client by creating
                                 a telnet URI and calling the systems protocol handler */
                             String telnetUri = "telnet://" + hostName + ":" + portNumber;
                             Desktop.getDesktop().browse(new URI(telnetUri));
-                        }catch(Exception ex){
+                        } catch (Exception ex) {
                             /* Error: cannot open telnet client */
-                            System.out.println("Unable to open system's "
-                                + "telnet client: " + ex.getMessage());
+                            log.error("Unable to open system's telnet client: {}", ex.getMessage());
                         }
                     }
                     /* hide the message view */
                     messageView.setVisible(false);
-                }else{
+                } else {
                     /* hide the message view */
                     messageView.setVisible(false);
                 }
@@ -432,36 +419,32 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
     /**
      * Ask user to open web content through http
-     * 
-     * @param addressText
-     * The actual address requested
-     * 
-     * @param contentType
-     * The actual content type of the content
+     *
+     * @param addressText The actual address requested
+     * @param contentType The actual content type of the content
      */
-    private void openWebContent(String addressText, GopherItemType contentType){
+    private void openWebContent(String addressText, GopherItemType contentType) {
         String confirmText = "Open \"" + addressText + "\" with your web browser?";
         String[] optionList = new String[]{"Open Website", "Dismiss"};
-        this.messageView.showConfirm(confirmText, optionList, new MessageViewListener(){
+        this.messageView.showConfirm(confirmText, optionList, new MessageViewListener() {
             @Override
             public void optionSelected(int option) {
-                if(option == 0){
+                if (option == 0) {
                     /* launch the system WWW browser */
-                    if (Desktop.isDesktopSupported() == true 
-                        && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                        try{
+                    if (Desktop.isDesktopSupported()
+                            && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                        try {
                             /* launch the systems WWW browser */
                             Desktop.getDesktop().browse(new URI(addressText));
-                        }catch(Exception ex){
+                        } catch (Exception ex) {
                             /* Error: cannot enjoy bloated javascript 
                                     stuffed World Wide Web pages! */
-                            System.out.println("Unable to open system's "
-                                + "world wide web browser: " + ex.getMessage());
+                            log.error("Unable to open system's world wide web browser: {}", ex.getMessage());
                         }
                     }
                     /* hide the message view */
                     messageView.setVisible(false);
-                }else{
+                } else {
                     /* hide the message view */
                     messageView.setVisible(false);
                 }
@@ -471,14 +454,11 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
     /**
      * Fetches gopher menu or text content
-     * 
-     * @param addressText
-     * The address to fetch content from
-     * 
-     * @param contentType
-     * The actual content type requested
+     *
+     * @param addressText The address to fetch content from
+     * @param contentType The actual content type requested
      */
-    private void fetchGopherContent(String addressText, GopherItemType contentType){
+    private void fetchGopherContent(String addressText, GopherItemType contentType) {
         /* this is default gopher content */
         /* activate the load indicator in the address bar */
         this.navigationBar.setIsLoading(true);
@@ -489,7 +469,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         /* check if selector prefixes are enabled */
         ConfigFile configFile = ConfigurationManager.getConfigFile();
         String prefixEnabled = configFile.getSetting("SELECTOR_PREFIX_ENABLED", "Navigation", "yes");
-        if(prefixEnabled.equals("yes")){
+        if (prefixEnabled.equals("yes")) {
             /* create the gopher url object for the address */
             GopherUrl prefixUrl = new GopherUrl(addressText);
             prefixUrl.setTypePrefix(GopherItem.getTypeCode(contentType));
@@ -501,13 +481,13 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         /* update the navigation bar with the new address */
         this.navigationBar.setAddressText(address);
 
-        try{
+        try {
             /* try to execute the thread */
-            this.gopherClient.fetchAsync(addressText,contentType,this);
-        }catch(Exception ex){
+            this.gopherClient.fetchAsync(addressText, contentType, this);
+        } catch (Exception ex) {
             /* might throw an ex when thread is interrupted */
-            System.out.println("Exception while fetching async: " + ex.getMessage());
-        }        
+            log.error("Exception while fetching async: {}", ex.getMessage());
+        }
     }
 
     /**
@@ -516,7 +496,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     @Override
     public void backwardRequested() {
         /* set the new history position */
-        if(this.historyPosition > 0){
+        if (this.historyPosition > 0) {
             this.historyPosition--;
 
             /* get the new page from history */
@@ -530,7 +510,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     @Override
     public void forwardRequested() {
         /* set the new history position */
-        if(this.historyPosition < (this.history.size()-1)){
+        if (this.historyPosition < (this.history.size() - 1)) {
             this.historyPosition++;
 
             /* get the new page from history */
@@ -562,21 +542,20 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.gopherClient.cancelFetch();
 
         /* notify the local handler about cancellation by the user */
-        this.pageLoadFailed(GopherError.USER_CANCELLED,null);
+        this.pageLoadFailed(GopherError.USER_CANCELLED, null);
     }
 
     /**
      * Handles page load events from the listener
-     * 
-     * @param result
-     * The gopher page that was received
+     *
+     * @param result The gopher page that was received
      */
     @Override
     public void pageLoaded(GopherPage result) {
         /* set the window title to the url of this page */
-        this.frame.setTitle(result.getUrl().getUrlString() 
-            + " (" + SystemUtility.getFileSizeString(result.getByteArray().length) + ")"
-            + " - " + APPLICATION_TITLE);
+        this.frame.setTitle(result.getUrl().getUrlString()
+                + " (" + SystemUtility.getFileSizeString(result.getByteArray().length) + ")"
+                + " - " + APPLICATION_TITLE);
 
         /* update the address text with the loaded page */
         String address = result.getUrl().getUrlString();
@@ -584,7 +563,7 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         /* check if selector prefixes are enabled */
         ConfigFile configFile = ConfigurationManager.getConfigFile();
         String prefixEnabled = configFile.getSetting("SELECTOR_PREFIX_ENABLED", "Navigation", "yes");
-        if(prefixEnabled.equals("yes")){
+        if (prefixEnabled.equals("yes")) {
             /* create the gopher url object for the address */
             GopherUrl prefixUrl = result.getUrl();
             prefixUrl.setTypePrefix(GopherItem.getTypeCode(result.getContentType()));
@@ -598,12 +577,12 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
 
 
         /* detect the content type and determine how the handle it */
-        if(result.getContentType() == GopherItemType.GOPHERMENU){
+        if (result.getContentType() == GopherItemType.GOPHERMENU) {
             /* this is a gopher menu hence it is rendered like
                 one including highlighting of links and 
                 the menu icons for the various item types */
             this.pageView.showGopherPage(result);
-        }else{
+        } else {
             /* this is plain content, so render it
                 appropriately and let the view decide
                 on how to handle the content */
@@ -623,33 +602,33 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     @Override
     public void pageLoadFailed(GopherError error, GopherUrl url) {
         /* show message for connection timeout */
-        if(error == GopherError.CONNECT_FAILED){
-            if(url != null){
+        if (error == GopherError.CONNECT_FAILED) {
+            if (url != null) {
                 this.messageView.showInfo("Connection refused: " + url.getHost());
             }
         }
 
         /* show message for connection timeout */
-        if(error == GopherError.CONNECTION_TIMEOUT){
-            if(url != null){
+        if (error == GopherError.CONNECTION_TIMEOUT) {
+            if (url != null) {
                 this.messageView.showInfo("Connection timed out: " + url.getHost());
             }
         }
 
         /* show DNS or host not found error */
-        if(error == GopherError.HOST_UNKNOWN){
-            if(url != null){
+        if (error == GopherError.HOST_UNKNOWN) {
+            if (url != null) {
                 this.messageView.showInfo("Server not found: " + url.getHost());
             }
         }
 
         /* show some information about an exception */
-        if(error == GopherError.EXCEPTION){
+        if (error == GopherError.EXCEPTION) {
             this.messageView.showInfo("Ouchn, an unknown error occured.");
         }
 
         /* output some base information to the console */
-        System.out.println("Failed to load gopher page: " + error.toString());
+        log.error("Failed to load gopher page: {}", error.toString());
 
         /* reset the navigation bar status */
         this.navigationBar.setIsLoading(false);
@@ -661,9 +640,9 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
     @Override
     public void progress(GopherUrl url, long byteCount) {
         /* report the download size in the title bar */
-        this.frame.setTitle(url.getUrlString() 
-            + " (" + SystemUtility.getFileSizeString(byteCount) + ")"
-            + " - " + APPLICATION_TITLE);
+        this.frame.setTitle(url.getUrlString()
+                + " (" + SystemUtility.getFileSizeString(byteCount) + ")"
+                + " - " + APPLICATION_TITLE);
     }
 
     /**
@@ -671,9 +650,9 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
      */
     @Override
     public void showDownloadRequested() {
-        if(this.downloadWindow.isVisible()){
+        if (this.downloadWindow.isVisible()) {
             this.downloadWindow.hide();
-        }else{
+        } else {
             this.downloadWindow.show(this.frame);
         }
     }
@@ -707,11 +686,11 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         fileDialog.setFile(page.getFileName());
         fileDialog.setVisible(true);
         String targetFileName = fileDialog.getDirectory() + fileDialog.getFile();
-        if(targetFileName.equals(null) == false
-            && targetFileName.equals("nullnull") == false){
+        if (!targetFileName.equals(null)
+                && !targetFileName.equals("nullnull")) {
             /* pass url and target file to download manager */
             page.saveAsFile(targetFileName);
-        } 
+        }
     }
 
     /**
@@ -745,6 +724,6 @@ public class MainWindow implements NavigationInputListener, GopherClientEventLis
         this.navigationBar.setIsLoading(false);
 
         /* binary files are handled by the download manager */
-        this.confirmDownload(url.getUrlString(),(new GopherItem(detected,url)));
+        this.confirmDownload(url.getUrlString(), (new GopherItem(detected, url)));
     }
 }
