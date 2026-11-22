@@ -1,8 +1,26 @@
 # Gophie
 
+[![Download macOS Universal DMG](https://img.shields.io/badge/macOS-Universal%20DMG-248AC2?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/jankammerath/Gophie/releases/latest)
+[![Download Windows x64 ZIP](https://img.shields.io/badge/Windows-x64%20ZIP-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/jankammerath/Gophie/releases/latest)
+[![Download Windows Arm64 ZIP](https://img.shields.io/badge/Windows-Arm64%20ZIP-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/jankammerath/Gophie/releases/latest)
+[![Download Linux DEB](https://img.shields.io/badge/Linux-DEB%20(amd64)-A81D33?style=for-the-badge&logo=debian&logoColor=white)](https://github.com/jankammerath/Gophie/releases/latest)
+[![Download Linux RPM](https://img.shields.io/badge/Linux-RPM%20(x86__64)-EE0000?style=for-the-badge&logo=redhat&logoColor=white)](https://github.com/jankammerath/Gophie/releases/latest)
+
 **Gophie 2 is entirely rewritten in Rust!** Gophie is a fast, native, cross-platform graphical browser for **The Internet Gopher** (RFC 1436 & RFC 4266), rewritten in Rust for high performance and low memory usage on **macOS, Windows, and Linux**.
 
 ![Gophie 2 on macOS](screenshots/gophie2.png)
+
+## Download
+
+Grab the latest pre-built release from the [GitHub Releases](https://github.com/jankammerath/Gophie/releases/latest) page — no external runtime required:
+
+| Platform | Architecture | Package |
+| :--- | :--- | :--- |
+| **macOS** | Apple Silicon & Intel (Universal) | [Download `.dmg`](https://github.com/jankammerath/Gophie/releases/latest) |
+| **Windows** | x64 (self-contained `.exe`) | [Download `x64 .zip`](https://github.com/jankammerath/Gophie/releases/latest) |
+| **Windows** | Arm64 (self-contained `.exe`) | [Download `arm64 .zip`](https://github.com/jankammerath/Gophie/releases/latest) |
+| **Linux** (Debian / Ubuntu) | amd64 | [Download `.deb`](https://github.com/jankammerath/Gophie/releases/latest) |
+| **Linux** (Fedora / RHEL / openSUSE) | x86_64 | [Download `.rpm`](https://github.com/jankammerath/Gophie/releases/latest) |
 
 ## Features
 
