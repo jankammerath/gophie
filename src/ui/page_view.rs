@@ -18,6 +18,14 @@ pub enum PageViewAction {
     Menu(PageMenuAction),
 }
 
+struct RenderContext<'a> {
+    theme: &'a Theme,
+    selected_all: bool,
+    selected_text: &'a str,
+    selector_prefix_enabled: bool,
+    scroll_to_top: bool,
+}
+
 enum CachedContent {
     Empty,
     Menu,
@@ -116,56 +124,48 @@ impl PageView {
             .fill(theme.view_background)
             .inner_margin(Margin {
                 left: 12,
-                right: 12,
-                top: 10,
+                right: 0,
+                top: 8,
                 bottom: 8,
             })
             .show(ui, |ui| {
                 ui.set_min_size(ui.available_size());
-
-                let mut scroll = ScrollArea::both()
-                    .auto_shrink([false, false])
-                    .id_salt("gophie_page_scroll");
-                if self.scroll_to_top {
-                    scroll = scroll.vertical_scroll_offset(0.0);
-                    self.scroll_to_top = false;
-                }
+                // Use a predictable desktop-style solid scrollbar flush to the right edge.
+                ui.style_mut().spacing.scroll = egui::style::ScrollStyle::solid();
 
                 let selected_text = self.selected_text();
+                let render_ctx = RenderContext {
+                    theme,
+                    selected_all: self.selected_all,
+                    selected_text: &selected_text,
+                    selector_prefix_enabled,
+                    scroll_to_top: std::mem::take(&mut self.scroll_to_top),
+                };
 
-                scroll.show(ui, |ui| {
-                    let Some(page) = &self.current_page else {
-                        return;
-                    };
+                let Some(page) = &self.current_page else {
+                    return;
+                };
 
-                    match &self.cached {
-                        CachedContent::Empty => {}
-                        CachedContent::Menu => {
-                            if let Some(a) = Self::render_menu(
-                                ui,
-                                page,
-                                theme,
-                                self.selected_all,
-                                &selected_text,
-                                selector_prefix_enabled,
-                            ) {
-                                action = Some(a);
-                            }
+                match &self.cached {
+                    CachedContent::Empty => {}
+                    CachedContent::Menu => {
+                        if let Some(a) = Self::render_menu(ui, page, &render_ctx) {
+                            action = Some(a);
                         }
-                        CachedContent::Text { lines } => {
-                            if let Some(a) = Self::render_text(
-                                ui,
-                                page,
-                                lines,
-                                theme,
-                                self.selected_all,
-                                &selected_text,
-                                selector_prefix_enabled,
-                            ) {
-                                action = Some(a);
-                            }
+                    }
+                    CachedContent::Text { lines } => {
+                        if let Some(a) = Self::render_text(ui, page, lines, &render_ctx) {
+                            action = Some(a);
                         }
-                        CachedContent::Image { texture, size } => {
+                    }
+                    CachedContent::Image { texture, size } => {
+                        let mut scroll = ScrollArea::both()
+                            .id_salt("gophie_image_scroll")
+                            .auto_shrink([false, false]);
+                        if render_ctx.scroll_to_top {
+                            scroll = scroll.vertical_scroll_offset(0.0);
+                        }
+                        scroll.show(ui, |ui| {
                             if let Some(a) = Self::render_image(
                                 ui,
                                 page,
@@ -175,16 +175,16 @@ impl PageView {
                             ) {
                                 action = Some(a);
                             }
-                        }
-                        CachedContent::ImageError(msg) => {
-                            ui.label(
-                                RichText::new(format!("Failed to display image:\n{}", msg))
-                                    .font(FontId::monospace(theme.page_font_size))
-                                    .color(theme.view_text),
-                            );
-                        }
+                        });
                     }
-                });
+                    CachedContent::ImageError(msg) => {
+                        ui.label(
+                            RichText::new(format!("Failed to display image:\n{}", msg))
+                                .font(FontId::monospace(theme.page_font_size))
+                                .color(theme.view_text),
+                        );
+                    }
+                }
             });
 
         action
@@ -193,23 +193,28 @@ impl PageView {
     fn render_menu(
         ui: &mut egui::Ui,
         page: &GopherPage,
-        theme: &Theme,
-        selected_all: bool,
-        selected_text: &str,
-        selector_prefix_enabled: bool,
+        rc: &RenderContext<'_>,
     ) -> Option<PageViewAction> {
         let mut action = None;
+        let theme = rc.theme;
         let items = page.items();
         let row_height = theme.page_font_size + 5.0;
         let digit_count = items.len().max(1).to_string().len().max(2);
         let line_num_width = (digit_count as f32) * (theme.page_font_size * 0.56) + 8.0;
         let icon_col_width = theme.page_icon_font_size + 12.0;
 
-        ScrollArea::vertical()
+        // Must be set before `show_rows` so egui's virtualized height matches rendered rows exactly.
+        ui.spacing_mut().item_spacing.y = 0.0;
+
+        let mut scroll = ScrollArea::vertical()
             .id_salt("gophie_menu_rows")
-            .auto_shrink([false, false])
-            .show_rows(ui, row_height, items.len(), |ui, row_range| {
-                ui.spacing_mut().item_spacing.y = 0.0;
+            .auto_shrink([false, false]);
+        if rc.scroll_to_top {
+            scroll = scroll.vertical_scroll_offset(0.0);
+        }
+
+        scroll.show_rows(ui, row_height, items.len(), |ui, row_range| {
+            ui.spacing_mut().item_spacing.y = 0.0;
 
                 for idx in row_range {
                     let item = &items[idx];
@@ -259,7 +264,7 @@ impl PageView {
                             let mut text = RichText::new(display)
                                 .font(FontId::monospace(theme.page_font_size))
                                 .color(theme.page_link);
-                            if selected_all {
+                            if rc.selected_all {
                                 text = text.background_color(theme.page_selection);
                             }
 
@@ -286,8 +291,8 @@ impl PageView {
                                 if let Some(menu_act) = PageMenu::show_link_menu(
                                     ui,
                                     item,
-                                    selected_text,
-                                    selector_prefix_enabled,
+                                    rc.selected_text,
+                                    rc.selector_prefix_enabled,
                                 ) {
                                     action = Some(PageViewAction::Menu(menu_act));
                                 }
@@ -296,7 +301,7 @@ impl PageView {
                             let mut text = RichText::new(display)
                                 .font(FontId::monospace(theme.page_font_size))
                                 .color(theme.view_text);
-                            if selected_all {
+                            if rc.selected_all {
                                 text = text.background_color(theme.page_selection);
                             }
 
@@ -309,8 +314,8 @@ impl PageView {
                                 if let Some(menu_act) = PageMenu::show_page_menu(
                                     ui,
                                     page,
-                                    selected_text,
-                                    selector_prefix_enabled,
+                                    rc.selected_text,
+                                    rc.selector_prefix_enabled,
                                 ) {
                                     action = Some(PageViewAction::Menu(menu_act));
                                 }
@@ -327,42 +332,50 @@ impl PageView {
         ui: &mut egui::Ui,
         page: &GopherPage,
         lines: &[String],
-        theme: &Theme,
-        selected_all: bool,
-        selected_text: &str,
-        selector_prefix_enabled: bool,
+        rc: &RenderContext<'_>,
     ) -> Option<PageViewAction> {
         let mut action = None;
+        let theme = rc.theme;
         let row_height = theme.page_font_size + 4.0;
 
-        ScrollArea::vertical()
-            .id_salt("gophie_text_rows")
-            .auto_shrink([false, false])
-            .show_rows(ui, row_height, lines.len().max(1), |ui, row_range| {
-                ui.spacing_mut().item_spacing.y = 0.0;
-                for idx in row_range {
-                    let line = lines.get(idx).map(String::as_str).unwrap_or("");
-                    let display = if line.is_empty() { " " } else { line };
-                    let mut text = RichText::new(display)
-                        .font(FontId::monospace(theme.page_font_size))
-                        .color(theme.view_text);
-                    if selected_all {
-                        text = text.background_color(theme.page_selection);
-                    }
+        // Must be set before `show_rows` so egui's virtualized height matches rendered rows exactly.
+        ui.spacing_mut().item_spacing.y = 0.0;
 
+        let mut scroll = ScrollArea::vertical()
+            .id_salt("gophie_text_rows")
+            .auto_shrink([false, false]);
+        if rc.scroll_to_top {
+            scroll = scroll.vertical_scroll_offset(0.0);
+        }
+
+        scroll.show_rows(ui, row_height, lines.len().max(1), |ui, row_range| {
+            ui.spacing_mut().item_spacing.y = 0.0;
+            for idx in row_range {
+                let line = lines.get(idx).map(String::as_str).unwrap_or("");
+                let display = if line.is_empty() { " " } else { line };
+                let mut text = RichText::new(display)
+                    .font(FontId::monospace(theme.page_font_size))
+                    .color(theme.view_text);
+                if rc.selected_all {
+                    text = text.background_color(theme.page_selection);
+                }
+
+                ui.horizontal(|ui| {
+                    ui.set_height(row_height);
                     let resp = ui.add(egui::Label::new(text).sense(Sense::click()).extend());
                     resp.context_menu(|ui| {
                         if let Some(menu_act) = PageMenu::show_page_menu(
                             ui,
                             page,
-                            selected_text,
-                            selector_prefix_enabled,
+                            rc.selected_text,
+                            rc.selector_prefix_enabled,
                         ) {
                             action = Some(PageViewAction::Menu(menu_act));
                         }
                     });
-                }
-            });
+                });
+            }
+        });
 
         action
     }
