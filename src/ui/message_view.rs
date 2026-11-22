@@ -113,31 +113,42 @@ impl MessageView {
                     );
 
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        ui.spacing_mut().button_padding = egui::vec2(14.0, 6.0);
+                        ui.spacing_mut().item_spacing.x = 8.0;
+
                         let make_btn = |label: &str| {
                             Button::new(
                                 RichText::new(label)
-                                    .font(FontId::proportional(12.0))
+                                    .font(FontId::proportional(13.0))
                                     .color(theme.message_foreground),
                             )
                             .fill(egui::Color32::TRANSPARENT)
                             .stroke(Stroke::new(1.0_f32, theme.message_foreground))
                             .corner_radius(CornerRadius::same(6))
+                            .min_size(egui::vec2(72.0, 28.0))
                         };
 
                         match &mode {
                             MessageMode::Info => {
-                                if ui.add(make_btn("Close")).clicked() {
+                                if ui
+                                    .add(make_btn("Close"))
+                                    .on_hover_cursor(egui::CursorIcon::PointingHand)
+                                    .clicked()
+                                {
                                     dismiss = true;
                                 }
                             }
                             MessageMode::Confirm { options, action } => {
                                 // Render right-to-left so option 0 appears leftmost.
                                 for (idx, label) in options.iter().enumerate().rev() {
-                                    if ui.add(make_btn(label)).clicked() {
+                                    if ui
+                                        .add(make_btn(label))
+                                        .on_hover_cursor(egui::CursorIcon::PointingHand)
+                                        .clicked()
+                                    {
                                         outcome = Self::resolve_option(action, idx);
                                         dismiss = true;
                                     }
-                                    ui.add_space(4.0);
                                 }
                             }
                         }

@@ -208,41 +208,71 @@ impl DownloadWindow {
         enabled: bool,
         theme: &Theme,
     ) -> bool {
+        let icon_galley = ui.painter().layout_no_wrap(
+            icon.to_string(),
+            feather_font(14.0),
+            egui::Color32::WHITE,
+        );
+        let text_galley = ui.painter().layout_no_wrap(
+            label.to_string(),
+            FontId::proportional(13.0),
+            egui::Color32::WHITE,
+        );
+
+        let gap = 7.0;
+        let pad_x = 8.0;
+        let pad_y = 5.0;
+        let size = Vec2::new(
+            pad_x * 2.0 + icon_galley.size().x + gap + text_galley.size().x,
+            (icon_galley.size().y.max(text_galley.size().y) + pad_y * 2.0).max(28.0),
+        );
+
         let sense = if enabled {
             Sense::click()
         } else {
             Sense::hover()
         };
+        let (rect, response) = ui.allocate_exact_size(size, sense);
 
-        let resp = ui.allocate_ui(Vec2::new(0.0, 20.0), |ui| {
-            ui.horizontal(|ui| {
-                ui.spacing_mut().item_spacing.x = 6.0;
-                let hovered = enabled && ui.rect_contains_pointer(ui.max_rect());
-                let color = if !enabled {
-                    theme.actionbar_inactive_text.gamma_multiply(0.5)
-                } else if hovered {
-                    theme.actionbar_text
-                } else {
-                    theme.actionbar_inactive_text
-                };
-
-                ui.label(RichText::new(icon).font(feather_font(14.0)).color(color));
-                ui.label(
-                    RichText::new(label)
-                        .font(FontId::proportional(13.0))
-                        .color(color),
-                );
-            })
-        })
-        .response
-        .interact(sense);
-
-        let resp = if enabled {
-            resp.on_hover_cursor(CursorIcon::PointingHand)
+        let hovered = enabled && response.hovered();
+        let color = if !enabled {
+            theme.actionbar_inactive_text.gamma_multiply(0.5)
+        } else if hovered {
+            theme.actionbar_text
         } else {
-            resp
+            theme.actionbar_inactive_text
         };
 
-        enabled && resp.clicked()
+        let icon_pos = egui::pos2(
+            rect.left() + pad_x,
+            rect.center().y - icon_galley.size().y * 0.5,
+        );
+        let text_pos = egui::pos2(
+            icon_pos.x + icon_galley.size().x + gap,
+            rect.center().y - text_galley.size().y * 0.5,
+        );
+
+        ui.painter().text(
+            icon_pos,
+            egui::Align2::LEFT_TOP,
+            icon,
+            feather_font(14.0),
+            color,
+        );
+        ui.painter().text(
+            text_pos,
+            egui::Align2::LEFT_TOP,
+            label,
+            FontId::proportional(13.0),
+            color,
+        );
+
+        let response = if enabled {
+            response.on_hover_cursor(CursorIcon::PointingHand)
+        } else {
+            response
+        };
+
+        enabled && response.clicked()
     }
 }
