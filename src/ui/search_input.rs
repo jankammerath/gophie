@@ -74,6 +74,9 @@ impl SearchInput {
                     );
                     ui.add_space(8.0);
 
+                    ui.visuals_mut().selection.bg_fill = theme.nav_selection;
+                    ui.visuals_mut().selection.stroke.color = theme.search_text;
+
                     let edit = TextEdit::singleline(&mut self.query)
                         .font(FontId::proportional(14.0))
                         .text_color(theme.search_text)

@@ -401,32 +401,40 @@ impl SettingsWindow {
                                             );
                                             Self::color_cell(
                                                 ui,
-                                                "Search Bar",
-                                                &mut self.draft.theme.search_background,
+                                                "Address Selection",
+                                                &mut self.draft.theme.nav_selection,
                                                 text_color,
                                             );
                                             ui.end_row();
 
+                                            Self::color_cell(
+                                                ui,
+                                                "Search Bar",
+                                                &mut self.draft.theme.search_background,
+                                                text_color,
+                                            );
                                             Self::color_cell(
                                                 ui,
                                                 "Message Bar",
                                                 &mut self.draft.theme.message_background,
                                                 text_color,
                                             );
+                                            ui.end_row();
+
                                             Self::color_cell(
                                                 ui,
                                                 "Message Text",
                                                 &mut self.draft.theme.message_foreground,
                                                 text_color,
                                             );
-                                            ui.end_row();
-
                                             Self::color_cell(
                                                 ui,
                                                 "Downloads Bg",
                                                 &mut self.draft.theme.filelist_background,
                                                 text_color,
                                             );
+                                            ui.end_row();
+
                                             Self::color_cell(
                                                 ui,
                                                 "Selected Row",

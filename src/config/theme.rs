@@ -94,7 +94,7 @@ impl Default for Theme {
             nav_background: Color32::from_rgb(0x24, 0x8A, 0xC2),
             nav_text: Color32::from_rgb(0x76, 0xBC, 0xE3),
             nav_text_hover: Color32::WHITE,
-            nav_selection: Color32::WHITE,
+            nav_selection: Color32::from_rgb(0x14, 0x52, 0x75),
 
             view_background: Color32::from_rgb(0x1B, 0x1B, 0x1B),
             view_text: Color32::from_rgb(0xE8, 0xE8, 0xE8),
@@ -145,6 +145,7 @@ impl Theme {
         Self {
             nav_background: Color32::from_rgb(0x2E, 0x7D, 0x32),
             nav_text: Color32::from_rgb(0xA5, 0xD6, 0xA7),
+            nav_selection: Color32::from_rgb(0x17, 0x47, 0x1A),
             actionbar_background: Color32::from_rgb(0x2E, 0x7D, 0x32),
             actionbar_inactive_text: Color32::from_rgb(0xA5, 0xD6, 0xA7),
             search_background: Color32::from_rgb(0x2E, 0x7D, 0x32),
@@ -161,6 +162,7 @@ impl Theme {
         Self {
             nav_background: Color32::from_rgb(0xC2, 0x18, 0x5B),
             nav_text: Color32::from_rgb(0xF4, 0x8F, 0xB1),
+            nav_selection: Color32::from_rgb(0x7A, 0x0D, 0x38),
             actionbar_background: Color32::from_rgb(0xC2, 0x18, 0x5B),
             actionbar_inactive_text: Color32::from_rgb(0xF4, 0x8F, 0xB1),
             search_background: Color32::from_rgb(0xC2, 0x18, 0x5B),

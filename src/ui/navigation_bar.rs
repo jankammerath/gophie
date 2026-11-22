@@ -112,7 +112,7 @@ impl NavigationBar {
 
                     ui.scope(|ui| {
                         ui.visuals_mut().selection.bg_fill = theme.nav_selection;
-                        ui.visuals_mut().selection.stroke.color = theme.nav_background;
+                        ui.visuals_mut().selection.stroke.color = theme.nav_text_hover;
 
                         let response = ui.add(
                             TextEdit::singleline(&mut self.address_text)
