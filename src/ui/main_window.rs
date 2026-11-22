@@ -4,7 +4,7 @@ use std::sync::mpsc;
 
 use eframe::egui::{self, Key, Modifiers, ViewportCommand};
 
-use crate::config::{ConfigManager, SystemUtility};
+use crate::config::{ConfigManager, SystemUtility, WindowAppearance};
 use crate::net::{
     DownloadManager, FetchEvent, GopherClient, GopherError, GopherItem, GopherItemType,
     GopherPage, GopherUrl,
@@ -43,6 +43,7 @@ pub struct MainWindow {
     settings_window: SettingsWindow,
 
     initial_load_started: bool,
+    applied_window_appearance: Option<WindowAppearance>,
 }
 
 impl MainWindow {
@@ -70,6 +71,7 @@ impl MainWindow {
             download_window: DownloadWindow::new(),
             settings_window: SettingsWindow::new(),
             initial_load_started: false,
+            applied_window_appearance: None,
         }
     }
 
@@ -428,6 +430,13 @@ impl eframe::App for MainWindow {
         self.handle_shortcuts(ctx);
 
         let theme = self.config.theme().clone();
+        if self.applied_window_appearance != Some(theme.window_appearance) {
+            ctx.set_theme(theme.window_appearance.to_theme_preference());
+            ctx.send_viewport_cmd(ViewportCommand::SetTheme(
+                theme.window_appearance.to_system_theme(),
+            ));
+            self.applied_window_appearance = Some(theme.window_appearance);
+        }
         let prefix_enabled = self.config.selector_prefix_enabled();
 
         // Top header bar: MessageView + SearchInput

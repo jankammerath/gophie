@@ -2,10 +2,11 @@
 
 use eframe::egui::{
     self, Button, Color32, ComboBox, CornerRadius, CursorIcon, FontId, Frame, Grid, Key, Margin,
-    RichText, ScrollArea, Slider, Stroke, TextEdit, Vec2, ViewportBuilder, ViewportId,
+    RichText, ScrollArea, Slider, Stroke, TextEdit, Vec2, ViewportBuilder, ViewportCommand,
+    ViewportId,
 };
 
-use crate::config::{AppSettings, Theme};
+use crate::config::{AppSettings, Theme, WindowAppearance};
 
 const COMMON_CHARSETS: &[&str] = &[
     "UTF-8",
@@ -21,6 +22,7 @@ const COMMON_CHARSETS: &[&str] = &[
 pub struct SettingsWindow {
     visible: bool,
     draft: AppSettings,
+    applied_appearance: Option<WindowAppearance>,
 }
 
 impl SettingsWindow {
@@ -32,8 +34,10 @@ impl SettingsWindow {
     pub fn toggle(&mut self, current: AppSettings) {
         if self.visible {
             self.visible = false;
+            self.applied_appearance = None;
         } else {
             self.draft = current;
+            self.applied_appearance = None;
             self.visible = true;
         }
     }
@@ -55,6 +59,13 @@ impl SettingsWindow {
             .with_min_inner_size([480.0, 460.0]);
 
         ctx.show_viewport_immediate(viewport_id, builder, |ctx, _class| {
+            if self.applied_appearance != Some(active_theme.window_appearance) {
+                ctx.send_viewport_cmd(ViewportCommand::SetTheme(
+                    active_theme.window_appearance.to_system_theme(),
+                ));
+                self.applied_appearance = Some(active_theme.window_appearance);
+            }
+
             if ctx.input(|i| i.viewport().close_requested() || i.key_pressed(Key::Escape)) {
                 close_requested = true;
             }
@@ -251,6 +262,27 @@ impl SettingsWindow {
                                         .min_col_width(150.0)
                                         .spacing([18.0, 12.0])
                                         .show(ui, |ui| {
+                                            Self::label(ui, "Window Appearance", text_color);
+                                            ui.horizontal(|ui| {
+                                                ui.spacing_mut().item_spacing.x = 6.0;
+                                                ui.selectable_value(
+                                                    &mut self.draft.theme.window_appearance,
+                                                    WindowAppearance::Dark,
+                                                    "Dark",
+                                                );
+                                                ui.selectable_value(
+                                                    &mut self.draft.theme.window_appearance,
+                                                    WindowAppearance::Light,
+                                                    "Light",
+                                                );
+                                                ui.selectable_value(
+                                                    &mut self.draft.theme.window_appearance,
+                                                    WindowAppearance::System,
+                                                    "System",
+                                                );
+                                            });
+                                            ui.end_row();
+
                                             Self::label(ui, "Page Font Size", text_color);
                                             ui.add(
                                                 Slider::new(
@@ -413,6 +445,7 @@ impl SettingsWindow {
 
         if close_requested {
             self.visible = false;
+            self.applied_appearance = None;
         }
         saved_settings
     }

@@ -1,12 +1,61 @@
 //! Visual theme configuration parsed from the `[Appearance]` section of `config.ini`.
 
-use eframe::egui::Color32;
+use eframe::egui::{Color32, SystemTheme, ThemePreference};
 
 use super::ConfigFile;
+
+/// Controls the native OS window chrome (titlebar) appearance.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum WindowAppearance {
+    #[default]
+    System,
+    Dark,
+    Light,
+}
+
+impl WindowAppearance {
+    /// Parses a `WINDOW_APPEARANCE` config value (`system`, `dark`, `light`).
+    pub fn parse(value: &str) -> Self {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "dark" => Self::Dark,
+            "light" => Self::Light,
+            _ => Self::System,
+        }
+    }
+
+    /// Returns the string representation stored in `config.ini`.
+    pub fn as_config_str(self) -> &'static str {
+        match self {
+            Self::System => "system",
+            Self::Dark => "dark",
+            Self::Light => "light",
+        }
+    }
+
+    /// Converts to `egui::SystemTheme` for native OS window titlebar theming.
+    pub fn to_system_theme(self) -> SystemTheme {
+        match self {
+            Self::System => SystemTheme::SystemDefault,
+            Self::Dark => SystemTheme::Dark,
+            Self::Light => SystemTheme::Light,
+        }
+    }
+
+    /// Converts to `egui::ThemePreference` for built-in widget chrome.
+    pub fn to_theme_preference(self) -> ThemePreference {
+        match self {
+            Self::System => ThemePreference::System,
+            Self::Dark => ThemePreference::Dark,
+            Self::Light => ThemePreference::Light,
+        }
+    }
+}
 
 /// Default palette and typography settings matching Gophie's signature dark-and-blue look.
 #[derive(Debug, Clone)]
 pub struct Theme {
+    pub window_appearance: WindowAppearance,
+
     pub nav_background: Color32,
     pub nav_text: Color32,
     pub nav_text_hover: Color32,
@@ -40,6 +89,8 @@ pub struct Theme {
 impl Default for Theme {
     fn default() -> Self {
         Self {
+            window_appearance: WindowAppearance::Dark,
+
             nav_background: Color32::from_rgb(0x24, 0x8A, 0xC2),
             nav_text: Color32::from_rgb(0x76, 0xBC, 0xE3),
             nav_text_hover: Color32::WHITE,
@@ -76,6 +127,7 @@ impl Theme {
     /// Light theme preset inspired by Gophie's Light theme.
     pub fn light() -> Self {
         Self {
+            window_appearance: WindowAppearance::Light,
             view_background: Color32::from_rgb(0xF7, 0xF7, 0xF7),
             view_text: Color32::from_rgb(0x1E, 0x1E, 0x1E),
             page_link: Color32::from_rgb(0x13, 0x8A, 0x3E),
@@ -122,6 +174,12 @@ impl Theme {
 
     /// Writes all appearance values into the `[Appearance]` section of `config`.
     pub fn write_to_config(&self, config: &mut ConfigFile) {
+        config.set_setting(
+            "WINDOW_APPEARANCE",
+            self.window_appearance.as_config_str(),
+            "Appearance",
+        );
+
         let mut set_color = |key: &str, c: Color32| {
             config.set_setting(key, &color_to_hex(c), "Appearance");
         };
@@ -172,7 +230,17 @@ impl Theme {
             parse_hex_color(raw).unwrap_or(fallback)
         };
 
+        let window_appearance = {
+            let raw = config.get_setting("WINDOW_APPEARANCE", "Appearance", "");
+            if raw.is_empty() {
+                d.window_appearance
+            } else {
+                WindowAppearance::parse(raw)
+            }
+        };
+
         Self {
+            window_appearance,
             nav_background: color("NAVIGATIONBAR_BACKGROUND", d.nav_background),
             nav_text: color("NAVIGATIONBAR_TEXTCOLOR", d.nav_text),
             nav_text_hover: color("NAVIGATIONBAR_TEXTHOVERCOLOR", d.nav_text_hover),

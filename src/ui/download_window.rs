@@ -2,10 +2,10 @@
 
 use eframe::egui::{
     self, CursorIcon, FontId, Frame, Margin, RichText, ScrollArea, Sense, Vec2, ViewportBuilder,
-    ViewportId,
+    ViewportCommand, ViewportId,
 };
 
-use crate::config::Theme;
+use crate::config::{Theme, WindowAppearance};
 use crate::net::{DownloadManager, DownloadStatus};
 
 use super::assets::{feather_font, icons};
@@ -24,6 +24,7 @@ pub enum DownloadWindowAction {
 pub struct DownloadWindow {
     visible: bool,
     selected_id: Option<u64>,
+    applied_appearance: Option<WindowAppearance>,
 }
 
 impl DownloadWindow {
@@ -33,6 +34,9 @@ impl DownloadWindow {
 
     pub fn toggle(&mut self) {
         self.visible = !self.visible;
+        if !self.visible {
+            self.applied_appearance = None;
+        }
     }
 
     pub fn show_window(&mut self) {
@@ -66,6 +70,13 @@ impl DownloadWindow {
             .with_min_inner_size([400.0, 200.0]);
 
         ctx.show_viewport_immediate(viewport_id, builder, |ctx, _class| {
+            if self.applied_appearance != Some(theme.window_appearance) {
+                ctx.send_viewport_cmd(ViewportCommand::SetTheme(
+                    theme.window_appearance.to_system_theme(),
+                ));
+                self.applied_appearance = Some(theme.window_appearance);
+            }
+
             if ctx.input(|i| i.viewport().close_requested()) {
                 close_requested = true;
             }
@@ -197,6 +208,7 @@ impl DownloadWindow {
 
         if close_requested {
             self.visible = false;
+            self.applied_appearance = None;
         }
         action
     }
