@@ -51,6 +51,7 @@ pub struct MainWindow {
     initial_load_started: bool,
     applied_window_appearance: Option<WindowAppearance>,
     was_editing_text: bool,
+    clear_widget_focus_next_frame: bool,
 }
 
 impl MainWindow {
@@ -86,6 +87,7 @@ impl MainWindow {
             initial_load_started: false,
             applied_window_appearance: None,
             was_editing_text: false,
+            clear_widget_focus_next_frame: false,
         }
     }
 
@@ -455,21 +457,14 @@ impl MainWindow {
             self.navigate_forward(ctx);
         }
         if tab_next {
-            // Undo any focus egui's begin_pass Tab handling gave to the address bar.
-            ctx.memory_mut(|m| {
-                if let Some(id) = m.focused() {
-                    m.surrender_focus(id);
-                }
-            });
             self.page_view.focus_next_link();
+            self.clear_widget_focus_next_frame = true;
+            ctx.request_repaint();
         }
         if tab_prev {
-            ctx.memory_mut(|m| {
-                if let Some(id) = m.focused() {
-                    m.surrender_focus(id);
-                }
-            });
             self.page_view.focus_prev_link();
+            self.clear_widget_focus_next_frame = true;
+            ctx.request_repaint();
         }
         if activate_focused {
             if let Some(item) = self.page_view.focused_link() {
@@ -506,6 +501,16 @@ impl eframe::App for MainWindow {
         if !self.initial_load_started {
             self.initial_load_started = true;
             self.navigate_home(ctx);
+        }
+
+        // Undo focus that egui's end_pass Tab cycling granted to the address bar on the previous frame.
+        if self.clear_widget_focus_next_frame {
+            self.clear_widget_focus_next_frame = false;
+            ctx.memory_mut(|m| {
+                if let Some(id) = m.focused() {
+                    m.surrender_focus(id);
+                }
+            });
         }
 
         self.poll_network_events(ctx);
@@ -659,7 +664,7 @@ impl eframe::App for MainWindow {
         }
 
         // Record whether a text input (address bar or search bar) holds focus for the next frame.
-        self.was_editing_text = ctx.wants_keyboard_input();
+        self.was_editing_text = !self.clear_widget_focus_next_frame && ctx.wants_keyboard_input();
     }
 }
 
