@@ -230,30 +230,36 @@ impl PageView {
                         ui.set_height(row_height);
                         ui.spacing_mut().item_spacing.x = 4.0;
 
-                        // Line number gutter
+                        // Line number gutter (non-selectable so dragging only selects page text)
                         ui.allocate_ui_with_layout(
                             Vec2::new(line_num_width, row_height),
                             Layout::right_to_left(Align::Center),
                             |ui| {
-                                ui.label(
-                                    RichText::new(line_number.to_string())
-                                        .font(FontId::monospace(theme.page_font_size))
-                                        .color(theme.page_line_number),
+                                ui.add(
+                                    egui::Label::new(
+                                        RichText::new(line_number.to_string())
+                                            .font(FontId::monospace(theme.page_font_size))
+                                            .color(theme.page_line_number),
+                                    )
+                                    .selectable(false),
                                 );
                             },
                         );
 
-                        // Feather item-type icon column
+                        // Feather item-type icon column (non-selectable)
                         ui.allocate_ui_with_layout(
                             Vec2::new(icon_col_width, row_height),
                             Layout::centered_and_justified(egui::Direction::LeftToRight),
                             |ui| {
                                 let glyph = icons::for_item_type(item.item_type());
                                 if !glyph.is_empty() {
-                                    ui.label(
-                                        RichText::new(glyph)
-                                            .font(feather_font(theme.page_icon_font_size))
-                                            .color(theme.view_text),
+                                    ui.add(
+                                        egui::Label::new(
+                                            RichText::new(glyph)
+                                                .font(feather_font(theme.page_icon_font_size))
+                                                .color(theme.view_text),
+                                        )
+                                        .selectable(false),
                                     );
                                 }
                             },
