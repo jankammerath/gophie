@@ -4,7 +4,7 @@ use std::sync::mpsc;
 
 use eframe::egui::{self, Key, Modifiers, ViewportCommand};
 
-use crate::config::{ConfigManager, SystemUtility, WindowAppearance};
+use crate::config::{ConfigManager, NavigationBarPosition, SystemUtility, WindowAppearance};
 use crate::net::{
     CapsCache, CapsEvent, DownloadManager, FetchEvent, GopherCaps, GopherClient, GopherError,
     GopherItem, GopherItemType, GopherPage, GopherUrl,
@@ -479,6 +479,12 @@ impl eframe::App for MainWindow {
             self.applied_window_appearance = Some(theme.window_appearance);
         }
         let prefix_enabled = self.config.selector_prefix_enabled();
+        let has_server_caps = self.current_host_caps().is_some();
+
+        // Top navigation bar (when user configured Address Bar = Top)
+        if theme.nav_bar_position == NavigationBarPosition::Top {
+            self.render_navigation_panel(ctx, &theme, prefix_enabled, has_server_caps, true);
+        }
 
         // Top header bar: MessageView + SearchInput
         if self.message_view.is_visible() || self.search_input.is_visible() {
@@ -528,50 +534,10 @@ impl eframe::App for MainWindow {
                 });
         }
 
-        let has_server_caps = self.current_host_caps().is_some();
-
-        // Bottom navigation bar
-        egui::TopBottomPanel::bottom("gophie_nav_bar")
-            .frame(egui::Frame::NONE)
-            .show_separator_line(false)
-            .show(ctx, |ui| {
-                if let Some(nav_action) = self.navigation_bar.show(
-                    ui,
-                    &theme,
-                    prefix_enabled,
-                    self.downloads.active_count(),
-                    has_server_caps,
-                ) {
-                    match nav_action {
-                        NavAction::Back => self.navigate_back(ctx),
-                        NavAction::Forward => self.navigate_forward(ctx),
-                        NavAction::Refresh => self.reload_current(ctx),
-                        NavAction::Stop => {
-                            self.client.cancel_fetch();
-                            self.navigation_bar.set_is_loading(false);
-                        }
-                        NavAction::Home => self.navigate_home(ctx),
-                        NavAction::Search => {
-                            if self.search_input.is_visible() {
-                                self.search_input.hide();
-                            } else {
-                                let engine = self.config.search_engine();
-                                self.search_input.open("Search Gopherspace", engine);
-                            }
-                        }
-                        NavAction::Navigate { address, item } => {
-                            self.handle_address_request(ctx, &address, item);
-                        }
-                        NavAction::ToggleDownloads => self.download_window.toggle(),
-                        NavAction::ToggleSettings => {
-                            self.settings_window.toggle(self.config.settings());
-                        }
-                        NavAction::ToggleServerInfo => {
-                            self.server_info_window.toggle();
-                        }
-                    }
-                }
-            });
+        // Bottom navigation bar (default)
+        if theme.nav_bar_position == NavigationBarPosition::Bottom {
+            self.render_navigation_panel(ctx, &theme, prefix_enabled, has_server_caps, false);
+        }
 
         // Optional caps.txt breadcrumb strip when inside a subdirectory
         let breadcrumb_target = self.render_breadcrumb_bar(ctx, &theme);
@@ -652,6 +618,64 @@ impl eframe::App for MainWindow {
 }
 
 impl MainWindow {
+    /// Renders the navigation bar docked at either the top or bottom of the window.
+    fn render_navigation_panel(
+        &mut self,
+        ctx: &egui::Context,
+        theme: &crate::config::Theme,
+        prefix_enabled: bool,
+        has_server_caps: bool,
+        at_top: bool,
+    ) {
+        let panel = if at_top {
+            egui::TopBottomPanel::top("gophie_nav_bar_top")
+        } else {
+            egui::TopBottomPanel::bottom("gophie_nav_bar_bottom")
+        };
+
+        panel
+            .frame(egui::Frame::NONE)
+            .show_separator_line(false)
+            .show(ctx, |ui| {
+                if let Some(nav_action) = self.navigation_bar.show(
+                    ui,
+                    theme,
+                    prefix_enabled,
+                    self.downloads.active_count(),
+                    has_server_caps,
+                ) {
+                    match nav_action {
+                        NavAction::Back => self.navigate_back(ctx),
+                        NavAction::Forward => self.navigate_forward(ctx),
+                        NavAction::Refresh => self.reload_current(ctx),
+                        NavAction::Stop => {
+                            self.client.cancel_fetch();
+                            self.navigation_bar.set_is_loading(false);
+                        }
+                        NavAction::Home => self.navigate_home(ctx),
+                        NavAction::Search => {
+                            if self.search_input.is_visible() {
+                                self.search_input.hide();
+                            } else {
+                                let engine = self.config.search_engine();
+                                self.search_input.open("Search Gopherspace", engine);
+                            }
+                        }
+                        NavAction::Navigate { address, item } => {
+                            self.handle_address_request(ctx, &address, item);
+                        }
+                        NavAction::ToggleDownloads => self.download_window.toggle(),
+                        NavAction::ToggleSettings => {
+                            self.settings_window.toggle(self.config.settings());
+                        }
+                        NavAction::ToggleServerInfo => {
+                            self.server_info_window.toggle();
+                        }
+                    }
+                }
+            });
+    }
+
     /// Renders a clickable `caps.txt` breadcrumb trail above the page view when inside a sub-selector.
     fn render_breadcrumb_bar(
         &self,

@@ -6,7 +6,7 @@ use eframe::egui::{
     ViewportId,
 };
 
-use crate::config::{AppSettings, Theme, WindowAppearance};
+use crate::config::{AppSettings, NavigationBarPosition, Theme, WindowAppearance};
 
 const COMMON_CHARSETS: &[&str] = &[
     "UTF-8",
@@ -288,6 +288,22 @@ impl SettingsWindow {
                                                     &mut self.draft.theme.window_appearance,
                                                     WindowAppearance::System,
                                                     "System",
+                                                );
+                                            });
+                                            ui.end_row();
+
+                                            Self::label(ui, "Address Bar", text_color);
+                                            ui.horizontal(|ui| {
+                                                ui.spacing_mut().item_spacing.x = 6.0;
+                                                ui.selectable_value(
+                                                    &mut self.draft.theme.nav_bar_position,
+                                                    NavigationBarPosition::Bottom,
+                                                    "Bottom",
+                                                );
+                                                ui.selectable_value(
+                                                    &mut self.draft.theme.nav_bar_position,
+                                                    NavigationBarPosition::Top,
+                                                    "Top",
                                                 );
                                             });
                                             ui.end_row();

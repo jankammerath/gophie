@@ -51,10 +51,37 @@ impl WindowAppearance {
     }
 }
 
+/// Controls whether the navigation / address bar is docked at the bottom or top of the window.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum NavigationBarPosition {
+    #[default]
+    Bottom,
+    Top,
+}
+
+impl NavigationBarPosition {
+    /// Parses a `NAVIGATIONBAR_POSITION` config value (`bottom` or `top`).
+    pub fn parse(value: &str) -> Self {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "top" => Self::Top,
+            _ => Self::Bottom,
+        }
+    }
+
+    /// Returns the string representation stored in `config.ini`.
+    pub fn as_config_str(self) -> &'static str {
+        match self {
+            Self::Bottom => "bottom",
+            Self::Top => "top",
+        }
+    }
+}
+
 /// Default palette and typography settings matching Gophie's signature dark-and-blue look.
 #[derive(Debug, Clone)]
 pub struct Theme {
     pub window_appearance: WindowAppearance,
+    pub nav_bar_position: NavigationBarPosition,
 
     pub nav_background: Color32,
     pub nav_text: Color32,
@@ -91,6 +118,7 @@ impl Default for Theme {
     fn default() -> Self {
         Self {
             window_appearance: WindowAppearance::Dark,
+            nav_bar_position: NavigationBarPosition::Bottom,
 
             nav_background: Color32::from_rgb(0x24, 0x8A, 0xC2),
             nav_text: Color32::from_rgb(0x76, 0xBC, 0xE3),
@@ -183,6 +211,11 @@ impl Theme {
             self.window_appearance.as_config_str(),
             "Appearance",
         );
+        config.set_setting(
+            "NAVIGATIONBAR_POSITION",
+            self.nav_bar_position.as_config_str(),
+            "Appearance",
+        );
 
         let mut set_color = |key: &str, c: Color32| {
             config.set_setting(key, &color_to_hex(c), "Appearance");
@@ -248,8 +281,15 @@ impl Theme {
             }
         };
 
+        let nav_bar_position = NavigationBarPosition::parse(config.get_setting(
+            "NAVIGATIONBAR_POSITION",
+            "Appearance",
+            d.nav_bar_position.as_config_str(),
+        ));
+
         Self {
             window_appearance,
+            nav_bar_position,
             nav_background: color("NAVIGATIONBAR_BACKGROUND", d.nav_background),
             nav_text: color("NAVIGATIONBAR_TEXTCOLOR", d.nav_text),
             nav_text_hover: color("NAVIGATIONBAR_TEXTHOVERCOLOR", d.nav_text_hover),
