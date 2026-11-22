@@ -304,6 +304,15 @@ impl SettingsWindow {
                                                 .suffix(" px"),
                                             );
                                             ui.end_row();
+
+                                            Self::label(ui, "Line Numbers", text_color);
+                                            ui.checkbox(
+                                                &mut self.draft.theme.show_line_numbers,
+                                                RichText::new("Show line numbers in Gopher menus")
+                                                    .font(FontId::proportional(13.0))
+                                                    .color(text_color),
+                                            );
+                                            ui.end_row();
                                         });
                                 },
                             );

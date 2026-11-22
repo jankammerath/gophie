@@ -240,21 +240,23 @@ impl PageView {
                         ui.set_height(row_height);
                         ui.spacing_mut().item_spacing.x = 4.0;
 
-                        // Line number gutter (non-selectable so dragging only selects page text)
-                        ui.allocate_ui_with_layout(
-                            Vec2::new(line_num_width, row_height),
-                            Layout::right_to_left(Align::Center),
-                            |ui| {
-                                ui.add(
-                                    egui::Label::new(
-                                        RichText::new(line_number.to_string())
-                                            .font(FontId::monospace(theme.page_font_size))
-                                            .color(theme.page_line_number),
-                                    )
-                                    .selectable(false),
-                                );
-                            },
-                        );
+                        // Line number gutter (optional, non-selectable so dragging only selects page text)
+                        if theme.show_line_numbers {
+                            ui.allocate_ui_with_layout(
+                                Vec2::new(line_num_width, row_height),
+                                Layout::right_to_left(Align::Center),
+                                |ui| {
+                                    ui.add(
+                                        egui::Label::new(
+                                            RichText::new(line_number.to_string())
+                                                .font(FontId::monospace(theme.page_font_size))
+                                                .color(theme.page_line_number),
+                                        )
+                                        .selectable(false),
+                                    );
+                                },
+                            );
+                        }
 
                         // Feather item-type icon column (non-selectable)
                         ui.allocate_ui_with_layout(

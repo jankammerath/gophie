@@ -84,6 +84,7 @@ pub struct Theme {
 
     pub page_font_size: f32,
     pub page_icon_font_size: f32,
+    pub show_line_numbers: bool,
 }
 
 impl Default for Theme {
@@ -119,6 +120,7 @@ impl Default for Theme {
 
             page_font_size: 17.0,
             page_icon_font_size: 12.0,
+            show_line_numbers: true,
         }
     }
 }
@@ -222,6 +224,11 @@ impl Theme {
             &(self.page_icon_font_size.round() as u32).to_string(),
             "Appearance",
         );
+        config.set_setting(
+            "SHOW_LINE_NUMBERS",
+            if self.show_line_numbers { "yes" } else { "no" },
+            "Appearance",
+        );
     }
 
     /// Builds a `Theme` by overriding defaults with any values present in `[Appearance]`.
@@ -275,6 +282,11 @@ impl Theme {
             page_icon_font_size: config
                 .get_f32("PAGE_ICON_FONT_SIZE", "Appearance", d.page_icon_font_size)
                 .clamp(8.0, 36.0),
+            show_line_numbers: config.get_bool(
+                "SHOW_LINE_NUMBERS",
+                "Appearance",
+                d.show_line_numbers,
+            ),
         }
     }
 }
