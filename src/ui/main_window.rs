@@ -395,7 +395,7 @@ impl MainWindow {
             self.navigate_forward(ctx);
         }
         if select_all && !ctx.wants_keyboard_input() {
-            self.page_view.select_all();
+            self.page_view.select_all(ctx);
         }
         if copy_selection && !ctx.wants_keyboard_input() {
             let selected = self.page_view.selected_text();
@@ -412,7 +412,7 @@ impl MainWindow {
             } else if self.message_view.is_visible() {
                 self.message_view.hide();
             } else {
-                self.page_view.clear_selection();
+                self.page_view.clear_selection(ctx);
             }
         }
     }
@@ -533,7 +533,7 @@ impl eframe::App for MainWindow {
                             PageMenuAction::SaveLinkAs(item) => {
                                 self.initiate_save_download(ctx, item);
                             }
-                            PageMenuAction::SelectAll => self.page_view.select_all(),
+                            PageMenuAction::SelectAll => self.page_view.select_all(ctx),
                             PageMenuAction::SetAsHomeGopher(url) => {
                                 self.config.set_gopher_home(&url);
                                 self.message_view

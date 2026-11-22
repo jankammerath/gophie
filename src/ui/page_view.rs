@@ -83,20 +83,23 @@ impl PageView {
         self.current_page = Some(page);
     }
 
-    /// Marks all text on the current page as selected for copying.
-    pub fn select_all(&mut self) {
+    /// Marks all text on the current page as selected and clears any partial cursor selection.
+    pub fn select_all(&mut self, ctx: &egui::Context) {
         if self
             .current_page
             .as_ref()
             .is_some_and(|p| !p.content_type().is_image())
         {
+            // Clear any active partial label selection so both states never overlap.
+            egui::text_selection::LabelSelectionState::default().store(ctx);
             self.selected_all = true;
         }
     }
 
-    /// Clears any active selection highlight.
-    pub fn clear_selection(&mut self) {
+    /// Clears any active selection (both Select All and cursor drag selection).
+    pub fn clear_selection(&mut self, ctx: &egui::Context) {
         self.selected_all = false;
+        egui::text_selection::LabelSelectionState::default().store(ctx);
     }
 
     /// Returns the currently selected text (full page text when Select All is active).
@@ -130,14 +133,21 @@ impl PageView {
             })
             .show(ui, |ui| {
                 ui.set_min_size(ui.available_size());
-                // Use a predictable desktop-style solid scrollbar whose track matches the window background.
+                // Use a predictable desktop-style solid scrollbar whose track matches the window background,
+                // and unify cursor text selection color with Gophie's configured `page_selection` color.
                 ui.style_mut().spacing.scroll = egui::style::ScrollStyle::solid();
                 let visuals = ui.visuals_mut();
                 visuals.extreme_bg_color = theme.view_background;
                 visuals.panel_fill = theme.view_background;
+                visuals.selection.bg_fill = theme.page_selection;
                 visuals.widgets.inactive.bg_stroke = egui::Stroke::NONE;
                 visuals.widgets.hovered.bg_stroke = egui::Stroke::NONE;
                 visuals.widgets.active.bg_stroke = egui::Stroke::NONE;
+
+                // Left-clicking or starting a cursor drag unselects Select All seamlessly.
+                if self.selected_all && ui.input(|i| i.pointer.primary_pressed()) {
+                    self.selected_all = false;
+                }
 
                 let selected_text = self.selected_text();
                 let render_ctx = RenderContext {
