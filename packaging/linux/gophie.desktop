@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Gophie
+GenericName=Gopher Browser
+Comment=A modern, graphical, cross-platform browser for The Internet Gopher (RFC 1436)
+Exec=gophie %u
+Icon=gophie
+Terminal=false
+Categories=Network;WebBrowser;
+MimeType=x-scheme-handler/gopher;
+StartupWMClass=Gophie

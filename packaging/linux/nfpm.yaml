@@ -1,0 +1,52 @@
+name: "gophie"
+arch: "amd64"
+platform: "linux"
+version: "${VERSION}"
+section: "net"
+priority: "optional"
+maintainer: "Jan Kammerath <https://gophie.org/>"
+description: |
+  Gophie - A modern, graphical, cross-platform Gopher browser
+  Browse Gopherspace (RFC 1436 & RFC 4266) with menus, text files,
+  inline images, full-text search, and an integrated download manager.
+vendor: "Gophie"
+homepage: "https://gophie.org/"
+license: "GPL-3.0-or-later"
+
+overrides:
+  deb:
+    depends:
+      - libgtk-3-0
+      - libgl1
+      - libxkbcommon0
+  rpm:
+    depends:
+      - gtk3
+      - mesa-libGL
+      - libxkbcommon
+
+contents:
+  - src: target/release/gophie
+    dst: /usr/bin/gophie
+    file_info:
+      mode: 0755
+  - src: packaging/linux/gophie.desktop
+    dst: /usr/share/applications/gophie.desktop
+    file_info:
+      mode: 0644
+  - src: packaging/linux/gophie-512x512.png
+    dst: /usr/share/icons/hicolor/512x512/apps/gophie.png
+    file_info:
+      mode: 0644
+  - src: packaging/linux/gophie-128x128.png
+    dst: /usr/share/icons/hicolor/128x128/apps/gophie.png
+    file_info:
+      mode: 0644
+  - src: packaging/linux/gophie-48x48.png
+    dst: /usr/share/icons/hicolor/48x48/apps/gophie.png
+    file_info:
+      mode: 0644
+  - src: LICENSE
+    dst: /usr/share/doc/gophie/LICENSE
+    file_info:
+      mode: 0644
