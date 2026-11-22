@@ -53,6 +53,17 @@ cargo test
 
 The release binary is produced at `target/release/gophie` (or `target/release/gophie.exe` on Windows) with all fonts (`Inconsolata`, `OpenSans`, `Feather`) and icons embedded — no external runtime required.
 
+## Creating a Release
+
+Pushing a version tag matching `v*` automatically triggers the GitHub Actions [Release workflow](.github/workflows/release.yml) to build and publish the macOS Universal `.dmg`, Windows `x64`/`Arm64` `.zip`, Linux `.deb`/`.rpm`, and `SHA256SUMS.txt`:
+
+```bash
+git tag v2.1.0
+git push origin v2.1.0
+```
+
+You can also trigger a release manually under **Actions → Release → Run workflow**.
+
 ## Configuration (`~/Gophie/config.ini`)
 
 See [config/config.ini](config/config.ini) for a full sample configuration.
