@@ -198,6 +198,15 @@ impl SettingsWindow {
                                             );
                                             ui.end_row();
 
+                                            Self::label(ui, "Search Engine", text_color);
+                                            ui.add(
+                                                TextEdit::singleline(&mut self.draft.search_engine)
+                                                    .desired_width(280.0)
+                                                    .hint_text("gopher.floodgap.com/v2/vs")
+                                                    .margin(Vec2::new(8.0, 6.0)),
+                                            );
+                                            ui.end_row();
+
                                             Self::label(ui, "RFC 4266 Type Prefix", text_color);
                                             ui.checkbox(
                                                 &mut self.draft.selector_prefix_enabled,

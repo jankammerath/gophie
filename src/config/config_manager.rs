@@ -8,6 +8,8 @@ use super::{ConfigFile, Theme};
 
 /// Default Gopher homepage loaded on startup when `GOPHERHOME` is not configured.
 pub const DEFAULT_GOPHERHOME: &str = "gopher.floodgap.com";
+/// Default Type-7 Gopher search engine (Veronica-2 on Floodgap).
+pub const DEFAULT_SEARCH_ENGINE: &str = "gopher.floodgap.com/v2/vs";
 /// Default text encoding used to decode Gopher menus and text files.
 pub const DEFAULT_CHARSET: &str = "UTF-8";
 
@@ -18,6 +20,7 @@ const CONFIG_FILE_NAME: &str = "config.ini";
 #[derive(Debug, Clone)]
 pub struct AppSettings {
     pub gopher_home: String,
+    pub search_engine: String,
     pub selector_prefix_enabled: bool,
     pub default_charset: String,
     pub theme: Theme,
@@ -27,6 +30,7 @@ impl Default for AppSettings {
     fn default() -> Self {
         Self {
             gopher_home: DEFAULT_GOPHERHOME.to_string(),
+            search_engine: DEFAULT_SEARCH_ENGINE.to_string(),
             selector_prefix_enabled: true,
             default_charset: DEFAULT_CHARSET.to_string(),
             theme: Theme::default(),
@@ -77,6 +81,13 @@ impl ConfigManager {
             .to_string()
     }
 
+    /// Returns the configured Type-7 Gopher search engine URL.
+    pub fn search_engine(&self) -> String {
+        self.config_file
+            .get_setting("SEARCH_ENGINE", "Navigation", DEFAULT_SEARCH_ENGINE)
+            .to_string()
+    }
+
     /// Updates `GOPHERHOME` in `config.ini` and persists it to disk.
     pub fn set_gopher_home(&mut self, url: &str) {
         self.config_file.set_setting("GOPHERHOME", url, "Navigation");
@@ -107,6 +118,7 @@ impl ConfigManager {
     pub fn settings(&self) -> AppSettings {
         AppSettings {
             gopher_home: self.gopher_home(),
+            search_engine: self.search_engine(),
             selector_prefix_enabled: self.selector_prefix_enabled(),
             default_charset: self.default_charset(),
             theme: self.theme.clone(),
@@ -121,6 +133,12 @@ impl ConfigManager {
         } else {
             home
         };
+        let search_engine = settings.search_engine.trim();
+        let search_engine = if search_engine.is_empty() {
+            DEFAULT_SEARCH_ENGINE
+        } else {
+            search_engine
+        };
         let charset = settings.default_charset.trim();
         let charset = if charset.is_empty() {
             DEFAULT_CHARSET
@@ -130,6 +148,8 @@ impl ConfigManager {
 
         self.config_file
             .set_setting("GOPHERHOME", home, "Navigation");
+        self.config_file
+            .set_setting("SEARCH_ENGINE", search_engine, "Navigation");
         self.config_file.set_setting(
             "SELECTOR_PREFIX_ENABLED",
             if settings.selector_prefix_enabled {

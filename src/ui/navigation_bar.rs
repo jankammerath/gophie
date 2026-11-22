@@ -15,6 +15,7 @@ pub enum NavAction {
     Refresh,
     Stop,
     Home,
+    Search,
     Navigate { address: String, item: GopherItem },
     ToggleDownloads,
     ToggleSettings,
@@ -108,8 +109,8 @@ impl NavigationBar {
                         action = Some(NavAction::Home);
                     }
 
-                    // Reserve space on the right for settings, downloads, optional server info, and spinner.
-                    let mut right_reserved = 68.0;
+                    // Reserve space on the right for settings, downloads, search, optional server info, and spinner.
+                    let mut right_reserved = 100.0;
                     if has_server_caps {
                         right_reserved += 32.0;
                     }
@@ -178,6 +179,10 @@ impl NavigationBar {
                             )
                         {
                             action = Some(NavAction::ToggleServerInfo);
+                        }
+
+                        if Self::icon_button(ui, icons::SEARCH, true, "Search Gopherspace", theme) {
+                            action = Some(NavAction::Search);
                         }
 
                         if self.is_loading {

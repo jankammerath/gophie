@@ -550,6 +550,14 @@ impl eframe::App for MainWindow {
                             self.navigation_bar.set_is_loading(false);
                         }
                         NavAction::Home => self.navigate_home(ctx),
+                        NavAction::Search => {
+                            if self.search_input.is_visible() {
+                                self.search_input.hide();
+                            } else {
+                                let engine = self.config.search_engine();
+                                self.search_input.open("Search Gopherspace", engine);
+                            }
+                        }
                         NavAction::Navigate { address, item } => {
                             self.handle_address_request(ctx, &address, item);
                         }
