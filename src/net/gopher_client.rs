@@ -11,9 +11,13 @@ use std::time::{Duration, Instant};
 
 use crate::io::{FileSignature, FileSignatureType};
 
-use super::{GopherError, GopherFetchError, GopherItemType, GopherPage, GopherUrl};
+use super::{
+    GopherCaps, GopherError, GopherFetchError, GopherItemType, GopherPage, GopherUrl,
+};
 
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(12);
+const CAPS_TIMEOUT: Duration = Duration::from_secs(5);
+const MAX_CAPS_BYTES: usize = 64 * 1024;
 const READ_POLL_TIMEOUT: Duration = Duration::from_millis(250);
 const IDLE_READ_TIMEOUT: Duration = Duration::from_secs(20);
 const CHUNK_SIZE: usize = 16 * 1024;
@@ -42,6 +46,14 @@ pub enum FetchEvent {
         detected: GopherItemType,
         url: GopherUrl,
     },
+}
+
+/// Result emitted by an asynchronous `caps.txt` background query.
+#[derive(Debug)]
+pub struct CapsEvent {
+    pub host: String,
+    pub port: u16,
+    pub caps: Option<GopherCaps>,
 }
 
 /// Progress and completion events emitted by a background file download.
@@ -155,6 +167,56 @@ impl GopherClient {
         });
 
         request_id
+    }
+
+    /// Fetches `caps.txt` for `(host, port)` asynchronously on a background thread.
+    /// Silently yields `caps: None` if the server does not support `caps.txt` or times out.
+    pub fn fetch_caps_async<F>(
+        host: String,
+        port: u16,
+        tx: mpsc::Sender<CapsEvent>,
+        on_update: F,
+    ) where
+        F: Fn() + Send + 'static,
+    {
+        thread::spawn(move || {
+            let caps = Self::fetch_caps_blocking(&host, port);
+            let _ = tx.send(CapsEvent { host, port, caps });
+            on_update();
+        });
+    }
+
+    fn fetch_caps_blocking(host: &str, port: u16) -> Option<GopherCaps> {
+        let addr_str = format!("{}:{}", host, port);
+        let addr = addr_str.to_socket_addrs().ok()?.next()?;
+        let mut stream = TcpStream::connect_timeout(&addr, CAPS_TIMEOUT).ok()?;
+        let _ = stream.set_read_timeout(Some(CAPS_TIMEOUT));
+        let _ = stream.set_write_timeout(Some(CAPS_TIMEOUT));
+
+        stream.write_all(b"caps.txt\r\n").ok()?;
+        stream.flush().ok()?;
+
+        let mut buffer = Vec::with_capacity(4096);
+        let mut chunk = [0u8; 4096];
+        loop {
+            match stream.read(&mut chunk) {
+                Ok(0) => break,
+                Ok(n) => {
+                    let remaining = MAX_CAPS_BYTES.saturating_sub(buffer.len());
+                    if remaining == 0 {
+                        break;
+                    }
+                    buffer.extend_from_slice(&chunk[..n.min(remaining)]);
+                    if buffer.len() >= MAX_CAPS_BYTES {
+                        break;
+                    }
+                }
+                Err(_) => break,
+            }
+        }
+
+        let text = String::from_utf8_lossy(&buffer);
+        GopherCaps::parse(&text)
     }
 
     /// Streams a Gopher resource directly to `target_path` on a background thread.

@@ -6,8 +6,8 @@ use eframe::egui::{self, Key, Modifiers, ViewportCommand};
 
 use crate::config::{ConfigManager, SystemUtility, WindowAppearance};
 use crate::net::{
-    DownloadManager, FetchEvent, GopherClient, GopherError, GopherItem, GopherItemType,
-    GopherPage, GopherUrl,
+    CapsCache, CapsEvent, DownloadManager, FetchEvent, GopherCaps, GopherClient, GopherError,
+    GopherItem, GopherItemType, GopherPage, GopherUrl,
 };
 
 use super::assets;
@@ -17,6 +17,7 @@ use super::navigation_bar::{NavAction, NavigationBar};
 use super::page_menu::{PageMenu, PageMenuAction};
 use super::page_view::{PageView, PageViewAction};
 use super::search_input::SearchInput;
+use super::server_info_window::{ServerInfoAction, ServerInfoWindow};
 use super::settings_window::SettingsWindow;
 
 /// Application display name used in window titles.
@@ -32,6 +33,10 @@ pub struct MainWindow {
     fetch_rx: mpsc::Receiver<FetchEvent>,
     active_request_id: u64,
 
+    caps_cache: CapsCache,
+    caps_tx: mpsc::Sender<CapsEvent>,
+    caps_rx: mpsc::Receiver<CapsEvent>,
+
     history: Vec<GopherPage>,
     history_pos: Option<usize>,
 
@@ -41,6 +46,7 @@ pub struct MainWindow {
     search_input: SearchInput,
     download_window: DownloadWindow,
     settings_window: SettingsWindow,
+    server_info_window: ServerInfoWindow,
 
     initial_load_started: bool,
     applied_window_appearance: Option<WindowAppearance>,
@@ -54,6 +60,7 @@ impl MainWindow {
         let config = ConfigManager::load_default();
         let home = config.gopher_home();
         let (fetch_tx, fetch_rx) = mpsc::channel();
+        let (caps_tx, caps_rx) = mpsc::channel();
 
         Self {
             config,
@@ -62,6 +69,9 @@ impl MainWindow {
             fetch_tx,
             fetch_rx,
             active_request_id: 0,
+            caps_cache: CapsCache::new(),
+            caps_tx,
+            caps_rx,
             history: Vec::new(),
             history_pos: None,
             navigation_bar: NavigationBar::new(home),
@@ -70,6 +80,7 @@ impl MainWindow {
             search_input: SearchInput::new(),
             download_window: DownloadWindow::new(),
             settings_window: SettingsWindow::new(),
+            server_info_window: ServerInfoWindow::new(),
             initial_load_started: false,
             applied_window_appearance: None,
         }
@@ -95,6 +106,7 @@ impl MainWindow {
     ) {
         self.navigation_bar.set_is_loading(true);
         let parsed = GopherUrl::parse(address);
+        self.ensure_caps_fetched(ctx, parsed.host(), parsed.port());
         let display = self.format_display_address(&parsed, content_type);
         self.navigation_bar.set_address_text(display);
 
@@ -281,6 +293,33 @@ impl MainWindow {
         self.fetch_gopher_content(ctx, &home, GopherItemType::GopherMenu);
     }
 
+    fn ensure_caps_fetched(&mut self, ctx: &egui::Context, host: &str, port: u16) {
+        if self.caps_cache.needs_fetch(host, port) {
+            self.caps_cache.mark_in_flight(host, port);
+            let repaint_ctx = ctx.clone();
+            GopherClient::fetch_caps_async(
+                host.to_string(),
+                port,
+                self.caps_tx.clone(),
+                move || repaint_ctx.request_repaint(),
+            );
+        }
+    }
+
+    fn poll_caps_events(&mut self) {
+        while let Ok(event) = self.caps_rx.try_recv() {
+            self.caps_cache.insert(&event.host, event.port, event.caps);
+        }
+    }
+
+    fn current_host_caps(&self) -> Option<(String, u16, &GopherCaps)> {
+        let page = self.page_view.current_page()?;
+        let host = page.url().host();
+        let port = page.url().port();
+        let caps = self.caps_cache.get(host, port)?;
+        Some((host.to_string(), port, caps))
+    }
+
     fn poll_network_events(&mut self, ctx: &egui::Context) {
         while let Ok(event) = self.fetch_rx.try_recv() {
             match event {
@@ -426,6 +465,7 @@ impl eframe::App for MainWindow {
         }
 
         self.poll_network_events(ctx);
+        self.poll_caps_events();
         self.downloads.poll_events();
         self.handle_shortcuts(ctx);
 
@@ -487,6 +527,8 @@ impl eframe::App for MainWindow {
                 });
         }
 
+        let has_server_caps = self.current_host_caps().is_some();
+
         // Bottom navigation bar
         egui::TopBottomPanel::bottom("gophie_nav_bar")
             .frame(egui::Frame::NONE)
@@ -497,6 +539,7 @@ impl eframe::App for MainWindow {
                     &theme,
                     prefix_enabled,
                     self.downloads.active_count(),
+                    has_server_caps,
                 ) {
                     match nav_action {
                         NavAction::Back => self.navigate_back(ctx),
@@ -514,9 +557,18 @@ impl eframe::App for MainWindow {
                         NavAction::ToggleSettings => {
                             self.settings_window.toggle(self.config.settings());
                         }
+                        NavAction::ToggleServerInfo => {
+                            self.server_info_window.toggle();
+                        }
                     }
                 }
             });
+
+        // Optional caps.txt breadcrumb strip when inside a subdirectory
+        let breadcrumb_target = self.render_breadcrumb_bar(ctx, &theme);
+        if let Some(target_url) = breadcrumb_target {
+            self.fetch_gopher_content(ctx, &target_url, GopherItemType::GopherMenu);
+        }
 
         // Main page view
         egui::CentralPanel::default()
@@ -572,5 +624,121 @@ impl eframe::App for MainWindow {
                 self.navigation_bar.set_address_text(addr);
             }
         }
+        // Secondary native Server Info (caps.txt) window
+        let info_action = if let Some((host, _port, caps)) = self.current_host_caps() {
+            let caps_cloned = caps.clone();
+            self.server_info_window
+                .show(ctx, &host, Some(&caps_cloned), &theme)
+        } else {
+            self.server_info_window.show(ctx, "", None, &theme)
+        };
+        if let Some(ServerInfoAction::EmailAdmin(email)) = info_action {
+            self.message_view.show_confirm(
+                format!("Do you want to send an e-mail to \"{}\"?", email),
+                &["Create new e-mail", "Dismiss"],
+                ConfirmAction::OpenEmail(email),
+            );
+        }
+    }
+}
+
+impl MainWindow {
+    /// Renders a clickable `caps.txt` breadcrumb trail above the page view when inside a sub-selector.
+    fn render_breadcrumb_bar(
+        &self,
+        ctx: &egui::Context,
+        theme: &crate::config::Theme,
+    ) -> Option<String> {
+        let page = self.page_view.current_page()?;
+        let host = page.url().host();
+        let port = page.url().port();
+        let caps = self.caps_cache.get(host, port)?;
+        let crumbs = caps.breadcrumbs(page.url().wire_selector());
+        if crumbs.is_empty() {
+            return None;
+        }
+
+        let delim = caps.path_delimiter.as_deref().unwrap_or("/");
+        let mut clicked_url = None;
+
+        let strip_bg = if theme.view_background.r() > 128 {
+            egui::Color32::from_rgb(0xEC, 0xEC, 0xEC)
+        } else {
+            egui::Color32::from_rgb(0x24, 0x24, 0x24)
+        };
+
+        egui::TopBottomPanel::top("gophie_breadcrumbs")
+            .frame(
+                egui::Frame::new()
+                    .fill(strip_bg)
+                    .inner_margin(egui::Margin::symmetric(14, 5)),
+            )
+            .show_separator_line(false)
+            .show(ctx, |ui| {
+                ui.horizontal_wrapped(|ui| {
+                    ui.spacing_mut().item_spacing.x = 6.0;
+                    let muted = theme.view_text.gamma_multiply(0.55);
+
+                    let root_resp = ui
+                        .add(
+                            egui::Label::new(
+                                egui::RichText::new(host)
+                                    .font(egui::FontId::monospace(13.0))
+                                    .color(theme.page_link),
+                            )
+                            .selectable(false)
+                            .sense(egui::Sense::click()),
+                        )
+                        .on_hover_cursor(egui::CursorIcon::PointingHand);
+                    if root_resp.clicked() {
+                        clicked_url = Some(GopherUrl::from_parts(host, port, "").to_url_string(false));
+                    }
+
+                    for (idx, crumb) in crumbs.iter().enumerate() {
+                        ui.add(
+                            egui::Label::new(
+                                egui::RichText::new(delim)
+                                    .font(egui::FontId::monospace(13.0))
+                                    .color(muted),
+                            )
+                            .selectable(false),
+                        );
+
+                        let is_last = idx + 1 == crumbs.len();
+                        let color = if is_last {
+                            theme.view_text
+                        } else {
+                            theme.page_link
+                        };
+                        let sense = if is_last {
+                            egui::Sense::hover()
+                        } else {
+                            egui::Sense::click()
+                        };
+
+                        let resp = ui.add(
+                            egui::Label::new(
+                                egui::RichText::new(&crumb.label)
+                                    .font(egui::FontId::monospace(13.0))
+                                    .color(color),
+                            )
+                            .selectable(false)
+                            .sense(sense),
+                        );
+                        if !is_last
+                            && resp
+                                .on_hover_cursor(egui::CursorIcon::PointingHand)
+                                .clicked()
+                        {
+                            clicked_url = Some(
+                                GopherUrl::from_parts(host, port, &crumb.selector)
+                                    .to_url_string(false),
+                            );
+                        }
+                    }
+                });
+            });
+
+        clicked_url
     }
 }

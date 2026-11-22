@@ -18,6 +18,7 @@ pub enum NavAction {
     Navigate { address: String, item: GopherItem },
     ToggleDownloads,
     ToggleSettings,
+    ToggleServerInfo,
 }
 
 /// Bottom navigation bar matching Gophie's blue toolbar layout.
@@ -71,6 +72,7 @@ impl NavigationBar {
         theme: &Theme,
         selector_prefix_enabled: bool,
         active_downloads: usize,
+        has_server_caps: bool,
     ) -> Option<NavAction> {
         let mut action = None;
 
@@ -106,8 +108,14 @@ impl NavigationBar {
                         action = Some(NavAction::Home);
                     }
 
-                    // Reserve space on the right for downloads, settings, and optional loading spinner.
-                    let right_reserved = if self.is_loading { 96.0 } else { 68.0 };
+                    // Reserve space on the right for settings, downloads, optional server info, and spinner.
+                    let mut right_reserved = 68.0;
+                    if has_server_caps {
+                        right_reserved += 32.0;
+                    }
+                    if self.is_loading {
+                        right_reserved += 28.0;
+                    }
                     let input_width = (ui.available_width() - right_reserved).max(120.0);
 
                     ui.scope(|ui| {
@@ -158,6 +166,18 @@ impl NavigationBar {
                         };
                         if Self::icon_button(ui, icons::DOWNLOADS, true, &dl_tip, theme) {
                             action = Some(NavAction::ToggleDownloads);
+                        }
+
+                        if has_server_caps
+                            && Self::icon_button(
+                                ui,
+                                icons::INFO,
+                                true,
+                                "Server Info (caps.txt)",
+                                theme,
+                            )
+                        {
+                            action = Some(NavAction::ToggleServerInfo);
                         }
 
                         if self.is_loading {
