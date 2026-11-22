@@ -1,4 +1,6 @@
-# Gophie (Rust)
+# Gophie
+
+**Gophie is currently being rewritten in Rust**
 
 Gophie is a fast, native, cross-platform graphical browser for **The Internet Gopher** (RFC 1436 & RFC 4266), rewritten in Rust for high performance and low memory usage on **macOS, Windows, and Linux**.
 
