@@ -80,12 +80,13 @@ impl DownloadItem {
     }
 }
 
-/// Manages concurrent downloads and polls their progress events on the UI thread.
+/// Manages concurrent downloads, polls progress events, and persists history across restarts.
 pub struct DownloadManager {
     items: Vec<DownloadItem>,
     next_id: u64,
     tx: mpsc::Sender<DownloadEvent>,
     rx: mpsc::Receiver<DownloadEvent>,
+    history_path: Option<PathBuf>,
 }
 
 impl Default for DownloadManager {
@@ -95,7 +96,7 @@ impl Default for DownloadManager {
 }
 
 impl DownloadManager {
-    /// Creates an empty `DownloadManager`.
+    /// Creates an empty in-memory `DownloadManager`.
     pub fn new() -> Self {
         let (tx, rx) = mpsc::channel();
         Self {
@@ -103,7 +104,16 @@ impl DownloadManager {
             next_id: 1,
             tx,
             rx,
+            history_path: None,
         }
+    }
+
+    /// Creates a `DownloadManager` backed by a persistent history file and loads existing entries.
+    pub fn with_history_path(path: PathBuf) -> Self {
+        let mut manager = Self::new();
+        manager.history_path = Some(path);
+        manager.load_history();
+        manager
     }
 
     /// Starts downloading `item` to `target_path` in a background thread.
@@ -175,12 +185,14 @@ impl DownloadManager {
             let entry = self.items.remove(pos);
             entry.cancel_flag.store(true, Ordering::SeqCst);
             let _ = fs::remove_file(&entry.target_path);
+            self.save_history();
         }
     }
 
     /// Removes all completed, failed, and idle items while keeping active downloads.
     pub fn clear_non_active(&mut self) {
         self.items.retain(|d| d.status == DownloadStatus::Active);
+        self.save_history();
     }
 
     /// Returns `true` if there is at least one non-active item that can be cleared.
@@ -208,6 +220,8 @@ impl DownloadManager {
 
     /// Drains pending background download events and updates item state.
     pub fn poll_events(&mut self) {
+        let mut changed = false;
+
         while let Ok(event) = self.rx.try_recv() {
             match event {
                 DownloadEvent::Progress {
@@ -227,15 +241,135 @@ impl DownloadManager {
                         if entry.open_when_finished {
                             entry.open_on_desktop();
                         }
+                        changed = true;
                     }
                 }
                 DownloadEvent::Failed { id, message } => {
                     eprintln!("Download #{} failed: {}", id, message);
                     if let Some(entry) = self.items.iter_mut().find(|d| d.id == id) {
                         entry.status = DownloadStatus::Failed;
+                        changed = true;
                     }
                 }
             }
         }
+
+        if changed {
+            self.save_history();
+        }
+    }
+
+    fn save_history(&self) {
+        let Some(path) = &self.history_path else {
+            return;
+        };
+
+        let mut content = String::new();
+        for entry in &self.items {
+            let status_str = match entry.status {
+                DownloadStatus::Completed => "completed",
+                DownloadStatus::Failed => "failed",
+                DownloadStatus::Active | DownloadStatus::Idle => continue,
+            };
+            let clean = |s: &str| s.replace(['\t', '\r', '\n'], " ");
+            let line = format!(
+                "{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
+                status_str,
+                entry.bytes_loaded,
+                entry.item.item_type_code(),
+                clean(entry.item.host()),
+                entry.item.port(),
+                clean(entry.item.selector()),
+                clean(&entry.target_path.to_string_lossy()),
+            );
+            content.push_str(&line);
+        }
+
+        if let Some(parent) = path.parent() {
+            let _ = fs::create_dir_all(parent);
+        }
+        if let Err(err) = fs::write(path, content) {
+            eprintln!("Failed to save download history: {}", err);
+        }
+    }
+
+    fn load_history(&mut self) {
+        let Some(path) = &self.history_path else {
+            return;
+        };
+        let Ok(content) = fs::read_to_string(path) else {
+            return;
+        };
+
+        for line in content.lines() {
+            let cols: Vec<&str> = line.split('\t').collect();
+            if cols.len() < 7 {
+                continue;
+            }
+            let status = match cols[0] {
+                "completed" => DownloadStatus::Completed,
+                "failed" => DownloadStatus::Failed,
+                _ => continue,
+            };
+            let bytes_loaded = cols[1].parse::<u64>().unwrap_or(0);
+            let type_code = cols[2].chars().next().unwrap_or('9');
+            let host = cols[3];
+            let port = cols[4].parse::<u16>().unwrap_or(70);
+            let selector = cols[5];
+            let target_path = PathBuf::from(cols[6]);
+
+            let url = GopherUrl::from_parts(host, port, selector);
+            let item = GopherItem::from_code_and_url(type_code, &url);
+            let id = self.next_id;
+            self.next_id += 1;
+
+            self.items.push(DownloadItem {
+                id,
+                item,
+                target_path,
+                open_when_finished: false,
+                status,
+                bytes_loaded,
+                bytes_per_sec: 0,
+                cancel_flag: Arc::new(AtomicBool::new(false)),
+            });
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn persists_and_reloads_download_history() {
+        let tmp = std::env::temp_dir().join("gophie_test_downloads_history.tsv");
+        let _ = fs::remove_file(&tmp);
+
+        let mut mgr = DownloadManager::with_history_path(tmp.clone());
+        let url = GopherUrl::from_parts("gopher.semmel.ch", 70, "/audio/test.mp3");
+        let item = GopherItem::from_code_and_url('s', &url);
+        mgr.items.push(DownloadItem {
+            id: 1,
+            item,
+            target_path: PathBuf::from("/tmp/test.mp3"),
+            open_when_finished: false,
+            status: DownloadStatus::Completed,
+            bytes_loaded: 1_234_567,
+            bytes_per_sec: 0,
+            cancel_flag: Arc::new(AtomicBool::new(false)),
+        });
+        mgr.save_history();
+
+        let reloaded = DownloadManager::with_history_path(tmp.clone());
+        let entries: Vec<&DownloadItem> = reloaded.items_newest_first().collect();
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].status(), DownloadStatus::Completed);
+        assert_eq!(entries[0].bytes_loaded(), 1_234_567);
+        assert_eq!(entries[0].gopher_item().file_name(), "test.mp3");
+        assert_eq!(entries[0].gopher_item().host(), "gopher.semmel.ch");
+        assert_eq!(entries[0].target_path(), Path::new("/tmp/test.mp3"));
+
+        let _ = fs::remove_file(&tmp);
     }
 }

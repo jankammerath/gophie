@@ -15,6 +15,7 @@ pub const DEFAULT_CHARSET: &str = "UTF-8";
 
 const CONFIG_DIR_NAME: &str = "Gophie";
 const CONFIG_FILE_NAME: &str = "config.ini";
+const DOWNLOADS_HISTORY_FILE_NAME: &str = "downloads.tsv";
 
 /// Editable snapshot of all user-facing configuration values shown in the Settings dialog.
 #[derive(Debug, Clone)]
@@ -112,6 +113,15 @@ impl ConfigManager {
     /// Returns the default directory for storing downloaded files.
     pub fn download_dir(&self) -> &Path {
         &self.download_dir
+    }
+
+    /// Returns the path to the persistent download history file (`~/Gophie/downloads.tsv`).
+    pub fn downloads_history_path(&self) -> PathBuf {
+        self.config_file
+            .path()
+            .parent()
+            .unwrap_or_else(|| Path::new("."))
+            .join(DOWNLOADS_HISTORY_FILE_NAME)
     }
 
     /// Builds an editable snapshot of all current configuration settings.

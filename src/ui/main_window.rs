@@ -59,13 +59,14 @@ impl MainWindow {
 
         let config = ConfigManager::load_default();
         let home = config.gopher_home();
+        let downloads_path = config.downloads_history_path();
         let (fetch_tx, fetch_rx) = mpsc::channel();
         let (caps_tx, caps_rx) = mpsc::channel();
 
         Self {
             config,
             client: GopherClient::new(),
-            downloads: DownloadManager::new(),
+            downloads: DownloadManager::with_history_path(downloads_path),
             fetch_tx,
             fetch_rx,
             active_request_id: 0,
