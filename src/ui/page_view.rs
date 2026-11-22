@@ -24,6 +24,8 @@ struct RenderContext<'a> {
     selected_text: &'a str,
     selector_prefix_enabled: bool,
     scroll_to_top: bool,
+    focused_link_idx: Option<usize>,
+    scroll_to_focused: bool,
 }
 
 enum CachedContent {
@@ -40,6 +42,8 @@ pub struct PageView {
     cached: CachedContent,
     selected_all: bool,
     scroll_to_top: bool,
+    focused_link_idx: Option<usize>,
+    scroll_to_focused: bool,
 }
 
 impl Default for PageView {
@@ -55,6 +59,8 @@ impl PageView {
             cached: CachedContent::Empty,
             selected_all: false,
             scroll_to_top: false,
+            focused_link_idx: None,
+            scroll_to_focused: false,
         }
     }
 
@@ -67,6 +73,8 @@ impl PageView {
     pub fn set_page(&mut self, ctx: &egui::Context, page: GopherPage) {
         self.selected_all = false;
         self.scroll_to_top = true;
+        self.focused_link_idx = None;
+        self.scroll_to_focused = false;
 
         self.cached = match page.content_type() {
             GopherItemType::GopherMenu => CachedContent::Menu,
@@ -96,10 +104,72 @@ impl PageView {
         }
     }
 
-    /// Clears any active selection (both Select All and cursor drag selection).
+    /// Clears any active selection (both Select All and cursor drag selection) and link focus.
     pub fn clear_selection(&mut self, ctx: &egui::Context) {
         self.selected_all = false;
+        self.focused_link_idx = None;
         egui::text_selection::LabelSelectionState::default().store(ctx);
+    }
+
+    /// Moves keyboard focus to the next link in the current Gopher menu (wraps around).
+    pub fn focus_next_link(&mut self) {
+        let Some(page) = &self.current_page else {
+            return;
+        };
+        let items = page.items();
+        if items.is_empty() {
+            return;
+        }
+
+        let start = match self.focused_link_idx {
+            Some(idx) => (idx + 1) % items.len(),
+            None => 0,
+        };
+
+        for offset in 0..items.len() {
+            let candidate = (start + offset) % items.len();
+            if items[candidate].is_link() {
+                self.focused_link_idx = Some(candidate);
+                self.scroll_to_focused = true;
+                return;
+            }
+        }
+    }
+
+    /// Moves keyboard focus to the previous link in the current Gopher menu (wraps around).
+    pub fn focus_prev_link(&mut self) {
+        let Some(page) = &self.current_page else {
+            return;
+        };
+        let items = page.items();
+        if items.is_empty() {
+            return;
+        }
+
+        let start = match self.focused_link_idx {
+            Some(0) | None => items.len() - 1,
+            Some(idx) => idx - 1,
+        };
+
+        for offset in 0..items.len() {
+            let candidate = (start + items.len() - offset) % items.len();
+            if items[candidate].is_link() {
+                self.focused_link_idx = Some(candidate);
+                self.scroll_to_focused = true;
+                return;
+            }
+        }
+    }
+
+    /// Returns the currently keyboard-focused link item, if any.
+    pub fn focused_link(&self) -> Option<GopherItem> {
+        let idx = self.focused_link_idx?;
+        self.current_page
+            .as_ref()?
+            .items()
+            .get(idx)
+            .filter(|item| item.is_link())
+            .cloned()
     }
 
     /// Returns the currently selected text (full page text when Select All is active).
@@ -144,9 +214,10 @@ impl PageView {
                 visuals.widgets.hovered.bg_stroke = egui::Stroke::NONE;
                 visuals.widgets.active.bg_stroke = egui::Stroke::NONE;
 
-                // Left-clicking or starting a cursor drag unselects Select All seamlessly.
-                if self.selected_all && ui.input(|i| i.pointer.primary_pressed()) {
+                // Left-clicking or starting a cursor drag unselects Select All and clears keyboard link focus.
+                if ui.input(|i| i.pointer.primary_pressed()) {
                     self.selected_all = false;
+                    self.focused_link_idx = None;
                 }
 
                 let selected_text = self.selected_text();
@@ -156,6 +227,8 @@ impl PageView {
                     selected_text: &selected_text,
                     selector_prefix_enabled,
                     scroll_to_top: std::mem::take(&mut self.scroll_to_top),
+                    focused_link_idx: self.focused_link_idx,
+                    scroll_to_focused: std::mem::take(&mut self.scroll_to_focused),
                 };
 
                 let Some(page) = &self.current_page else {
@@ -227,6 +300,12 @@ impl PageView {
             .auto_shrink([false, false]);
         if rc.scroll_to_top {
             scroll = scroll.vertical_scroll_offset(0.0);
+        } else if rc.scroll_to_focused {
+            if let Some(focused_idx) = rc.focused_link_idx {
+                let target_y = (focused_idx as f32) * row_height;
+                let centered = (target_y - ui.available_height() * 0.35).max(0.0);
+                scroll = scroll.vertical_scroll_offset(centered);
+            }
         }
 
         scroll.show_rows(ui, row_height, items.len(), |ui, row_range| {
@@ -285,6 +364,7 @@ impl PageView {
                         };
 
                         if item.is_link() {
+                            let is_focused = rc.focused_link_idx == Some(idx);
                             let mut text = RichText::new(display)
                                 .font(FontId::monospace(theme.page_font_size))
                                 .color(theme.page_link);
@@ -296,7 +376,17 @@ impl PageView {
                                 .add(egui::Label::new(text).sense(Sense::click()).extend())
                                 .on_hover_cursor(CursorIcon::PointingHand);
 
-                            if resp.hovered() {
+                            if is_focused {
+                                let focus_rect = resp.rect.expand2(Vec2::new(4.0, 1.0));
+                                ui.painter().rect_stroke(
+                                    focus_rect,
+                                    egui::CornerRadius::same(3),
+                                    egui::Stroke::new(1.5_f32, theme.page_link),
+                                    egui::StrokeKind::Outside,
+                                );
+                            }
+
+                            if resp.hovered() || is_focused {
                                 let rect = resp.rect;
                                 ui.painter().line_segment(
                                     [

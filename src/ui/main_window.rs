@@ -50,6 +50,7 @@ pub struct MainWindow {
 
     initial_load_started: bool,
     applied_window_appearance: Option<WindowAppearance>,
+    was_editing_text: bool,
 }
 
 impl MainWindow {
@@ -84,6 +85,7 @@ impl MainWindow {
             server_info_window: ServerInfoWindow::new(),
             initial_load_started: false,
             applied_window_appearance: None,
+            was_editing_text: false,
         }
     }
 
@@ -389,8 +391,14 @@ impl MainWindow {
         let mut select_all = false;
         let mut copy_selection = false;
         let mut escape = false;
+        let mut tab_next = false;
+        let mut tab_prev = false;
+        let mut activate_focused = false;
+        // Use the previous frame's text-input focus state so egui's pre-pass Tab cycling
+        // into the address bar does not hijack document link navigation.
+        let editing_text = self.was_editing_text;
 
-        ctx.input(|i| {
+        ctx.input_mut(|i| {
             let cmd = i.modifiers.command;
             if cmd && i.key_pressed(Key::L) {
                 focus_url = true;
@@ -420,6 +428,18 @@ impl MainWindow {
             if i.key_pressed(Key::Escape) {
                 escape = true;
             }
+
+            if !editing_text {
+                if i.consume_key(Modifiers::SHIFT, Key::Tab) {
+                    tab_prev = true;
+                } else if i.consume_key(Modifiers::NONE, Key::Tab) {
+                    tab_next = true;
+                } else if i.consume_key(Modifiers::NONE, Key::Enter) {
+                    activate_focused = true;
+                } else if i.consume_key(Modifiers::NONE, Key::Backspace) {
+                    go_back = true;
+                }
+            }
         });
 
         if focus_url {
@@ -434,10 +454,33 @@ impl MainWindow {
         if go_forward {
             self.navigate_forward(ctx);
         }
-        if select_all && !ctx.wants_keyboard_input() {
+        if tab_next {
+            // Undo any focus egui's begin_pass Tab handling gave to the address bar.
+            ctx.memory_mut(|m| {
+                if let Some(id) = m.focused() {
+                    m.surrender_focus(id);
+                }
+            });
+            self.page_view.focus_next_link();
+        }
+        if tab_prev {
+            ctx.memory_mut(|m| {
+                if let Some(id) = m.focused() {
+                    m.surrender_focus(id);
+                }
+            });
+            self.page_view.focus_prev_link();
+        }
+        if activate_focused {
+            if let Some(item) = self.page_view.focused_link() {
+                let url = item.url_string();
+                self.handle_address_request(ctx, &url, item);
+            }
+        }
+        if select_all && !editing_text {
             self.page_view.select_all(ctx);
         }
-        if copy_selection && !ctx.wants_keyboard_input() {
+        if copy_selection && !editing_text {
             let selected = self.page_view.selected_text();
             if !selected.is_empty() {
                 PageMenu::copy_text(&selected);
@@ -614,6 +657,9 @@ impl eframe::App for MainWindow {
                 ConfirmAction::OpenEmail(email),
             );
         }
+
+        // Record whether a text input (address bar or search bar) holds focus for the next frame.
+        self.was_editing_text = ctx.wants_keyboard_input();
     }
 }
 
