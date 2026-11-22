@@ -8,5 +8,6 @@ mod navigation_bar;
 mod page_menu;
 mod page_view;
 mod search_input;
+mod settings_window;
 
 pub use main_window::{MainWindow, APPLICATION_TITLE};

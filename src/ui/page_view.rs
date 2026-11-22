@@ -130,8 +130,14 @@ impl PageView {
             })
             .show(ui, |ui| {
                 ui.set_min_size(ui.available_size());
-                // Use a predictable desktop-style solid scrollbar flush to the right edge.
+                // Use a predictable desktop-style solid scrollbar whose track matches the window background.
                 ui.style_mut().spacing.scroll = egui::style::ScrollStyle::solid();
+                let visuals = ui.visuals_mut();
+                visuals.extreme_bg_color = theme.view_background;
+                visuals.panel_fill = theme.view_background;
+                visuals.widgets.inactive.bg_stroke = egui::Stroke::NONE;
+                visuals.widgets.hovered.bg_stroke = egui::Stroke::NONE;
+                visuals.widgets.active.bg_stroke = egui::Stroke::NONE;
 
                 let selected_text = self.selected_text();
                 let render_ctx = RenderContext {

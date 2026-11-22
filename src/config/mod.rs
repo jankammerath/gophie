@@ -6,6 +6,6 @@ mod system_util;
 mod theme;
 
 pub use config_file::ConfigFile;
-pub use config_manager::ConfigManager;
+pub use config_manager::{AppSettings, ConfigManager};
 pub use system_util::SystemUtility;
-pub use theme::{parse_hex_color, Theme};
+pub use theme::{color_to_hex, parse_hex_color, Theme};

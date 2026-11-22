@@ -17,6 +17,7 @@ use super::navigation_bar::{NavAction, NavigationBar};
 use super::page_menu::{PageMenu, PageMenuAction};
 use super::page_view::{PageView, PageViewAction};
 use super::search_input::SearchInput;
+use super::settings_window::SettingsWindow;
 
 /// Application display name used in window titles.
 pub const APPLICATION_TITLE: &str = "Gophie";
@@ -39,6 +40,7 @@ pub struct MainWindow {
     message_view: MessageView,
     search_input: SearchInput,
     download_window: DownloadWindow,
+    settings_window: SettingsWindow,
 
     initial_load_started: bool,
 }
@@ -66,6 +68,7 @@ impl MainWindow {
             message_view: MessageView::new(),
             search_input: SearchInput::new(),
             download_window: DownloadWindow::new(),
+            settings_window: SettingsWindow::new(),
             initial_load_started: false,
         }
     }
@@ -499,6 +502,9 @@ impl eframe::App for MainWindow {
                             self.handle_address_request(ctx, &address, item);
                         }
                         NavAction::ToggleDownloads => self.download_window.toggle(),
+                        NavAction::ToggleSettings => {
+                            self.settings_window.toggle(self.config.settings());
+                        }
                     }
                 }
             });
@@ -544,6 +550,17 @@ impl eframe::App for MainWindow {
                     }
                 }
                 DownloadWindowAction::ClearNonActive => self.downloads.clear_non_active(),
+            }
+        }
+
+        // Secondary native Settings window
+        if let Some(updated_settings) = self.settings_window.show(ctx, &theme) {
+            if let Err(err) = self.config.apply_settings(updated_settings) {
+                self.message_view
+                    .show_info(format!("Failed to save settings: {}", err));
+            } else if let Some(page) = self.page_view.current_page() {
+                let addr = self.format_display_address(page.url(), page.content_type());
+                self.navigation_bar.set_address_text(addr);
             }
         }
     }

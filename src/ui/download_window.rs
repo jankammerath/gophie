@@ -129,6 +129,13 @@ impl DownloadWindow {
             egui::CentralPanel::default()
                 .frame(Frame::new().fill(theme.filelist_background))
                 .show(ctx, |ui| {
+                    ui.style_mut().spacing.scroll = egui::style::ScrollStyle::solid();
+                    let visuals = ui.visuals_mut();
+                    visuals.extreme_bg_color = theme.filelist_background;
+                    visuals.widgets.inactive.bg_stroke = egui::Stroke::NONE;
+                    visuals.widgets.hovered.bg_stroke = egui::Stroke::NONE;
+                    visuals.widgets.active.bg_stroke = egui::Stroke::NONE;
+
                     ScrollArea::vertical()
                         .auto_shrink([false, false])
                         .show(ui, |ui| {

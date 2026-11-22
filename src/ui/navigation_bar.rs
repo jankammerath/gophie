@@ -17,6 +17,7 @@ pub enum NavAction {
     Home,
     Navigate { address: String, item: GopherItem },
     ToggleDownloads,
+    ToggleSettings,
 }
 
 /// Bottom navigation bar matching Gophie's blue toolbar layout.
@@ -105,8 +106,8 @@ impl NavigationBar {
                         action = Some(NavAction::Home);
                     }
 
-                    // Reserve space on the right for the downloads icon and optional loading spinner.
-                    let right_reserved = if self.is_loading { 64.0 } else { 36.0 };
+                    // Reserve space on the right for downloads, settings, and optional loading spinner.
+                    let right_reserved = if self.is_loading { 96.0 } else { 68.0 };
                     let input_width = (ui.available_width() - right_reserved).max(120.0);
 
                     ui.scope(|ui| {
@@ -146,8 +147,8 @@ impl NavigationBar {
                     });
 
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        if self.is_loading {
-                            ui.add(Spinner::new().size(16.0).color(theme.nav_text_hover));
+                        if Self::icon_button(ui, icons::SETTINGS, true, "Settings", theme) {
+                            action = Some(NavAction::ToggleSettings);
                         }
 
                         let dl_tip = if active_downloads > 0 {
@@ -157,6 +158,10 @@ impl NavigationBar {
                         };
                         if Self::icon_button(ui, icons::DOWNLOADS, true, &dl_tip, theme) {
                             action = Some(NavAction::ToggleDownloads);
+                        }
+
+                        if self.is_loading {
+                            ui.add(Spinner::new().size(16.0).color(theme.nav_text_hover));
                         }
                     });
                 });

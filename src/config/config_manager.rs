@@ -1,6 +1,7 @@
 //! Application configuration manager and standard directory resolution.
 
 use std::fs;
+use std::io;
 use std::path::{Path, PathBuf};
 
 use super::{ConfigFile, Theme};
@@ -12,6 +13,26 @@ pub const DEFAULT_CHARSET: &str = "UTF-8";
 
 const CONFIG_DIR_NAME: &str = "Gophie";
 const CONFIG_FILE_NAME: &str = "config.ini";
+
+/// Editable snapshot of all user-facing configuration values shown in the Settings dialog.
+#[derive(Debug, Clone)]
+pub struct AppSettings {
+    pub gopher_home: String,
+    pub selector_prefix_enabled: bool,
+    pub default_charset: String,
+    pub theme: Theme,
+}
+
+impl Default for AppSettings {
+    fn default() -> Self {
+        Self {
+            gopher_home: DEFAULT_GOPHERHOME.to_string(),
+            selector_prefix_enabled: true,
+            default_charset: DEFAULT_CHARSET.to_string(),
+            theme: Theme::default(),
+        }
+    }
+}
 
 /// Manages Gophie's persistent configuration file, theme, and user directories.
 #[derive(Debug, Clone)]
@@ -80,6 +101,49 @@ impl ConfigManager {
     /// Returns the default directory for storing downloaded files.
     pub fn download_dir(&self) -> &Path {
         &self.download_dir
+    }
+
+    /// Builds an editable snapshot of all current configuration settings.
+    pub fn settings(&self) -> AppSettings {
+        AppSettings {
+            gopher_home: self.gopher_home(),
+            selector_prefix_enabled: self.selector_prefix_enabled(),
+            default_charset: self.default_charset(),
+            theme: self.theme.clone(),
+        }
+    }
+
+    /// Applies updated settings, updates the live theme, and persists `config.ini` to disk.
+    pub fn apply_settings(&mut self, settings: AppSettings) -> io::Result<()> {
+        let home = settings.gopher_home.trim();
+        let home = if home.is_empty() {
+            DEFAULT_GOPHERHOME
+        } else {
+            home
+        };
+        let charset = settings.default_charset.trim();
+        let charset = if charset.is_empty() {
+            DEFAULT_CHARSET
+        } else {
+            charset
+        };
+
+        self.config_file
+            .set_setting("GOPHERHOME", home, "Navigation");
+        self.config_file.set_setting(
+            "SELECTOR_PREFIX_ENABLED",
+            if settings.selector_prefix_enabled {
+                "yes"
+            } else {
+                "no"
+            },
+            "Navigation",
+        );
+        self.config_file
+            .set_setting("DEFAULT_CHARSET", charset, "Network");
+        settings.theme.write_to_config(&mut self.config_file);
+        self.theme = settings.theme;
+        self.config_file.save()
     }
 
     /// Resolves `~/Gophie/` across macOS, Windows, and Linux.

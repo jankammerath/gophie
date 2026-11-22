@@ -22,6 +22,7 @@ pub mod icons {
     pub const STOP: &str = "\u{E9D6}";
     pub const HOME: &str = "\u{E979}";
     pub const DOWNLOADS: &str = "\u{E90B}";
+    pub const SETTINGS: &str = "\u{E9C4}";
     pub const SEARCH: &str = "\u{E9C1}";
 
     pub const INFO: &str = "\u{E902}";

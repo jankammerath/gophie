@@ -73,6 +73,97 @@ impl Default for Theme {
 }
 
 impl Theme {
+    /// Light theme preset inspired by Gophie's Light theme.
+    pub fn light() -> Self {
+        Self {
+            view_background: Color32::from_rgb(0xF7, 0xF7, 0xF7),
+            view_text: Color32::from_rgb(0x1E, 0x1E, 0x1E),
+            page_link: Color32::from_rgb(0x13, 0x8A, 0x3E),
+            page_line_number: Color32::from_rgb(0xA0, 0xA0, 0xA0),
+            page_selection: Color32::from_rgb(0xF2, 0xC9, 0x4C),
+            filelist_background: Color32::from_rgb(0xF7, 0xF7, 0xF7),
+            download_title: Color32::from_rgb(0x1E, 0x1E, 0x1E),
+            download_text: Color32::from_rgb(0x55, 0x55, 0x55),
+            ..Self::default()
+        }
+    }
+
+    /// Grass theme preset inspired by Gophie's Grass theme.
+    pub fn grass() -> Self {
+        Self {
+            nav_background: Color32::from_rgb(0x2E, 0x7D, 0x32),
+            nav_text: Color32::from_rgb(0xA5, 0xD6, 0xA7),
+            actionbar_background: Color32::from_rgb(0x2E, 0x7D, 0x32),
+            actionbar_inactive_text: Color32::from_rgb(0xA5, 0xD6, 0xA7),
+            search_background: Color32::from_rgb(0x2E, 0x7D, 0x32),
+            search_title: Color32::from_rgb(0xA5, 0xD6, 0xA7),
+            view_background: Color32::from_rgb(0x15, 0x1D, 0x15),
+            page_link: Color32::from_rgb(0x66, 0xBB, 0x6A),
+            filelist_background: Color32::from_rgb(0x15, 0x1D, 0x15),
+            ..Self::default()
+        }
+    }
+
+    /// Pink theme preset inspired by Gophie's Pink theme.
+    pub fn pink() -> Self {
+        Self {
+            nav_background: Color32::from_rgb(0xC2, 0x18, 0x5B),
+            nav_text: Color32::from_rgb(0xF4, 0x8F, 0xB1),
+            actionbar_background: Color32::from_rgb(0xC2, 0x18, 0x5B),
+            actionbar_inactive_text: Color32::from_rgb(0xF4, 0x8F, 0xB1),
+            search_background: Color32::from_rgb(0xC2, 0x18, 0x5B),
+            search_title: Color32::from_rgb(0xF4, 0x8F, 0xB1),
+            view_background: Color32::from_rgb(0x1D, 0x16, 0x1B),
+            page_link: Color32::from_rgb(0xF0, 0x62, 0x92),
+            filelist_background: Color32::from_rgb(0x1D, 0x16, 0x1B),
+            ..Self::default()
+        }
+    }
+
+    /// Writes all appearance values into the `[Appearance]` section of `config`.
+    pub fn write_to_config(&self, config: &mut ConfigFile) {
+        let mut set_color = |key: &str, c: Color32| {
+            config.set_setting(key, &color_to_hex(c), "Appearance");
+        };
+
+        set_color("NAVIGATIONBAR_BACKGROUND", self.nav_background);
+        set_color("NAVIGATIONBAR_TEXTCOLOR", self.nav_text);
+        set_color("NAVIGATIONBAR_TEXTHOVERCOLOR", self.nav_text_hover);
+        set_color("NAVIGATIONBAR_SELECTION_COLOR", self.nav_selection);
+
+        set_color("VIEW_BACKGROUND", self.view_background);
+        set_color("VIEW_TEXTCOLOR", self.view_text);
+        set_color("PAGE_LINK_COLOR", self.page_link);
+        set_color("PAGE_LINENUMBER_COLOR", self.page_line_number);
+        set_color("PAGE_SELECTION_COLOR", self.page_selection);
+
+        set_color("MESSAGEVIEW_BACKGROUND_COLOR", self.message_background);
+        set_color("MESSAGEVIEW_FOREGROUND_COLOR", self.message_foreground);
+
+        set_color("SEARCH_BACKGROUND", self.search_background);
+        set_color("SEARCH_TITLECOLOR", self.search_title);
+        set_color("SEARCH_TEXTCOLOR", self.search_text);
+
+        set_color("ACTIONBAR_BACKGROUND", self.actionbar_background);
+        set_color("ACTIONBAR_TEXTCOLOR", self.actionbar_text);
+        set_color("ACTIONBAR_INACTIVE_TEXTCOLOR", self.actionbar_inactive_text);
+        set_color("FILELIST_BACKGROUND", self.filelist_background);
+        set_color("DOWNLOAD_SELECTED_COLOR", self.download_selected);
+        set_color("DOWNLOAD_TITLE_COLOR", self.download_title);
+        set_color("DOWNLOAD_TEXT_COLOR", self.download_text);
+
+        config.set_setting(
+            "PAGE_FONT_SIZE",
+            &(self.page_font_size.round() as u32).to_string(),
+            "Appearance",
+        );
+        config.set_setting(
+            "PAGE_ICON_FONT_SIZE",
+            &(self.page_icon_font_size.round() as u32).to_string(),
+            "Appearance",
+        );
+    }
+
     /// Builds a `Theme` by overriding defaults with any values present in `[Appearance]`.
     pub fn from_config(config: &ConfigFile) -> Self {
         let d = Self::default();
@@ -116,6 +207,11 @@ impl Theme {
                 .clamp(8.0, 36.0),
         }
     }
+}
+
+/// Formats an `egui::Color32` as a `#rrggbb` hex string for `config.ini`.
+pub fn color_to_hex(color: Color32) -> String {
+    format!("#{:02x}{:02x}{:02x}", color.r(), color.g(), color.b())
 }
 
 /// Parses a `#RRGGBB` or `#RGB` hex color string into an `egui::Color32`.
