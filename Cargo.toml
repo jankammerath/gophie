@@ -1,0 +1,31 @@
+[package]
+name = "gophie"
+version = "2.0.0"
+edition = "2021"
+description = "A modern, graphical, cross-platform Gopher browser (RFC 1436 / RFC 4266)"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/jankammerath/Gophie"
+homepage = "https://gophie.org/"
+
+[dependencies]
+eframe = "0.31"
+image = { version = "0.25", default-features = false, features = [
+    "png",
+    "jpeg",
+    "gif",
+    "bmp",
+    "ico",
+    "tiff",
+    "webp",
+] }
+encoding_rs = "0.8"
+dirs = "6"
+rfd = "0.15"
+open = "5"
+arboard = "3"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = true
