@@ -15,7 +15,7 @@ use super::download_window::{DownloadWindow, DownloadWindowAction};
 use super::message_view::{ConfirmAction, MessageOutcome, MessageView};
 use super::navigation_bar::{NavAction, NavigationBar};
 use super::page_menu::{PageMenu, PageMenuAction};
-use super::page_view::{PageView, PageViewAction};
+use super::page_view::{PageView, PageViewAction, ScrollCommand};
 use super::search_input::SearchInput;
 use super::server_info_window::{ServerInfoAction, ServerInfoWindow};
 use super::settings_window::SettingsWindow;
@@ -396,6 +396,7 @@ impl MainWindow {
         let mut tab_next = false;
         let mut tab_prev = false;
         let mut activate_focused = false;
+        let mut scroll_cmd: Option<ScrollCommand> = None;
         // Use the previous frame's text-input focus state so egui's pre-pass Tab cycling
         // into the address bar does not hijack document link navigation.
         let editing_text = self.was_editing_text;
@@ -440,9 +441,25 @@ impl MainWindow {
                     activate_focused = true;
                 } else if i.consume_key(Modifiers::NONE, Key::Backspace) {
                     go_back = true;
+                } else if i.consume_key(Modifiers::NONE, Key::ArrowUp) {
+                    scroll_cmd = Some(ScrollCommand::LineUp);
+                } else if i.consume_key(Modifiers::NONE, Key::ArrowDown) {
+                    scroll_cmd = Some(ScrollCommand::LineDown);
+                } else if i.consume_key(Modifiers::NONE, Key::PageUp) {
+                    scroll_cmd = Some(ScrollCommand::PageUp);
+                } else if i.consume_key(Modifiers::NONE, Key::PageDown) {
+                    scroll_cmd = Some(ScrollCommand::PageDown);
+                } else if i.consume_key(Modifiers::NONE, Key::Home) {
+                    scroll_cmd = Some(ScrollCommand::Top);
+                } else if i.consume_key(Modifiers::NONE, Key::End) {
+                    scroll_cmd = Some(ScrollCommand::Bottom);
                 }
             }
         });
+
+        if let Some(cmd) = scroll_cmd {
+            self.page_view.scroll(cmd);
+        }
 
         if focus_url {
             self.navigation_bar.request_address_focus();

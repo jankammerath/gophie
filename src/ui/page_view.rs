@@ -18,14 +18,32 @@ pub enum PageViewAction {
     Menu(PageMenuAction),
 }
 
+/// Keyboard scroll commands handled by `PageView`.
+#[derive(Debug, Clone, Copy)]
+pub enum ScrollCommand {
+    LineUp,
+    LineDown,
+    PageUp,
+    PageDown,
+    Top,
+    Bottom,
+}
+
 struct RenderContext<'a> {
     theme: &'a Theme,
     selected_all: bool,
     selected_text: &'a str,
     selector_prefix_enabled: bool,
-    scroll_to_top: bool,
+    pending_scroll_y: Option<f32>,
     focused_link_idx: Option<usize>,
     scroll_to_focused: bool,
+}
+
+struct ScrollMetrics {
+    offset_y: f32,
+    viewport_height: f32,
+    content_height: f32,
+    visible_rows: std::ops::Range<usize>,
 }
 
 enum CachedContent {
@@ -41,9 +59,13 @@ pub struct PageView {
     current_page: Option<GopherPage>,
     cached: CachedContent,
     selected_all: bool,
-    scroll_to_top: bool,
+    pending_scroll_y: Option<f32>,
     focused_link_idx: Option<usize>,
     scroll_to_focused: bool,
+    scroll_offset_y: f32,
+    viewport_height: f32,
+    content_height: f32,
+    visible_rows: std::ops::Range<usize>,
 }
 
 impl Default for PageView {
@@ -58,9 +80,13 @@ impl PageView {
             current_page: None,
             cached: CachedContent::Empty,
             selected_all: false,
-            scroll_to_top: false,
+            pending_scroll_y: None,
             focused_link_idx: None,
             scroll_to_focused: false,
+            scroll_offset_y: 0.0,
+            viewport_height: 400.0,
+            content_height: 0.0,
+            visible_rows: 0..0,
         }
     }
 
@@ -72,9 +98,11 @@ impl PageView {
     /// Loads a new `GopherPage`, caching decoded lines or GPU image textures once.
     pub fn set_page(&mut self, ctx: &egui::Context, page: GopherPage) {
         self.selected_all = false;
-        self.scroll_to_top = true;
+        self.pending_scroll_y = Some(0.0);
         self.focused_link_idx = None;
         self.scroll_to_focused = false;
+        self.scroll_offset_y = 0.0;
+        self.visible_rows = 0..0;
 
         self.cached = match page.content_type() {
             GopherItemType::GopherMenu => CachedContent::Menu,
@@ -111,7 +139,26 @@ impl PageView {
         egui::text_selection::LabelSelectionState::default().store(ctx);
     }
 
+    /// Scrolls the active page view in response to keyboard navigation keys.
+    pub fn scroll(&mut self, cmd: ScrollCommand) {
+        let max_y = (self.content_height - self.viewport_height).max(0.0);
+        let line_step = 66.0;
+        let page_step = (self.viewport_height * 0.85).max(120.0);
+
+        let target = match cmd {
+            ScrollCommand::LineUp => (self.scroll_offset_y - line_step).max(0.0),
+            ScrollCommand::LineDown => (self.scroll_offset_y + line_step).min(max_y),
+            ScrollCommand::PageUp => (self.scroll_offset_y - page_step).max(0.0),
+            ScrollCommand::PageDown => (self.scroll_offset_y + page_step).min(max_y),
+            ScrollCommand::Top => 0.0,
+            ScrollCommand::Bottom => max_y,
+        };
+        self.scroll_offset_y = target;
+        self.pending_scroll_y = Some(target);
+    }
+
     /// Moves keyboard focus to the next link in the current Gopher menu (wraps around).
+    /// When no link in the visible viewport is focused, starts at the first visible link.
     pub fn focus_next_link(&mut self) {
         let Some(page) = &self.current_page else {
             return;
@@ -122,21 +169,22 @@ impl PageView {
         }
 
         let start = match self.focused_link_idx {
-            Some(idx) => (idx + 1) % items.len(),
-            None => 0,
+            Some(idx) if self.visible_rows.contains(&idx) => (idx + 1) % items.len(),
+            _ => self.visible_rows.start.min(items.len() - 1),
         };
 
         for offset in 0..items.len() {
             let candidate = (start + offset) % items.len();
             if items[candidate].is_link() {
                 self.focused_link_idx = Some(candidate);
-                self.scroll_to_focused = true;
+                self.scroll_to_focused = !self.visible_rows.contains(&candidate);
                 return;
             }
         }
     }
 
     /// Moves keyboard focus to the previous link in the current Gopher menu (wraps around).
+    /// When no link in the visible viewport is focused, starts at the last visible link.
     pub fn focus_prev_link(&mut self) {
         let Some(page) = &self.current_page else {
             return;
@@ -147,15 +195,30 @@ impl PageView {
         }
 
         let start = match self.focused_link_idx {
-            Some(0) | None => items.len() - 1,
-            Some(idx) => idx - 1,
+            Some(idx) if self.visible_rows.contains(&idx) => {
+                if idx == 0 {
+                    items.len() - 1
+                } else {
+                    idx - 1
+                }
+            }
+            _ => {
+                if self.visible_rows.is_empty() {
+                    items.len() - 1
+                } else {
+                    self.visible_rows
+                        .end
+                        .saturating_sub(1)
+                        .min(items.len() - 1)
+                }
+            }
         };
 
         for offset in 0..items.len() {
             let candidate = (start + items.len() - offset) % items.len();
             if items[candidate].is_link() {
                 self.focused_link_idx = Some(candidate);
-                self.scroll_to_focused = true;
+                self.scroll_to_focused = !self.visible_rows.contains(&candidate);
                 return;
             }
         }
@@ -226,7 +289,7 @@ impl PageView {
                     selected_all: self.selected_all,
                     selected_text: &selected_text,
                     selector_prefix_enabled,
-                    scroll_to_top: std::mem::take(&mut self.scroll_to_top),
+                    pending_scroll_y: self.pending_scroll_y.take(),
                     focused_link_idx: self.focused_link_idx,
                     scroll_to_focused: std::mem::take(&mut self.scroll_to_focused),
                 };
@@ -235,35 +298,36 @@ impl PageView {
                     return;
                 };
 
+                let mut metrics: Option<ScrollMetrics> = None;
+
                 match &self.cached {
                     CachedContent::Empty => {}
                     CachedContent::Menu => {
-                        if let Some(a) = Self::render_menu(ui, page, &render_ctx) {
-                            action = Some(a);
-                        }
+                        let (a, m) = Self::render_menu(ui, page, &render_ctx);
+                        action = a;
+                        metrics = Some(m);
                     }
                     CachedContent::Text { lines } => {
-                        if let Some(a) = Self::render_text(ui, page, lines, &render_ctx) {
-                            action = Some(a);
-                        }
+                        let (a, m) = Self::render_text(ui, page, lines, &render_ctx);
+                        action = a;
+                        metrics = Some(m);
                     }
                     CachedContent::Image { texture, size } => {
                         let mut scroll = ScrollArea::both()
                             .id_salt("gophie_image_scroll")
                             .auto_shrink([false, false]);
-                        if render_ctx.scroll_to_top {
-                            scroll = scroll.vertical_scroll_offset(0.0);
+                        if let Some(y) = render_ctx.pending_scroll_y {
+                            scroll = scroll.vertical_scroll_offset(y);
                         }
-                        scroll.show(ui, |ui| {
-                            if let Some(a) = Self::render_image(
-                                ui,
-                                page,
-                                texture,
-                                *size,
-                                selector_prefix_enabled,
-                            ) {
-                                action = Some(a);
-                            }
+                        let out = scroll.show(ui, |ui| {
+                            Self::render_image(ui, page, texture, *size, selector_prefix_enabled)
+                        });
+                        action = out.inner;
+                        metrics = Some(ScrollMetrics {
+                            offset_y: out.state.offset.y,
+                            viewport_height: out.inner_rect.height(),
+                            content_height: out.content_size.y,
+                            visible_rows: 0..0,
                         });
                     }
                     CachedContent::ImageError(msg) => {
@@ -274,6 +338,13 @@ impl PageView {
                         );
                     }
                 }
+
+                if let Some(m) = metrics {
+                    self.scroll_offset_y = m.offset_y;
+                    self.viewport_height = m.viewport_height;
+                    self.content_height = m.content_height;
+                    self.visible_rows = m.visible_rows;
+                }
             });
 
         action
@@ -283,7 +354,7 @@ impl PageView {
         ui: &mut egui::Ui,
         page: &GopherPage,
         rc: &RenderContext<'_>,
-    ) -> Option<PageViewAction> {
+    ) -> (Option<PageViewAction>, ScrollMetrics) {
         let mut action = None;
         let theme = rc.theme;
         let items = page.items();
@@ -298,8 +369,8 @@ impl PageView {
         let mut scroll = ScrollArea::vertical()
             .id_salt("gophie_menu_rows")
             .auto_shrink([false, false]);
-        if rc.scroll_to_top {
-            scroll = scroll.vertical_scroll_offset(0.0);
+        if let Some(y) = rc.pending_scroll_y {
+            scroll = scroll.vertical_scroll_offset(y);
         } else if rc.scroll_to_focused {
             if let Some(focused_idx) = rc.focused_link_idx {
                 let target_y = (focused_idx as f32) * row_height;
@@ -308,7 +379,9 @@ impl PageView {
             }
         }
 
-        scroll.show_rows(ui, row_height, items.len(), |ui, row_range| {
+        let mut visible_rows = 0..0;
+        let out = scroll.show_rows(ui, row_height, items.len(), |ui, row_range| {
+            visible_rows = row_range.clone();
             ui.spacing_mut().item_spacing.y = 0.0;
 
                 for idx in row_range {
@@ -439,7 +512,13 @@ impl PageView {
                 }
             });
 
-        action
+        let metrics = ScrollMetrics {
+            offset_y: out.state.offset.y,
+            viewport_height: out.inner_rect.height(),
+            content_height: out.content_size.y,
+            visible_rows,
+        };
+        (action, metrics)
     }
 
     fn render_text(
@@ -447,7 +526,7 @@ impl PageView {
         page: &GopherPage,
         lines: &[String],
         rc: &RenderContext<'_>,
-    ) -> Option<PageViewAction> {
+    ) -> (Option<PageViewAction>, ScrollMetrics) {
         let mut action = None;
         let theme = rc.theme;
         let row_height = theme.page_font_size + 4.0;
@@ -458,11 +537,13 @@ impl PageView {
         let mut scroll = ScrollArea::vertical()
             .id_salt("gophie_text_rows")
             .auto_shrink([false, false]);
-        if rc.scroll_to_top {
-            scroll = scroll.vertical_scroll_offset(0.0);
+        if let Some(y) = rc.pending_scroll_y {
+            scroll = scroll.vertical_scroll_offset(y);
         }
 
-        scroll.show_rows(ui, row_height, lines.len().max(1), |ui, row_range| {
+        let mut visible_rows = 0..0;
+        let out = scroll.show_rows(ui, row_height, lines.len().max(1), |ui, row_range| {
+            visible_rows = row_range.clone();
             ui.spacing_mut().item_spacing.y = 0.0;
             for idx in row_range {
                 let line = lines.get(idx).map(String::as_str).unwrap_or("");
@@ -491,7 +572,13 @@ impl PageView {
             }
         });
 
-        action
+        let metrics = ScrollMetrics {
+            offset_y: out.state.offset.y,
+            viewport_height: out.inner_rect.height(),
+            content_height: out.content_size.y,
+            visible_rows,
+        };
+        (action, metrics)
     }
 
     fn render_image(
