@@ -41,7 +41,7 @@ jobs:
   build-macos:
     name: macOS (Universal DMG)
     needs: meta
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
