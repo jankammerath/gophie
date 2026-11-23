@@ -7,6 +7,7 @@ use gophie::ui::{assets, MainWindow, APPLICATION_TITLE};
 
 fn main() -> eframe::Result<()> {
     let mut viewport = ViewportBuilder::default()
+        .with_app_id("gophie")
         .with_title(APPLICATION_TITLE)
         .with_inner_size([960.0, 680.0])
         .with_min_inner_size([800.0, 600.0]);
