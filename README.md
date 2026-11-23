@@ -6,6 +6,8 @@
 [![Download Linux DEB](https://img.shields.io/badge/Linux-DEB%20(amd64)-A81D33?style=for-the-badge&logo=debian&logoColor=white)](https://github.com/jankammerath/Gophie/releases/latest)
 [![Download Linux RPM](https://img.shields.io/badge/Linux-RPM%20(x86__64)-EE0000?style=for-the-badge&logo=redhat&logoColor=white)](https://github.com/jankammerath/Gophie/releases/latest)
 
+[![GitHub Sponsor](https://img.shields.io/badge/sponsor-30363D?style=flat&logo=GitHub-Sponsors&logoColor=ea4aaa)](https://github.com/sponsors/jankammerath)
+
 **Gophie 2 is entirely rewritten in Rust!** Gophie is a fast, native, cross-platform graphical browser for **The Internet Gopher** (RFC 1436 & RFC 4266), rewritten in Rust for high performance and low memory usage on **macOS, Windows, and Linux**.
 
 ![Gophie 2 on macOS](screenshots/gophie2.png)
