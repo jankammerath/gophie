@@ -181,9 +181,23 @@ jobs:
           path: dist/*.zip
 
   build-linux:
-    name: Linux (DEB & RPM)
+    name: Linux (${{ matrix.deb_arch }} DEB & ${{ matrix.rpm_arch }} RPM)
     needs: meta
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            nfpm_arch: amd64
+            nfpm_bin_arch: x86_64
+            deb_arch: amd64
+            rpm_arch: x86_64
+          - runner: ubuntu-24.04-arm
+            nfpm_arch: arm64
+            nfpm_bin_arch: arm64
+            deb_arch: arm64
+            rpm_arch: aarch64
     steps:
       - uses: actions/checkout@v4
 
@@ -204,6 +218,8 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - uses: Swatinem/rust-cache@v2
+        with:
+          key: linux-${{ matrix.nfpm_arch }}
 
       - name: Build Linux release binary
         run: cargo build --release
@@ -211,21 +227,22 @@ jobs:
       - name: Install nfpm
         run: |
           NFPM_VERSION="2.41.1"
-          curl -fsSL "https://github.com/goreleaser/nfpm/releases/download/v${NFPM_VERSION}/nfpm_${NFPM_VERSION}_Linux_x86_64.tar.gz" \
+          curl -fsSL "https://github.com/goreleaser/nfpm/releases/download/v${NFPM_VERSION}/nfpm_${NFPM_VERSION}_Linux_${{ matrix.nfpm_bin_arch }}.tar.gz" \
             | sudo tar -xz -C /usr/local/bin nfpm
 
       - name: Build DEB and RPM packages
         env:
           VERSION: ${{ needs.meta.outputs.version }}
+          NFPM_ARCH: ${{ matrix.nfpm_arch }}
         run: |
           mkdir -p dist
-          nfpm package --config packaging/linux/nfpm.yaml --packager deb --target "dist/Gophie-${VERSION}-linux-amd64.deb"
-          nfpm package --config packaging/linux/nfpm.yaml --packager rpm --target "dist/Gophie-${VERSION}-linux-x86_64.rpm"
+          nfpm package --config packaging/linux/nfpm.yaml --packager deb --target "dist/Gophie-${VERSION}-linux-${{ matrix.deb_arch }}.deb"
+          nfpm package --config packaging/linux/nfpm.yaml --packager rpm --target "dist/Gophie-${VERSION}-linux-${{ matrix.rpm_arch }}.rpm"
 
       - name: Upload Linux DEB and RPM artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-packages
+          name: linux-${{ matrix.nfpm_arch }}-packages
           path: |
             dist/*.deb
             dist/*.rpm

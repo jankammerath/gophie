@@ -21,8 +21,8 @@ Grab the latest pre-built release from the [GitHub Releases](https://github.com/
 | **macOS** | Apple Silicon & Intel (Universal) | [Download `.dmg`](https://github.com/jankammerath/Gophie/releases/latest) |
 | **Windows** | x64 (self-contained `.exe`) | [Download `x64 .zip`](https://github.com/jankammerath/Gophie/releases/latest) |
 | **Windows** | Arm64 (self-contained `.exe`) | [Download `arm64 .zip`](https://github.com/jankammerath/Gophie/releases/latest) |
-| **Linux** (Debian / Ubuntu) | amd64 | [Download `.deb`](https://github.com/jankammerath/Gophie/releases/latest) |
-| **Linux** (Fedora / RHEL / openSUSE) | x86_64 | [Download `.rpm`](https://github.com/jankammerath/Gophie/releases/latest) |
+| **Linux** (Debian / Ubuntu) | amd64 & arm64 | [Download `.deb`](https://github.com/jankammerath/Gophie/releases/latest) |
+| **Linux** (Fedora / RHEL / openSUSE) | x86_64 & aarch64 | [Download `.rpm`](https://github.com/jankammerath/Gophie/releases/latest) |
 
 ## Features
 
